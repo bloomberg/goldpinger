@@ -6,6 +6,10 @@ tag = $(name):$(version)
 namespace ?= ""
 files = $(shell find . -iname "*.go")
 
+
+bin/$(bin): $(files)
+	PKG=${pkg} ARCH=amd64 VERSION=${version} BIN=${bin} ./build/build.sh
+
 clean:
 	rm -rf ./vendor
 	rm -f ./bin/$(bin)
@@ -17,9 +21,6 @@ vendor:
 swagger:
 	swagger generate server -t pkg -f ./swagger.yml --exclude-main -A goldpinger && \
 	swagger generate client -t pkg -f ./swagger.yml -A goldpinger
-
-bin/$(bin): $(files)
-	PKG=${pkg} ARCH=amd64 VERSION=${version} BIN=${bin} ./build/build.sh
 
 build: bin/$(bin)
 	sudo docker build -t $(tag) -f ./build/Dockerfile .
