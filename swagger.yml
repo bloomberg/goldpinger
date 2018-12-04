@@ -1,0 +1,122 @@
+---
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Goldpinger 
+definitions:
+  CallStats:
+    properties:
+      check:
+        type: integer
+      check_all:
+        type: integer
+      ping:
+        type: integer
+  PingResults:
+    type: object
+    properties:
+      boot_time:
+        format: date-time
+        type: string
+      received:
+          $ref: '#/definitions/CallStats'
+  PodResult:
+    type: object
+    properties:
+      OK:
+        type: boolean
+        default: false
+      HostIP:
+        type: string
+        format: ipv4
+      response:
+          $ref: '#/definitions/PingResults'
+      error:
+        type: string
+      status-code:
+        type: integer
+        format: int32
+  CheckResults:
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/PodResult'
+  CheckAllPodResult:
+    type: object
+    properties:
+      OK:
+        type: boolean
+        default: false
+      HostIP:
+        type: string
+        format: ipv4
+      response:
+        $ref: '#/definitions/CheckResults'
+      error:
+        type: string
+      status-code:
+        type: integer
+        format: int32
+  CheckAllResults:
+    type: object
+    properties:
+      OK:
+        type: boolean
+        default: false
+      hosts-healthy:
+        type: integer 
+        format: int32
+      hosts-number:
+        type: integer 
+        format: int32
+      hosts:
+        type: array
+        items:
+          type: object
+          properties:
+            hostIP:
+              type: string
+              format: ipv4
+            podIP:
+              type: string
+              format: ipv4
+      responses:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/CheckAllPodResult'
+paths:
+  /ping:
+    get:
+      description: return query stats
+      produces:
+        - application/json 
+      operationId: ping 
+      responses:
+        200:
+          description: return success
+          schema:
+            $ref: '#/definitions/PingResults'
+  /check:
+    get:
+      description: Queries the API server for all other pods in this service,
+                   and pings them via their pods IPs. Calls their /ping endpoint
+      produces:
+        - application/json 
+      operationId: checkServicePods 
+      responses:
+        200:
+          description: Success, return response 
+          schema:
+            $ref: '#/definitions/CheckResults'
+  /check_all:
+    get:
+      description: Queries the API server for all other pods in this service,
+                   and makes all of them query all of their neighbours,
+                   using their pods IPs. Calls their /check endpoint.
+      produces:
+        - application/json 
+      operationId: checkAllPods 
+      responses:
+        200:
+          description: Success, return response 
+          schema:
+            $ref: '#/definitions/CheckAllResults'
