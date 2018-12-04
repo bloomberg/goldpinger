@@ -39,7 +39,7 @@ go get github.com/bloomberg/goldpinger/cmd/goldpinger
 goldpinger --help
 ```
 
-Note, that in order to guarantee correct versions of dependencies, the project [uses `dep`](./Makefile)
+Note, that in order to guarantee correct versions of dependencies, the project [uses `dep`](./Makefile).
 
 
 ## Building
