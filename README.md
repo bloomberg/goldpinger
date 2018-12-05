@@ -11,6 +11,7 @@ Oh, and it gives you the graph below for your cluster.
 ## On the menu
 
 - [Rationale](#rationale)
+- [Quick start](#quick-start)
 - [Building](#building)
 - [Installation](#installation)
   - [Authentication with Kubernetes API](#authentication-with-kubernetes-api)
@@ -31,6 +32,16 @@ We built __Goldpinger__ to troubleshoot, visualise and alert on our networking l
 It's small, simple and you'll wonder why you hadn't had it before.
 
 
+## Quick start
+
+```sh
+go get github.com/bloomberg/goldpinger/cmd/goldpinger
+goldpinger --help
+```
+
+Note, that in order to guarantee correct versions of dependencies, the project [uses `dep`](./Makefile).
+
+
 ## Building
 
 In order to build `Goldpinger`, you are going to need `go` version 1.10+, `dep`, and `docker`.
@@ -39,11 +50,13 @@ Building from source code consists of compiling the binary and building a [Docke
 
 ```sh
 # step 0: check out the code into your $GOPATH
+go get github.com/bloomberg/goldpinger/cmd/goldpinger 
+cd $GOPATH/src/github.com/bloomberg/goldpinger
 
 # step 1: download the dependencies via dep ensure
 make vendor
 
-# step 2: compile the binary
+# step 2: compile the binary for the desired architecture
 make bin/goldpinger
 # at this stage you should be able to run the binary
 ./bin/goldpinger --help
