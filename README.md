@@ -1,4 +1,4 @@
-# Goldpinger
+# Goldpinger [![Build Status](https://travis-ci.com/bloomberg/goldpinger.svg?branch=master)](https://travis-ci.com/bloomberg/goldpinger)
 
 __Goldpinger__ makes calls between its instances for visibility and alerting.
 It runs as a `DaemonSet` on `Kubernetes` and produces `Prometheus` metrics that can be scaped, visualised and alerted on.
