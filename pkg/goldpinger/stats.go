@@ -83,19 +83,6 @@ var (
 		},
 	)
 
-	groups = map[string]map[string]int64{
-		"received": map[string]int64{
-			"ping":      0,
-			"check":     0,
-			"check_all": 0,
-		},
-		"made": map[string]int64{
-			"ping":      0,
-			"check":     0,
-			"check_all": 0,
-		},
-	}
-
 	bootTime = time.Now()
 )
 
@@ -109,21 +96,14 @@ func init() {
 }
 
 func GetStats() *models.PingResults {
-	var result models.PingResults
-	var calls models.CallStats
-
-	calls.Check = groups["received"]["check"]
-	calls.CheckAll = groups["received"]["check_all"]
-	calls.Ping = groups["received"]["ping"]
-	result.BootTime = strfmt.DateTime(bootTime)
-	result.Received = &calls
-	return &result
+	// GetStats no longer populates the received and made calls - use metrics for that instead
+	return &models.PingResults{
+		BootTime: strfmt.DateTime(bootTime),
+	}
 }
 
 // counts various calls received and made
 func CountCall(group string, call string) {
-	groups[group][call]++
-
 	goldpingerStatsCounter.WithLabelValues(
 		GoldpingerConfig.Hostname,
 		group,
