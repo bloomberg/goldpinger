@@ -29,7 +29,15 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
+// these will be injected during build in build.sh script to allow printing
+var (
+	Version, Build string
+)
+
 func main() {
+
+	log.Println("Goldpinger version:", Version, "build:", Build)
+
 	// load embedded swagger file
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
