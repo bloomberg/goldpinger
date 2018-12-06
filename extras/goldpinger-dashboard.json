@@ -16,22 +16,22 @@
   "gnetId": null,
   "graphTooltip": 0,
   "hideControls": false,
-  "id": 1,
+  "id": null,
   "links": [],
-  "refresh": "10s",
+  "refresh": "5m",
   "rows": [
     {
       "collapse": false,
-      "height": 166,
+      "height": "300",
       "panels": [
         {
           "cacheTimeout": null,
           "colorBackground": false,
           "colorValue": true,
           "colors": [
-            "rgba(245, 54, 54, 0.9)",
+            "rgba(55, 174, 50, 0.97)",
             "rgba(237, 129, 40, 0.89)",
-            "rgba(55, 174, 50, 0.97)"
+            "rgba(245, 54, 54, 0.9)"
           ],
           "datasource": "K8S",
           "editable": true,
@@ -72,7 +72,7 @@
               "to": "null"
             }
           ],
-          "span": 4,
+          "span": 2,
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
@@ -93,6 +93,86 @@
           ],
           "thresholds": "31,32",
           "title": "Goldpinger Nodes",
+          "type": "singlestat",
+          "valueFontSize": "150%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "rgba(55, 174, 50, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "datasource": "K8S",
+          "editable": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "id": 20,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "span": 2,
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": true
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(increase(goldpinger_errors_total{goldpinger_instance=~\"$instance\"}[30m]))",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "",
+              "metric": "goldpinger_nodes_health",
+              "refId": "A",
+              "step": 600
+            }
+          ],
+          "thresholds": "1,2",
+          "title": "Increase in # Errors [30m]",
           "type": "singlestat",
           "valueFontSize": "150%",
           "valueMaps": [
@@ -147,6 +227,7 @@
                 "rgba(245, 54, 54, 0.9)"
               ],
               "decimals": 2,
+              "link": false,
               "pattern": "/.*/",
               "thresholds": [
                 "1",
@@ -180,51 +261,51 @@
           "error": false,
           "fill": 1,
           "grid": {},
-          "id": 10,
+          "id": 12,
           "legend": {
             "alignAsTable": true,
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
           "links": [],
-          "nullPointMode": "null as zero",
+          "nullPointMode": "connected",
           "percentage": false,
-          "pointradius": 2,
-          "points": true,
+          "pointradius": 5,
+          "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 6,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "goldpinger_nodes_health_total{status=\"unhealthy\"}",
+              "expr": "sum(increase(goldpinger_nodes_health_total{goldpinger_instance=~\"$instance\", status=\"unhealthy\"}[30m])) by (goldpinger_instance)",
               "format": "time_series",
-              "interval": "1m",
+              "interval": "5m",
               "intervalFactor": 1,
               "legendFormat": "{{ goldpinger_instance }}",
               "metric": "goldpinger_nodes_health",
               "refId": "A",
-              "step": 60
+              "step": 300
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Unhealthy nodes reported",
+          "title": "Unhealthy nodes increase [30m]",
           "tooltip": {
             "msResolution": true,
-            "shared": false,
-            "sort": 0,
+            "shared": true,
+            "sort": 2,
             "value_type": "cumulative"
           },
           "type": "graph",
@@ -264,51 +345,51 @@
           "error": false,
           "fill": 1,
           "grid": {},
-          "id": 12,
+          "id": 10,
           "legend": {
             "alignAsTable": true,
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
           "links": [],
-          "nullPointMode": "connected",
+          "nullPointMode": "null as zero",
           "percentage": false,
-          "pointradius": 5,
-          "points": false,
+          "pointradius": 2,
+          "points": true,
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 6,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(goldpinger_nodes_health_total{status=\"unhealthy\"}[30m])",
+              "expr": "sum(increase(goldpinger_nodes_health_total{goldpinger_instance=~\"$instance\",status=\"unhealthy\"}[30m])) by (goldpinger_instance) /  (sum(increase(goldpinger_nodes_health_total{goldpinger_instance=~\"$instance\",status=\"healthy\"}[30m])) by (goldpinger_instance) + sum(increase(goldpinger_nodes_health_total{goldpinger_instance=~\"$instance\",status=\"unhealthy\"}[30m])) by (goldpinger_instance))",
               "format": "time_series",
-              "interval": "5m",
+              "interval": "1m",
               "intervalFactor": 1,
               "legendFormat": "{{ goldpinger_instance }}",
               "metric": "goldpinger_nodes_health",
               "refId": "A",
-              "step": 300
+              "step": 60
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Unhealthy nodes increase [30m]",
+          "title": "% Unhealthy nodes reported",
           "tooltip": {
             "msResolution": true,
-            "shared": false,
-            "sort": 0,
+            "shared": true,
+            "sort": 2,
             "value_type": "cumulative"
           },
           "type": "graph",
@@ -321,7 +402,7 @@
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "percentunit",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -348,7 +429,7 @@
     },
     {
       "collapse": false,
-      "height": "200",
+      "height": "400",
       "panels": [
         {
           "aliasColors": {},
@@ -364,13 +445,13 @@
           "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -382,16 +463,16 @@
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 4,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(increase(goldpinger_peers_response_time_s_sum[30m])) by (host_ip)",
+              "expr": "histogram_quantile(0.99, sum(rate(goldpinger_peers_response_time_s_bucket{goldpinger_instance=~\"$instance\",call_type=~\"$call_type\"}[30m])) by (goldpinger_instance, le))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{ host_ip }}",
+              "legendFormat": "{{ goldpinger_instance }}",
               "refId": "A",
               "step": 120
             }
@@ -399,11 +480,11 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Increase in response time from node [30m]",
+          "title": "99% response time from node [30m]",
           "tooltip": {
             "msResolution": true,
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "cumulative"
           },
           "type": "graph",
@@ -443,17 +524,17 @@
           "error": false,
           "fill": 1,
           "grid": {},
-          "id": 1,
+          "id": 16,
           "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -465,27 +546,28 @@
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 4,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "avg(goldpinger_peers_response_time_s_sum{call_type=\"ping\"}/goldpinger_peers_response_time_s_count{call_type=\"ping\"}) by (host_ip)",
+              "expr": "histogram_quantile(0.95, sum(rate(goldpinger_peers_response_time_s_bucket{goldpinger_instance=~\"$instance\",call_type=~\"$call_type\"}[30m])) by (goldpinger_instance, le))",
               "format": "time_series",
+              "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{ host_ip }}",
+              "legendFormat": "{{ goldpinger_instance }}",
               "refId": "A",
-              "step": 30
+              "step": 120
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Response time from node (AVG)",
+          "title": "95% response time from node [30m]",
           "tooltip": {
             "msResolution": true,
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "cumulative"
           },
           "type": "graph",
@@ -525,17 +607,17 @@
           "error": false,
           "fill": 1,
           "grid": {},
-          "id": 5,
+          "id": 17,
           "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -547,27 +629,28 @@
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 4,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(goldpinger_peers_response_time_s_sum{call_type=\"ping\"}/goldpinger_peers_response_time_s_count{call_type=\"ping\"}) by (host_ip)",
+              "expr": "histogram_quantile(0.50, sum(rate(goldpinger_peers_response_time_s_bucket{goldpinger_instance=~\"$instance\",call_type=~\"$call_type\"}[30m])) by (goldpinger_instance, le))",
               "format": "time_series",
+              "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{ host_ip }}",
+              "legendFormat": "{{ goldpinger_instance }}",
               "refId": "A",
-              "step": 30
+              "step": 120
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Response time from node (MAX)",
+          "title": "50% response time from node [30m]",
           "tooltip": {
             "msResolution": true,
             "shared": false,
-            "sort": 0,
+            "sort": 2,
             "value_type": "cumulative"
           },
           "type": "graph",
@@ -607,7 +690,7 @@
     },
     {
       "collapse": false,
-      "height": 209,
+      "height": "400",
       "panels": [
         {
           "aliasColors": {},
@@ -624,13 +707,13 @@
           "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -642,16 +725,16 @@
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 4,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(increase(goldpinger_kube_master_response_time_s_sum[30m])) by (host_ip)",
+              "expr": "histogram_quantile(0.99, sum(rate(goldpinger_kube_master_response_time_s_bucket{goldpinger_instance=~\"$instance\"}[30m])) by (goldpinger_instance, le))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{ host_ip }}",
+              "legendFormat": "{{ goldpinger_instance }}",
               "refId": "A",
               "step": 120
             }
@@ -659,7 +742,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Increase in response time from k8s api [30m]",
+          "title": "99% response time from k8s api [30m]",
           "tooltip": {
             "msResolution": true,
             "shared": false,
@@ -704,17 +787,17 @@
           "fill": 1,
           "grid": {},
           "height": "",
-          "id": 14,
+          "id": 18,
           "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -726,23 +809,24 @@
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 4,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "avg(goldpinger_kube_master_response_time_s_sum/goldpinger_kube_master_response_time_s_count) by (host_ip)",
+              "expr": "histogram_quantile(0.95, sum(rate(goldpinger_kube_master_response_time_s_bucket{goldpinger_instance=~\"$instance\"}[30m])) by (goldpinger_instance, le))",
               "format": "time_series",
+              "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{ host_ip }}",
+              "legendFormat": "{{ goldpinger_instance }}",
               "refId": "A",
-              "step": 30
+              "step": 120
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Response time from k8s  (AVG)",
+          "title": "95% response time from k8s api [30m]",
           "tooltip": {
             "msResolution": true,
             "shared": false,
@@ -786,17 +870,18 @@
           "error": false,
           "fill": 1,
           "grid": {},
-          "id": 15,
+          "height": "",
+          "id": 19,
           "legend": {
             "alignAsTable": true,
             "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "rightSide": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": false,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -808,23 +893,24 @@
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 4,
           "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(goldpinger_kube_master_response_time_s_sum/goldpinger_kube_master_response_time_s_count) by (host_ip)",
+              "expr": "histogram_quantile(0.50, sum(rate(goldpinger_kube_master_response_time_s_bucket{goldpinger_instance=~\"$instance\"}[30m])) by (goldpinger_instance, le))",
               "format": "time_series",
+              "interval": "1m",
               "intervalFactor": 2,
-              "legendFormat": "{{ host_ip }}",
+              "legendFormat": "{{ goldpinger_instance }}",
               "refId": "A",
-              "step": 30
+              "step": 120
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Response time from k8s (MAX)",
+          "title": "50% response time from k8s api [30m]",
           "tooltip": {
             "msResolution": true,
             "shared": false,
@@ -865,24 +951,54 @@
       "showTitle": true,
       "title": "Connections to Kubernetes API",
       "titleSize": "h6"
-    },
-    {
-      "collapse": false,
-      "height": 250,
-      "panels": [],
-      "repeat": null,
-      "repeatIteration": null,
-      "repeatRowId": null,
-      "showTitle": false,
-      "title": "Dashboard Row",
-      "titleSize": "h6"
     }
   ],
   "schemaVersion": 14,
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": "K8S",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Instance",
+        "multi": true,
+        "name": "instance",
+        "options": [],
+        "query": "label_values(goldpinger_instance)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": "K8S",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Call Type",
+        "multi": true,
+        "name": "call_type",
+        "options": [],
+        "query": "label_values(call_type)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-1h",
@@ -915,5 +1031,5 @@
   },
   "timezone": "browser",
   "title": "Cluster: Goldpinger",
-  "version": 3
+  "version": 0
 }
