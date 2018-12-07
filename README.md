@@ -108,9 +108,6 @@ spec:
               value: "0.0.0.0"
             - name: PORT
               value: "80"
-            # refresh interval (seconds) tells goldpinger to call every other instance with that frequency (set to 0 to disable)
-            - name: REFRESH_INTERVAL
-              value: "30"
             # injecting real hostname will make for easier to understand graphs/metrics
             - name: HOSTNAME
               valueFrom:

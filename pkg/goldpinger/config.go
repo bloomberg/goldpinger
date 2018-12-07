@@ -18,10 +18,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// GoldpingerConfig represents the configuration for goldpinger
 var GoldpingerConfig = struct {
 	StaticFilePath   string `long:"static-file-path" description:"Folder for serving static files" env:"STATIC_FILE_PATH"`
 	KubeConfigPath   string `long:"kubeconfig" description:"Path to kubeconfig file" env:"KUBECONFIG"`
-	RefreshInterval  int    `long:"refresh-interval" description:"If > 0, will create a thread and collect stats every n seconds" env:"REFRESH_INTERVAL"`
+	RefreshInterval  int    `long:"refresh-interval" description:"If > 0, will create a thread and collect stats every n seconds" env:"REFRESH_INTERVAL" default:"30"`
 	Hostname         string `long:"hostname" description:"Hostname to use" env:"HOSTNAME"`
 	Port             int    `long:"client-port-override" description:"(for testing) use this port when calling other instances" env:"CLIENT_PORT_OVERRIDE"`
 	UseHostIP        bool   `long:"use-host-ip" description:"When making the calls, use host ip (defaults to pod ip)" env:"USE_HOST_IP"`
