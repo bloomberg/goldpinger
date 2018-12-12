@@ -1,7 +1,7 @@
-# Goldpinger
+# Goldpinger [![Build Status](https://travis-ci.com/bloomberg/goldpinger.svg?branch=master)](https://travis-ci.com/bloomberg/goldpinger)
 
 __Goldpinger__ makes calls between its instances for visibility and alerting.
-It runs as a `DaemonSet` on `Kubernetes` and produces `Prometheus` metrics that can be scaped, visualised and alerted on.
+It runs as a `DaemonSet` on `Kubernetes` and produces `Prometheus` metrics that can be scraped, visualised and alerted on.
 
 Oh, and it gives you the graph below for your cluster.
 
@@ -27,7 +27,7 @@ Oh, and it gives you the graph below for your cluster.
 
 ## Rationale
 
-We built __Goldpinger__ to troubleshoot, visualise and alert on our networking layer, while adopting `Kubernetes` at Bloomberg. It has since become the goto tool to see connectivity and slowness issues.
+We built __Goldpinger__ to troubleshoot, visualise and alert on our networking layer while adopting `Kubernetes` at Bloomberg. It has since become the go-to tool to see connectivity and slowness issues.
 
 It's small, simple and you'll wonder why you hadn't had it before.
 
@@ -71,7 +71,7 @@ namespace="docker.io/myhandle/" make push
 
 ## Installation
 
-`Goldpinger` works by asking `Kubernetes` for pods with particular labels (`app=goldpinger`). While you can deploy `Golpinger` in a variety of ways, it works very nicely as a `DaemonSet` out of the box.
+`Goldpinger` works by asking `Kubernetes` for pods with particular labels (`app=goldpinger`). While you can deploy `Goldpinger` in a variety of ways, it works very nicely as a `DaemonSet` out of the box.
 
 ### Authentication with Kubernetes API
 
@@ -108,9 +108,6 @@ spec:
               value: "0.0.0.0"
             - name: PORT
               value: "80"
-            # refresh interval (seconds) tells goldpinger to call every other instance with that frequency (set to 0 to disable)
-            - name: REFRESH_INTERVAL
-              value: "30"
             # injecting real hostname will make for easier to understand graphs/metrics
             - name: HOSTNAME
               valueFrom:
