@@ -3,7 +3,7 @@
 __Goldpinger__ makes calls between its instances for visibility and alerting.
 It runs as a `DaemonSet` on `Kubernetes` and produces `Prometheus` metrics that can be scraped, visualised and alerted on.
 
-Oh, and it gives you the graph below for your cluster.
+Oh, and it gives you the graph below for your cluster. Check out the [video explainer](https://youtu.be/DSFxRz_0TU4).
 
 ![](./extras/screenshot.png)
 
@@ -30,6 +30,8 @@ Oh, and it gives you the graph below for your cluster.
 We built __Goldpinger__ to troubleshoot, visualise and alert on our networking layer while adopting `Kubernetes` at Bloomberg. It has since become the go-to tool to see connectivity and slowness issues.
 
 It's small, simple and you'll wonder why you hadn't had it before.
+
+If you'd like to know more, you can watch [our presentation at Kubecon 2018 Seattle](https://youtu.be/DSFxRz_0TU4).
 
 
 ## Quick start
@@ -80,7 +82,9 @@ namespace="docker.io/myhandle/" make push
 ### Example YAML
 
 
-Here's an example of what you can do (using the in-cluster authentication to `Kubernetes` apiserver):
+Here's an example of what you can do (using the in-cluster authentication to `Kubernetes` apiserver). 
+
+:warning: Replace `docker.io/mynamespace-replaceme/goldpinger:1.0.0` with the actual tag you built.
 
 ```yaml
 ---
@@ -132,6 +136,24 @@ spec:
       name: http
   selector:
     app: goldpinger
+```
+
+Note, that you will also need to add an RBAC rule to allow `Goldpinger` to list other pods. If you're just playing around, you can consider a view-all default rule:
+
+```yaml
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default
 ```
 
 You can also see [an example of using `kubeconfig` in the `./extras`](./extras/example-with-kubeconfig.yaml).
