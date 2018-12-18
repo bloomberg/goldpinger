@@ -1,7 +1,7 @@
 name ?= goldpinger
-version ?= 1.0.1
+version ?= 1.0.2
 bin ?= goldpinger
-pkg ?= "github.com/bloomberg/goldpinger.git"
+pkg ?= "github.com/bloomberg/goldpinger"
 tag = $(name):$(version)
 namespace ?= ""
 files = $(shell find . -iname "*.go")

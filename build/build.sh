@@ -37,5 +37,6 @@ export CGO_ENABLED=0
 export GOARCH="${ARCH}"
 
 go build \
-   -o ./bin/${BIN} \
-   ./cmd/${BIN}
+    -ldflags "-X 'main.Version=${VERSION}' -X 'main.Build=`date`'" \
+    -o ./bin/${BIN} \
+    ./cmd/${BIN}
