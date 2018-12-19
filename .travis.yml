@@ -8,5 +8,6 @@ go:
   - master
 
 script:
+  - docker --version
   - go get -u github.com/golang/dep/cmd/dep && make vendor && make && make build
   - make build-multistage
