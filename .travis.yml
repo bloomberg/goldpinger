@@ -10,4 +10,6 @@ go:
 script:
   - docker --version
   - go get -u github.com/golang/dep/cmd/dep && make vendor && make && make build
+  - docker images
   - make build-multistage
+  - docker images
