@@ -22,6 +22,9 @@ swagger:
 	swagger generate server -t pkg -f ./swagger.yml --exclude-main -A goldpinger && \
 	swagger generate client -t pkg -f ./swagger.yml -A goldpinger
 
+build-multistage:
+	sudo docker build -t $(tag) -f ./Dockerfile .
+
 build: bin/$(bin)
 	sudo docker build -t $(tag) -f ./build/Dockerfile-simple .
 
