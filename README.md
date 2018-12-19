@@ -63,7 +63,7 @@ namespace="docker.io/myhandle/" make tag
 namespace="docker.io/myhandle/" make push
 ```
 
-This was contributed via @michiel - kudos !
+This was contributed via [@michiel](https://github.com/michiel) - kudos !
 
 ### Compililing locally
 
