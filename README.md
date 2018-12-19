@@ -13,6 +13,8 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 - [Rationale](#rationale)
 - [Quick start](#quick-start)
 - [Building](#building)
+  - [Compiling using a multi-stage Dockerfile](#compiling-using-a-multi-stage-dockerfile)
+  - [Compililing locally](#compililing-locally)
 - [Installation](#installation)
   - [Authentication with Kubernetes API](#authentication-with-kubernetes-api)
   - [Example YAML](#example-yaml)
@@ -48,7 +50,7 @@ Note, that in order to guarantee correct versions of dependencies, the project [
 
 The repo comes with two ways of building a `docker` image: compliling locally, and compliling using a multi-stage `Dockerfile` image.
 
-### Compiling using a multi-stage `Dockerfile`
+### Compiling using a multi-stage Dockerfile
 
 You will need `docker` version 17.05+ installed to support multi-stage builds.
 
@@ -63,7 +65,7 @@ namespace="docker.io/myhandle/" make push
 
 This was contributed via @michiel - kudos !
 
-### Compliling locally
+### Compililing locally
 
 In order to build `Goldpinger`, you are going to need `go` version 1.10+, `dep`, and `docker`.
 
