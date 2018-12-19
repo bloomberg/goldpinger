@@ -14,7 +14,7 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 - [Quick start](#quick-start)
 - [Building](#building)
   - [Compiling using a multi-stage Dockerfile](#compiling-using-a-multi-stage-dockerfile)
-  - [Compililing locally](#compililing-locally)
+  - [Compiling locally](#compiling-locally)
 - [Installation](#installation)
   - [Authentication with Kubernetes API](#authentication-with-kubernetes-api)
   - [Example YAML](#example-yaml)
@@ -65,7 +65,7 @@ namespace="docker.io/myhandle/" make push
 
 This was contributed via [@michiel](https://github.com/michiel) - kudos !
 
-### Compililing locally
+### Compiling locally
 
 In order to build `Goldpinger`, you are going to need `go` version 1.10+, `dep`, and `docker`.
 
