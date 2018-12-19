@@ -2,7 +2,7 @@ FROM golang:1.11-alpine as builder
 
 # Install our build tools
 
-RUN apk add --update git make
+RUN apk add --update git make bash
 RUN go get -u github.com/golang/dep/cmd/dep
 
 # Get sources
@@ -16,7 +16,6 @@ RUN make vendor
 
 # Build goldpinger
 
-RUN apk add bash
 RUN make bin/goldpinger
 
 # Build the asset container, copy over goldpinger
