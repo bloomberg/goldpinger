@@ -69,7 +69,7 @@ This was contributed via [@michiel](https://github.com/michiel) - kudos !
 
 In order to build `Goldpinger`, you are going to need `go` version 1.10+, `dep`, and `docker`.
 
-Building from source code consists of compiling the binary and building a [Docker image](./build/Dockerfile):
+Building from source code consists of compiling the binary and building a [Docker image](./build/Dockerfile-simple):
 
 ```sh
 # step 0: check out the code into your $GOPATH
