@@ -16,18 +16,17 @@ package goldpinger
 
 import (
 	"log"
-   "io/ioutil"
+	"io/ioutil"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func getNamespace() string {
-    b, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-    if err != nil {
-        log.Println("Unable to determine namespace: ", err.Error())
-    }
-
-    namespace := string(b)
-	 return namespace
+	b, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	if err != nil {
+		log.Println("Unable to determine namespace: ", err.Error())
+	}
+	namespace := string(b)
+	return namespace
 }
 
 func GetAllPods() map[string]string {
