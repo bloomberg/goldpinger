@@ -16,15 +16,24 @@ package goldpinger
 
 import (
 	"log"
-
+	"io/ioutil"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func getNamespace() string {
+	b, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	if err != nil {
+		log.Println("Unable to determine namespace: ", err.Error())
+		return ""
+	}
+	namespace := string(b)
+	return namespace
+}
+
 // GetAllPods returns a map of Pod IP to Host IP based on a label selector defined in config
 func GetAllPods() map[string]string {
-
 	timer := GetLabeledKubernetesCallsTimer()
-	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods("").List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
+	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
 	if err != nil {
 		log.Println("Error getting pods for selector: ", err.Error())
 		CountError("kubernetes_api")
