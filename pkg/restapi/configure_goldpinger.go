@@ -75,9 +75,9 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 			goldpinger.CountCall("received", "healthz")
 			healthResult := goldpinger.HealthCheck()
 			if *healthResult.OK {
-				return operations.NewHealthzServiceUnavailable().WithPayload(healthResult)
-			} else {
 				return operations.NewHealthzOK().WithPayload(healthResult)
+			} else {
+				return operations.NewHealthzServiceUnavailable().WithPayload(healthResult)
 			}
 		})
 
