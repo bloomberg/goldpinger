@@ -70,6 +70,17 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours())
 		})
 
+	api.HealthzHandler = operations.HealthzHandlerFunc(
+		func(params operations.HealthzParams) middleware.Responder {
+			goldpinger.CountCall("received", "healthz")
+			healthResult := goldpinger.HealthCheck()
+			if *healthResult.OK {
+				return operations.NewHealthzServiceUnavailable().WithPayload(healthResult)
+			} else {
+				return operations.NewHealthzOK().WithPayload(healthResult)
+			}
+		})
+
 	api.ServerShutdown = func() {}
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))

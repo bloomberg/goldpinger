@@ -72,6 +72,29 @@ func init() {
         }
       }
     },
+    "/healthz": {
+      "get": {
+        "description": "The healthcheck endpoint provides detailed information about the health of a web service. If each of the components required by the service are healthy, then the service is considered healthy and will return a 200 OK response. If any of the components needed by the service are unhealthy, then a 503 Service Unavailable response will be provided.",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "healthz",
+        "responses": {
+          "200": {
+            "description": "Health check report",
+            "schema": {
+              "$ref": "#/definitions/HealthCheckResults"
+            }
+          },
+          "503": {
+            "description": "Unhealthy service",
+            "schema": {
+              "$ref": "#/definitions/HealthCheckResults"
+            }
+          }
+        }
+      }
+    },
     "/ping": {
       "get": {
         "description": "return query stats",
@@ -170,6 +193,23 @@ func init() {
       "type": "object",
       "additionalProperties": {
         "$ref": "#/definitions/PodResult"
+      }
+    },
+    "HealthCheckResults": {
+      "type": "object",
+      "properties": {
+        "OK": {
+          "type": "boolean",
+          "default": false
+        },
+        "duration-ns": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "generated-at": {
+          "type": "string",
+          "format": "date-time"
+        }
       }
     },
     "PingResults": {
@@ -250,6 +290,29 @@ func init() {
         }
       }
     },
+    "/healthz": {
+      "get": {
+        "description": "The healthcheck endpoint provides detailed information about the health of a web service. If each of the components required by the service are healthy, then the service is considered healthy and will return a 200 OK response. If any of the components needed by the service are unhealthy, then a 503 Service Unavailable response will be provided.",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "healthz",
+        "responses": {
+          "200": {
+            "description": "Health check report",
+            "schema": {
+              "$ref": "#/definitions/HealthCheckResults"
+            }
+          },
+          "503": {
+            "description": "Unhealthy service",
+            "schema": {
+              "$ref": "#/definitions/HealthCheckResults"
+            }
+          }
+        }
+      }
+    },
     "/ping": {
       "get": {
         "description": "return query stats",
@@ -348,6 +411,23 @@ func init() {
       "type": "object",
       "additionalProperties": {
         "$ref": "#/definitions/PodResult"
+      }
+    },
+    "HealthCheckResults": {
+      "type": "object",
+      "properties": {
+        "OK": {
+          "type": "boolean",
+          "default": false
+        },
+        "duration-ns": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "generated-at": {
+          "type": "string",
+          "format": "date-time"
+        }
       }
     },
     "PingResults": {
