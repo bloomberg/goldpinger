@@ -20,10 +20,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// GetAllPods returns a map of Pod IP to Host IP based on a label selector defined in config
 func GetAllPods() map[string]string {
 
 	timer := GetLabeledKubernetesCallsTimer()
-	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods("").List(metav1.ListOptions{LabelSelector: "app=goldpinger"})
+	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods("").List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
 	if err != nil {
 		log.Println("Error getting pods for selector: ", err.Error())
 		CountError("kubernetes_api")
