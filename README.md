@@ -185,7 +185,7 @@ You can also see [an example of using `kubeconfig` in the `./extras`](./extras/e
 
 Once you have it running, you can hit any of the nodes (port 30080 in the example above) and see the UI.
 
-![](./extras/screenshot.png)
+![](./extras/screenshot-big.png)
 
 You can click on various nodes to gray out the clutter and see more information.
 
