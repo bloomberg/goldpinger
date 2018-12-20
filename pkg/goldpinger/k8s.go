@@ -24,6 +24,7 @@ func getNamespace() string {
 	b, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 	if err != nil {
 		log.Println("Unable to determine namespace: ", err.Error())
+		return ""
 	}
 	namespace := string(b)
 	return namespace
