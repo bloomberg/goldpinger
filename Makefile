@@ -23,16 +23,16 @@ swagger:
 	swagger generate client -t pkg -f ./swagger.yml -A goldpinger
 
 build-multistage:
-	sudo docker build -t $(tag) -f ./Dockerfile .
+	docker build -t $(tag) -f ./Dockerfile .
 
 build: bin/$(bin)
-	sudo docker build -t $(tag) -f ./build/Dockerfile-simple .
+	docker build -t $(tag) -f ./build/Dockerfile-simple .
 
 tag:
-	sudo docker tag $(tag) $(namespace)$(tag)
+	docker tag $(tag) $(namespace)$(tag)
 
 push:
-	sudo docker push $(namespace)$(tag)
+	docker push $(namespace)$(tag)
 
 run:
 	go run ./cmd/goldpinger/main.go
