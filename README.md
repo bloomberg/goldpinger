@@ -48,7 +48,7 @@ Note, that in order to guarantee correct versions of dependencies, the project [
 
 ## Building
 
-The repo comes with two ways of building a `docker` image: compliling locally, and compliling using a multi-stage `Dockerfile` image.
+The repo comes with two ways of building a `docker` image: compiling locally, and compiling using a multi-stage `Dockerfile` image.
 
 ### Compiling using a multi-stage Dockerfile
 
