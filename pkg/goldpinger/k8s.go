@@ -33,7 +33,7 @@ func getNamespace() string {
 // GetAllPods returns a map of Pod IP to Host IP based on a label selector defined in config
 func GetAllPods() map[string]string {
 	timer := GetLabeledKubernetesCallsTimer()
-	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
+	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(getNamespace()).List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
 	if err != nil {
 		log.Println("Error getting pods for selector: ", err.Error())
 		CountError("kubernetes_api")
