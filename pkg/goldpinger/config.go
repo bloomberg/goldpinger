@@ -26,5 +26,6 @@ var GoldpingerConfig = struct {
 	Hostname         string `long:"hostname" description:"Hostname to use" env:"HOSTNAME"`
 	Port             int    `long:"client-port-override" description:"(for testing) use this port when calling other instances" env:"CLIENT_PORT_OVERRIDE"`
 	UseHostIP        bool   `long:"use-host-ip" description:"When making the calls, use host ip (defaults to pod ip)" env:"USE_HOST_IP"`
+	LabelSelector    string `long:"label-selector" description:"label selector to use to discover goldpinger pods in the cluster" env:"LABEL_SELECTOR" default:"app=goldpinger"`
 	KubernetesClient *kubernetes.Clientset
 }{}
