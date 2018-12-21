@@ -35,6 +35,7 @@ fi
 
 export CGO_ENABLED=0
 export GOARCH="${ARCH}"
+export GOOS=${GOOS:-}
 
 go build \
     -ldflags "-X 'main.Version=${VERSION}' -X 'main.Build=`date`'" \

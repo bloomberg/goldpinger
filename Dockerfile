@@ -5,17 +5,15 @@ FROM golang:1.11-alpine as builder
 RUN apk add --update git make bash
 RUN go get -u github.com/golang/dep/cmd/dep
 
-# Get sources
+# Get dependencies
 
-RUN go get github.com/bloomberg/goldpinger/cmd/goldpinger
 WORKDIR /go/src/github.com/bloomberg/goldpinger
-
-# Install our dependencies
-
+COPY Gopkg.toml Gopkg.lock Makefile ./
 RUN make vendor
 
 # Build goldpinger
 
+COPY . ./
 RUN make bin/goldpinger
 
 # Build the asset container, copy over goldpinger
