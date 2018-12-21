@@ -35,10 +35,7 @@ fi
 
 export CGO_ENABLED=0
 export GOARCH="${ARCH}"
-GOOS=${GOOS:-}
-if [ ! -z "${GOOS}" ]; then
-    export GOOS
-fi
+export GOOS=${GOOS:-}
 
 go build \
     -ldflags "-X 'main.Version=${VERSION}' -X 'main.Build=`date`'" \
