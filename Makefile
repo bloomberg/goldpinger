@@ -16,7 +16,7 @@ clean:
 
 vendor:
 	rm -rf ./vendor
-	dep ensure -v
+	dep ensure -v -vendor-only
 
 swagger:
 	swagger generate server -t pkg -f ./swagger.yml --exclude-main -A goldpinger && \
