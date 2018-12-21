@@ -48,7 +48,7 @@ Note, that in order to guarantee correct versions of dependencies, the project [
 
 ## Building
 
-The repo comes with two ways of building a `docker` image: compiling locally, and compiling using a multi-stage `Dockerfile` image. :warning: Depending on your `docker` setup, you might need to prepend these commands with `sudo`.
+The repo comes with two ways of building a `docker` image: compiling locally, and compiling using a multi-stage `Dockerfile` image. :warning: Depending on your `docker` setup, you might need to prepend the commands below with `sudo`.
 
 ### Compiling using a multi-stage Dockerfile
 
