@@ -5,7 +5,7 @@ FROM golang:1.11-alpine as builder
 RUN apk add --update git make bash
 RUN go get -u github.com/golang/dep/cmd/dep
 
-# Get sources and dependencies
+# Get dependencies
 
 WORKDIR /go/src/github.com/bloomberg/goldpinger
 COPY Gopkg.toml Gopkg.lock Makefile ./
