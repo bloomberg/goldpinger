@@ -16,7 +16,7 @@ script:
   - make clean && make vendor && make && ./bin/goldpinger --help
   
   # build an image and run the image
-  - make clean && make build
+  - make clean && make vendor && make build
   - docker images
   - docker run `make version` --help
   
