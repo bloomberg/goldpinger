@@ -38,5 +38,8 @@ push:
 
 run:
 	go run ./cmd/goldpinger/main.go
+	
+version:
+	@echo $(tag)
 
-.PHONY: clean vendor build-swagger build tag push run
+.PHONY: clean vendor swagger build build-multistage tag push run version
