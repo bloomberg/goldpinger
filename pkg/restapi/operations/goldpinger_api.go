@@ -43,6 +43,9 @@ func NewGoldpingerAPI(spec *loads.Document) *GoldpingerAPI {
 		CheckServicePodsHandler: CheckServicePodsHandlerFunc(func(params CheckServicePodsParams) middleware.Responder {
 			return middleware.NotImplemented("operation CheckServicePods has not yet been implemented")
 		}),
+		HealthzHandler: HealthzHandlerFunc(func(params HealthzParams) middleware.Responder {
+			return middleware.NotImplemented("operation Healthz has not yet been implemented")
+		}),
 		PingHandler: PingHandlerFunc(func(params PingParams) middleware.Responder {
 			return middleware.NotImplemented("operation Ping has not yet been implemented")
 		}),
@@ -81,6 +84,8 @@ type GoldpingerAPI struct {
 	CheckAllPodsHandler CheckAllPodsHandler
 	// CheckServicePodsHandler sets the operation handler for the check service pods operation
 	CheckServicePodsHandler CheckServicePodsHandler
+	// HealthzHandler sets the operation handler for the healthz operation
+	HealthzHandler HealthzHandler
 	// PingHandler sets the operation handler for the ping operation
 	PingHandler PingHandler
 
@@ -152,6 +157,10 @@ func (o *GoldpingerAPI) Validate() error {
 
 	if o.CheckServicePodsHandler == nil {
 		unregistered = append(unregistered, "CheckServicePodsHandler")
+	}
+
+	if o.HealthzHandler == nil {
+		unregistered = append(unregistered, "HealthzHandler")
 	}
 
 	if o.PingHandler == nil {
@@ -265,6 +274,11 @@ func (o *GoldpingerAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/check"] = NewCheckServicePods(o.context, o.CheckServicePodsHandler)
+
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/healthz"] = NewHealthz(o.context, o.HealthzHandler)
 
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)

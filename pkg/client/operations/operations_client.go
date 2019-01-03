@@ -81,6 +81,34 @@ func (a *Client) CheckServicePods(params *CheckServicePodsParams) (*CheckService
 }
 
 /*
+Healthz The healthcheck endpoint provides detailed information about the health of a web service. If each of the components required by the service are healthy, then the service is considered healthy and will return a 200 OK response. If any of the components needed by the service are unhealthy, then a 503 Service Unavailable response will be provided.
+*/
+func (a *Client) Healthz(params *HealthzParams) (*HealthzOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewHealthzParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "healthz",
+		Method:             "GET",
+		PathPattern:        "/healthz",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{""},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &HealthzReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*HealthzOK), nil
+
+}
+
+/*
 Ping return query stats
 */
 func (a *Client) Ping(params *PingParams) (*PingOK, error) {

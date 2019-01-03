@@ -17,6 +17,7 @@ package goldpinger
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	apiclient "github.com/bloomberg/goldpinger/pkg/client"
 	"github.com/bloomberg/goldpinger/pkg/models"
@@ -158,6 +159,17 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 			HostIP: response.hostIPv4,
 			PodIP:  podIPv4,
 		})
+	}
+	return &result
+}
+
+func HealthCheck() *models.HealthCheckResults {
+	ok := true
+	start := time.Now()
+	result := models.HealthCheckResults{
+		OK: &ok,
+		DurationNs: time.Since(start).Nanoseconds(),
+		GeneratedAt: strfmt.DateTime(start),
 	}
 	return &result
 }
