@@ -223,7 +223,7 @@ To get you started, here's a rule that will trigger an alert if there are any no
 
 ```yaml
 alert: goldpinger_nodes_unhealthy
-expr: sum(goldpinger_nodes_healthy_total{status="unhealthy"})
+expr: sum(goldpinger_nodes_health_total{status="unhealthy"})
   BY (goldpinger_instance) > 0
 for: 5m
 annotations:
