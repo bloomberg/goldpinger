@@ -227,6 +227,10 @@ func init() {
         "response": {
           "$ref": "#/definitions/PingResults"
         },
+        "response-time": {
+          "type": "number",
+          "format": "float64"
+        },
         "status-code": {
           "type": "integer",
           "format": "int32"
@@ -444,6 +448,10 @@ func init() {
         },
         "response": {
           "$ref": "#/definitions/PingResults"
+        },
+        "response-time": {
+          "type": "number",
+          "format": "float64"
         },
         "status-code": {
           "type": "integer",

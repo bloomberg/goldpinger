@@ -36,6 +36,9 @@ definitions:
       status-code:
         type: integer
         format: int32
+      response-time:
+        type: number
+        format: float64
   CheckResults:
     type: object
     additionalProperties:
