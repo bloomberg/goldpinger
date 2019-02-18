@@ -203,7 +203,7 @@ var main = function(timeout){
                         if (typeof call !== 'string'){
                                 for (let target in call) {
                                         edges.push({
-                                                source: resp[callId],
+                                                source: callId,
                                                 target: target,
                                                 _data: call[target]
                                         });
