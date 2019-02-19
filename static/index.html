@@ -26,38 +26,34 @@ limitations under the License.
 
         <title>Goldpinger</title>
 
-        <script type="text/javascript" src="static/jsdelivr.net/lodash/4.14.0/lodash.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/sigma.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.exporters.svg.min.js"></script>:
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.layout.forceAtlas2.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.neo4j.cypher.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.parsers.cypher.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.parsers.gexf.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.parsers.json.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.pathfinding.astar.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.plugins.animate.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.plugins.dragNodes.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.plugins.filter.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.plugins.neighborhoods.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.plugins.relativeSize.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.renderers.customEdgeShapes.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.renderers.customShapes.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.renderers.edgeLabels.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.renderers.parallelEdges.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.renderers.snapshot.min.js"></script>
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/sigma.js/1.1.0/plugins/sigma.statistics.HITS.min.js"></script>
+        <!-- Utilities -->
+        <script type="text/javascript" src="static/jquery/3.1.0/jquery.min.js"></script>
 
-
-        <script type="text/javascript" src="static/cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <!-- Sigma.js -->
+        <script type="text/javascript" src="static/sigma.js/1.1.0/sigma.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.exporters.svg.min.js"></script>:
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.layout.forceAtlas2.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.neo4j.cypher.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.parsers.cypher.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.parsers.gexf.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.parsers.json.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.pathfinding.astar.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.plugins.animate.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.plugins.dragNodes.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.plugins.filter.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.plugins.neighborhoods.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.plugins.relativeSize.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.renderers.customEdgeShapes.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.renderers.customShapes.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.renderers.edgeLabels.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.renderers.parallelEdges.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.renderers.snapshot.min.js"></script>
+        <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.statistics.HITS.min.js"></script>
         
-        <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="static/bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
-
-        <!-- Optional theme -->
-        <link rel="stylesheet" href="static/bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" crossorigin="anonymous">
-
-        <!-- Latest compiled and minified JavaScript -->
-        <script src="static/bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="static/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
+        <link rel="stylesheet" href="static/bootstrap/3.3.7/css/bootstrap-theme.min.css" crossorigin="anonymous">
+        <script src="static/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
         <style type="text/css">
                 body {
@@ -187,32 +183,33 @@ var main = function(timeout){
                 // prepare nodes
                 var nodes = [];
                 var resp = data.responses;
-                _.forOwn(resp, function(value, podIP) {
+                for (let podIP in resp) {
+                        let value = resp[podIP];
                         nodes.push({
-                                "label": podIP+ " (" + value.HostIP + ")",
+                                "label": podIP + " (" + value.HostIP + ")",
                                 "id": podIP,
                                 "x": 0,
                                 "y": 0,
-                                _data: value
+                                _data: value,
                         });
-                });
+                };
                 //console.log(nodes);
 
                 // prepare the edges
                 var edges = [];
                 var resp = data.responses;
-                _.forOwn(resp, function(value, source) {
-                        var call = value.response;
-                        if (!_.isString(call)){
-                            _.forOwn(call, function(value, target){
-                                    edges.push({
-                                            source: source,
-                                            target: target,
-                                            _data: value
-                                    });
-                            });
+                for (let callId in resp) {
+                        var call = resp[callId].response;
+                        if (typeof call !== 'string'){
+                                for (let target in call) {
+                                        edges.push({
+                                                source: callId,
+                                                target: target,
+                                                _data: call[target]
+                                        });
+                                };
                         }
-                });
+                };
                 //console.log(edges);
 
 
