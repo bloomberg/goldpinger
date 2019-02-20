@@ -71,8 +71,8 @@ func PingAllPods(pods map[string]string) models.CheckResults {
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
 			var OK = (err == nil)
 			if OK {
-				responseTime := float64(time.Since(start).Nanoseconds()) / float64(int64(time.Millisecond))
-				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTime: responseTime}
+				responseTime := time.Since(start).Nanoseconds() / int64(time.Millisecond)
+				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTimeMs: responseTime}
 				timer.ObserveDuration()
 			} else {
 				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500}

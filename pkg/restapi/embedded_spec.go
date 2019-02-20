@@ -227,9 +227,10 @@ func init() {
         "response": {
           "$ref": "#/definitions/PingResults"
         },
-        "response-time": {
+        "response-time-ms": {
+          "description": "wall clock time in milliseconds",
           "type": "number",
-          "format": "float64"
+          "format": "int64"
         },
         "status-code": {
           "type": "integer",
@@ -449,9 +450,10 @@ func init() {
         "response": {
           "$ref": "#/definitions/PingResults"
         },
-        "response-time": {
+        "response-time-ms": {
+          "description": "wall clock time in milliseconds",
           "type": "number",
-          "format": "float64"
+          "format": "int64"
         },
         "status-code": {
           "type": "integer",
