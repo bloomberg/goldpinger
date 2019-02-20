@@ -36,9 +36,10 @@ definitions:
       status-code:
         type: integer
         format: int32
-      response-time:
+      response-time-ms:
         type: number
-        format: float64
+        format: int64
+        description: wall clock time in milliseconds
   CheckResults:
     type: object
     additionalProperties:
