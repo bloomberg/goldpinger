@@ -65,12 +65,14 @@ func PingAllPods(pods map[string]string) models.CheckResults {
 
 			CountCall("made", "ping")
 			timer := GetLabeledPeersCallsTimer("ping", hostIP, podIP)
+			start := time.Now()
 			resp, err := getClient(pickPodHostIP(podIP, hostIP)).Operations.Ping(nil)
 
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
 			var OK = (err == nil)
 			if OK {
-				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200}
+				responseTime := time.Since(start).Nanoseconds() / int64(time.Millisecond)
+				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTimeMs: responseTime}
 				timer.ObserveDuration()
 			} else {
 				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500}
@@ -167,8 +169,8 @@ func HealthCheck() *models.HealthCheckResults {
 	ok := true
 	start := time.Now()
 	result := models.HealthCheckResults{
-		OK: &ok,
-		DurationNs: time.Since(start).Nanoseconds(),
+		OK:          &ok,
+		DurationNs:  time.Since(start).Nanoseconds(),
 		GeneratedAt: strfmt.DateTime(start),
 	}
 	return &result

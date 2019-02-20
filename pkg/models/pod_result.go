@@ -30,6 +30,9 @@ type PodResult struct {
 	// response
 	Response *PingResults `json:"response,omitempty"`
 
+	// wall clock time in milliseconds
+	ResponseTimeMs int64 `json:"response-time-ms,omitempty"`
+
 	// status code
 	StatusCode int32 `json:"status-code,omitempty"`
 }

@@ -50,8 +50,12 @@ func (o *CheckServicePodsOK) WriteResponse(rw http.ResponseWriter, producer runt
 
 	rw.WriteHeader(200)
 	payload := o.Payload
+	if payload == nil {
+		// return empty map
+		payload = models.CheckResults{}
+	}
+
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this
 	}
-
 }
