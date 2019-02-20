@@ -33,14 +33,14 @@ func (o *HealthzURL) SetBasePath(bp string) {
 
 // Build a url path and query string
 func (o *HealthzURL) Build() (*url.URL, error) {
-	var result url.URL
+	var _result url.URL
 
 	var _path = "/healthz"
 
 	_basePath := o._basePath
-	result.Path = golangswaggerpaths.Join(_basePath, _path)
+	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
-	return &result, nil
+	return &_result, nil
 }
 
 // Must is a helper function to panic when the url builder returns an error
