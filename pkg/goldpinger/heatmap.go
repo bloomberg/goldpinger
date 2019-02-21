@@ -18,7 +18,6 @@ package goldpinger
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -89,11 +88,6 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 
 	// draw all the boxes
 	for sourceIP, results := range checkResults.Responses {
-		fmt.Println("source", sourceIP)
-		fmt.Println("OK ?", *results.OK)
-
-		keys = append(keys, sourceIP)
-
 		if *results.OK {
 			for destinationIP, response := range results.Response {
 				x, y := getPingBoxCoordinates(order[sourceIP], order[destinationIP], boxSize, paddingSize)
