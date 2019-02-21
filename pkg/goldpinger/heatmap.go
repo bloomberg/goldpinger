@@ -26,7 +26,21 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
 )
+
+func addLabel(img *image.RGBA, x, y int, text string) {
+	drawer := &font.Drawer{
+		Dst:  img,
+		Src:  image.NewUniform(color.RGBA{25, 200, 25, 255}),
+		Face: basicfont.Face7x13,
+		Dot:  fixed.Point26_6{fixed.Int26_6(x * 64), fixed.Int26_6(y * 64)},
+	}
+	drawer.DrawString(text)
+}
 
 // Calculates the color of the box to draw based on the latency and tresholds
 // We are aiming at slightly more palatable colors than just moving from 255 green to 255 red,
@@ -70,9 +84,10 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 
 	// set some sizes
 	numberOfPods := len(checkResults.Responses)
-	boxSize := 20
+	legendSize := 200
+	boxSize := 26
 	paddingSize := 1
-	heatmapSize := numberOfPods * (boxSize + paddingSize)
+	heatmapSize := numberOfPods*(boxSize+paddingSize) + boxSize*2
 	tresholdLatencies := [3]int64{1, 10, 100}
 	for index := range tresholdLatencies {
 		stringValue := query["t"+fmt.Sprintf("%d", index)]
@@ -84,7 +99,7 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	canvas := image.NewRGBA(image.Rect(0, 0, heatmapSize, heatmapSize))
+	canvas := image.NewRGBA(image.Rect(0, 0, heatmapSize+legendSize, heatmapSize))
 
 	// establish an order and fix the max delay
 	var keys []string
@@ -103,9 +118,19 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 			for destinationIP, response := range results.Response {
 				x, y := getPingBoxCoordinates(order[sourceIP], order[destinationIP], boxSize, paddingSize)
 				color := getPingBoxColor(response.ResponseTimeMs, tresholdLatencies)
-				drawPingBox(canvas, x, y, boxSize, color)
+				drawPingBox(canvas, boxSize+x, boxSize+y, boxSize, color)
 			}
 		}
+	}
+
+	// draw the legend
+	for index, ip := range keys {
+		// ip
+		addLabel(canvas, heatmapSize, (index+1)*(boxSize+paddingSize)+13, fmt.Sprintf("%d", index)+": "+ip)
+		// rows
+		addLabel(canvas, 0, (index+1)*(boxSize+paddingSize)+13, fmt.Sprintf("%d", index))
+		// columns
+		addLabel(canvas, (index+1)*(boxSize+paddingSize), 13, fmt.Sprintf("%d", index))
 	}
 
 	buffer := new(bytes.Buffer)
