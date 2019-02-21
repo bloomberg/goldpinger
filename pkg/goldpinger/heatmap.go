@@ -18,6 +18,7 @@ package goldpinger
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -30,17 +31,17 @@ import (
 // Calculates the color of the box to draw based on the latency and tresholds
 // We are aiming at slightly more palatable colors than just moving from 255 green to 255 red,
 // so we will use 25B, and then move from (25R, 200G) to (200R, 25G), so our scale is effectively 350 points
-func getPingBoxColor(latency, tresholdA, tresholdB, tresholdC int64) *color.RGBA {
+func getPingBoxColor(latency int64, tresholdLatencies [3]int64) *color.RGBA {
 	var red, green uint8 = 25, 200
-	if latency > tresholdC {
+	if latency > tresholdLatencies[2] {
 		red, green = 200, 25
-	} else if latency > tresholdB {
+	} else if latency >= tresholdLatencies[1] {
 		red, green = 200, 200
-		diff := (float32(latency-tresholdB) / float32(tresholdC-tresholdB)) * 175
+		diff := (float32(latency-tresholdLatencies[1]) / float32(tresholdLatencies[2]-tresholdLatencies[1])) * 175
 		green = green - uint8(diff)
-	} else if latency > tresholdA {
+	} else if latency >= tresholdLatencies[0] {
 		red, green = 25, 200
-		diff := (float32(latency-tresholdA) / float32(tresholdB-tresholdA)) * 175
+		diff := (float32(latency-tresholdLatencies[0]) / float32(tresholdLatencies[1]-tresholdLatencies[0])) * 175
 		red = red + uint8(diff)
 	}
 	return &color.RGBA{red, green, 25, 255}
@@ -61,6 +62,9 @@ func getPingBoxCoordinates(col, row, boxSize, padding int) (int, int) {
 // HeatmapHandler returns a PNG with a heatmap representation
 func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 
+	// parse the query to set the parameters
+	query := r.URL.Query()
+
 	// get the results
 	checkResults := CheckAllPods(GetAllPods())
 
@@ -69,9 +73,16 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 	boxSize := 20
 	paddingSize := 1
 	heatmapSize := numberOfPods * (boxSize + paddingSize)
-	var tresholdLatencyA int64 = 50
-	var tresholdLatencyB int64 = 100
-	var tresholdLatencyC int64 = 200
+	tresholdLatencies := [3]int64{1, 10, 100}
+	for index := range tresholdLatencies {
+		stringValue := query["t"+fmt.Sprintf("%d", index)]
+		if len(stringValue) == 0 {
+			continue
+		}
+		if v, err := strconv.ParseInt(stringValue[0], 0, 64); err == nil && v >= 0 {
+			tresholdLatencies[index] = v
+		}
+	}
 
 	canvas := image.NewRGBA(image.Rect(0, 0, heatmapSize, heatmapSize))
 
@@ -91,7 +102,7 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 		if *results.OK {
 			for destinationIP, response := range results.Response {
 				x, y := getPingBoxCoordinates(order[sourceIP], order[destinationIP], boxSize, paddingSize)
-				color := getPingBoxColor(response.ResponseTimeMs, tresholdLatencyA, tresholdLatencyB, tresholdLatencyC)
+				color := getPingBoxColor(response.ResponseTimeMs, tresholdLatencies)
 				drawPingBox(canvas, x, y, boxSize, color)
 			}
 		}
