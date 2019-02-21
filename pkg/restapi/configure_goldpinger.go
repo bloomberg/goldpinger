@@ -110,6 +110,8 @@ func fileServerMiddleware(next http.Handler) http.Handler {
 		fileServer := http.FileServer(http.Dir(goldpinger.GoldpingerConfig.StaticFilePath))
 		if r.URL.Path == "/" {
 			http.StripPrefix("/", fileServer).ServeHTTP(w, r)
+		} else if r.URL.Path == "/heatmap.png" {
+			goldpinger.HeatmapHandler(w, r)
 		} else if strings.HasPrefix(r.URL.Path, "/static/") {
 			http.StripPrefix("/static/", fileServer).ServeHTTP(w, r)
 		} else {
