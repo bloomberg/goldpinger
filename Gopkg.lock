@@ -364,6 +364,19 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:09c175055d303dadf3f82513c66e6da0b95ba22bc8e5d267a2674d16d95ea77a"
+  name = "golang.org/x/image"
+  packages = [
+    "font",
+    "font/basicfont",
+    "font/plan9font",
+    "math/fixed",
+  ]
+  pruneopts = "UT"
+  revision = "31aff87c08e9a5e5d524279a564f96968336f886"
+
+[[projects]]
+  branch = "master"
   digest = "1:eb8583d4582ffbc5c6d3ec00132cd0835101edde42b6f24eaafa628d1596f881"
   name = "golang.org/x/net"
   packages = [
@@ -626,7 +639,9 @@
     "github.com/jessevdk/go-flags",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
-    "golang.org/x/net/context",
+    "golang.org/x/image/font",
+    "golang.org/x/image/font/basicfont",
+    "golang.org/x/image/math/fixed",
     "golang.org/x/net/netutil",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/client-go/kubernetes",
