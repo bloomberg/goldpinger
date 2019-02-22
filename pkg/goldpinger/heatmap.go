@@ -85,7 +85,7 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 	// set some sizes
 	numberOfPods := len(checkResults.Responses)
 	legendSize := 200
-	boxSize := 26
+	boxSize := 14
 	paddingSize := 1
 	heatmapSize := numberOfPods*(boxSize+paddingSize) + boxSize*2
 	tresholdLatencies := [3]int64{1, 10, 100}
