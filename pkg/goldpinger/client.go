@@ -27,14 +27,14 @@ import (
 
 // CheckNeighbours queries the kubernetes API server for all other goldpinger pods
 // then calls Ping() on each one
-func CheckNeighbours() models.CheckResults {
-	return PingAllPods(GetAllPods())
+func CheckNeighbours(ps *PodSelecter) models.CheckResults {
+	return PingAllPods(ps.SelectPods())
 }
 
 // CheckNeighboursNeighbours queries the kubernetes API server for all other goldpinger
 // pods then calls Check() on each one
-func CheckNeighboursNeighbours() *models.CheckAllResults {
-	return CheckAllPods(GetAllPods())
+func CheckNeighboursNeighbours(ps *PodSelecter) *models.CheckAllResults {
+	return CheckAllPods(ps.SelectPods())
 }
 
 type PingAllPodsResult struct {

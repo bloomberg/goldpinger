@@ -47,6 +47,7 @@ func configureFlags(api *operations.GoldpingerAPI) {
 
 func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 	// configure the api here
+	ps := &goldpinger.PodSelecter{}
 	api.ServeError = errors.ServeError
 
 	api.JSONConsumer = runtime.JSONConsumer()
@@ -61,13 +62,13 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 	api.CheckServicePodsHandler = operations.CheckServicePodsHandlerFunc(
 		func(params operations.CheckServicePodsParams) middleware.Responder {
 			goldpinger.CountCall("received", "check")
-			return operations.NewCheckServicePodsOK().WithPayload(goldpinger.CheckNeighbours())
+			return operations.NewCheckServicePodsOK().WithPayload(goldpinger.CheckNeighbours(ps))
 		})
 
 	api.CheckAllPodsHandler = operations.CheckAllPodsHandlerFunc(
 		func(params operations.CheckAllPodsParams) middleware.Responder {
 			goldpinger.CountCall("received", "check_all")
-			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours())
+			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours(ps))
 		})
 
 	api.HealthzHandler = operations.HealthzHandlerFunc(
@@ -136,4 +137,45 @@ func prometheusMetricsMiddleware(next http.Handler) http.Handler {
 // So this is a good place to plug in a panic handling middleware, logging and metrics
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	return prometheusMetricsMiddleware(fileServerMiddleware(handler))
+}
+
+// Configure sets the handlers on GoldpingerAPI.
+func Configure(api *operations.GoldpingerAPI, ps *goldpinger.PodSelecter) http.Handler {
+	api.ServeError = errors.ServeError
+
+	api.JSONConsumer = runtime.JSONConsumer()
+	api.JSONProducer = runtime.JSONProducer()
+
+	api.PingHandler = operations.PingHandlerFunc(
+		func(params operations.PingParams) middleware.Responder {
+			goldpinger.CountCall("received", "ping")
+			return operations.NewPingOK().WithPayload(goldpinger.GetStats())
+		})
+
+	api.CheckServicePodsHandler = operations.CheckServicePodsHandlerFunc(
+		func(params operations.CheckServicePodsParams) middleware.Responder {
+			goldpinger.CountCall("received", "check")
+			return operations.NewCheckServicePodsOK().WithPayload(goldpinger.CheckNeighbours(ps))
+		})
+
+	api.CheckAllPodsHandler = operations.CheckAllPodsHandlerFunc(
+		func(params operations.CheckAllPodsParams) middleware.Responder {
+			goldpinger.CountCall("received", "check_all")
+			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours(ps))
+		})
+
+	api.HealthzHandler = operations.HealthzHandlerFunc(
+		func(params operations.HealthzParams) middleware.Responder {
+			goldpinger.CountCall("received", "healthz")
+			healthResult := goldpinger.HealthCheck()
+			if *healthResult.OK {
+				return operations.NewHealthzOK().WithPayload(healthResult)
+			} else {
+				return operations.NewHealthzServiceUnavailable().WithPayload(healthResult)
+			}
+		})
+
+	api.ServerShutdown = func() {}
+
+	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
 }
