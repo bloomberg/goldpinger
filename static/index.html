@@ -86,6 +86,7 @@ limitations under the License.
           <ul class="nav navbar-nav">
             <li class="active"><a href="#">Graph</a></li>
             <li><a href="#" id="show-data">Data</a></li>
+            <li><a href="#" id="show-heatmap">Heatmap</a></li>
             <li><a href="check_all" >Raw</a></li>
             <li><a href="metrics" >Metrics</a></li>
           </ul>
@@ -106,24 +107,70 @@ limitations under the License.
 
     </div>
 
-        <div id="modal-window-code" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-                <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
-                                <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                        <h4 class="modal-title" id="modal-title">title</h4>
-                                </div>
-                                <div class="modal-body" id="modal-body">
-                                body
-                                </div>
-                                <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                </div>
+    <div id="modal-window-code" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                        <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="modal-title">title</h4>
+                        </div>
+                        <div class="modal-body" id="modal-body">
+                        body
+                        </div>
+                        <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
                 </div>
         </div>
+</div>
+
+
+<div id="modal-window-heatmap" class="modal fade bs-example-modal-lg" tabindex="-2" role="dialog" aria-labelledby="myLargeModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                        <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="modal-title">Heatmap</h4>
+                        </div>
+                        <div class="modal-body">
+
+                                <div id="heatmap-body" style="padding: 10px"></div>
+
+                                <div class="input-group">
+                                        <span class="input-group-addon" style="width: 200px">Good treshold</span>
+                                        <input id="t0" type="number" step="1" class="form-control" placeholder="2" value="2">
+                                        <span class="input-group-addon">milliseconds</span>
+                                </div>
+                                <div class="input-group">
+                                        <span class="input-group-addon" style="width: 200px">Warning treshold</span>
+                                        <input id="t1" type="number" step="1" class="form-control" placeholder="5" value="5">
+                                        <span class="input-group-addon">milliseconds</span>
+                                </div>
+                                <div class="input-group">
+                                        <span class="input-group-addon" style="width: 200px">Problem treshold</span>
+                                        <input id="t2" type="number" step="1" class="form-control" placeholder="100" value="100">
+                                        <span class="input-group-addon">milliseconds</span>
+                                </div>
+                        </div>
+                        <div class="modal-footer">
+                                <button class="btn btn-success" id="update-heatmap" type="button">refresh</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                </div>
+        </div>
+</div>
+
 
 <script>
+
+var getHeatmapUrl = function(){
+        return "heatmap.png?"
+                +  "t0=" + Number($("#t0").val())
+                + "&t1=" + Number($("#t1").val())
+                + "&t2=" + Number($("#t2").val())
+                + "&now=" + Date.now();
+}
+
 var fetchJSON = function(url) {
         return new Promise(function(resolve, reject) {
                 console.log("calling " + url);
@@ -346,6 +393,18 @@ $("#show-data").click(function (e) {
 $("#reload-graph").click(function (e) {
         s.kill();
         main();
+});
+$("#show-heatmap").click(function (e) {
+        updateHeatmap();
+        $('#modal-window-heatmap').modal('show');
+});
+var updateHeatmap = function(){
+        $('#heatmap-body').html(
+                '<img src="' + getHeatmapUrl() + '" />'
+        );
+}
+$("#update-heatmap").click(function (e) {
+        updateHeatmap();
 });
 </script>
 </body>
