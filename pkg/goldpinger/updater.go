@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-func StartUpdater(ps *PodSelecter) {
+func StartUpdater() {
 	if GoldpingerConfig.RefreshInterval <= 0 {
 		log.Println("Not creating updater, period is 0")
 		return
@@ -29,7 +29,7 @@ func StartUpdater(ps *PodSelecter) {
 	// start the updater
 	go func() {
 		for {
-			results := PingAllPods(ps.SelectPods())
+			results := PingAllPods(GoldpingerConfig.PodSelecter.SelectPods())
 			var troublemakers []string
 			for podIP, value := range results {
 				if *value.OK != true {

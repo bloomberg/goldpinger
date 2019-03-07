@@ -102,10 +102,10 @@ func main() {
 	if goldpinger.GoldpingerConfig.PingNumber == 0 {
 		log.Println("--ping-number set to 0: pinging all pods")
 	}
-	podSelecter := goldpinger.NewPodSelecter(goldpinger.GoldpingerConfig.PingNumber, goldpinger.GoldpingerConfig.PodIP, goldpinger.GetAllPods)
+	goldpinger.GoldpingerConfig.PodSelecter = goldpinger.NewPodSelecter(goldpinger.GoldpingerConfig.PingNumber, goldpinger.GoldpingerConfig.PodIP, goldpinger.GetAllPods)
 
-	restapi.Configure(api, podSelecter)
-	goldpinger.StartUpdater(podSelecter)
+	server.ConfigureAPI()
+	goldpinger.StartUpdater()
 
 	log.Println("All good, starting serving the API")
 
