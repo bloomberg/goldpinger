@@ -25,7 +25,8 @@ script:
   - docker images
   - docker run `make version` --help
 
-after_success:
-  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then
-      docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" && make tag && make push;
-    fi
+deploy:
+  provider: script
+  script: bash docker_deploy.sh
+  on:
+    branch: master
