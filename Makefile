@@ -4,7 +4,7 @@ bin ?= goldpinger
 pkg ?= "github.com/bloomberg/goldpinger"
 tag = $(name):$(version)
 goos ?= ${GOOS}
-namespace ?= ""
+namespace ?= "bloomberg/"
 files = $(shell find . -iname "*.go")
 
 
@@ -38,7 +38,7 @@ push:
 
 run:
 	go run ./cmd/goldpinger/main.go
-	
+
 version:
 	@echo $(tag)
 
