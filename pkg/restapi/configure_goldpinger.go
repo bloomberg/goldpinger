@@ -70,6 +70,17 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours())
 		})
 
+	api.HealthzHandler = operations.HealthzHandlerFunc(
+		func(params operations.HealthzParams) middleware.Responder {
+			goldpinger.CountCall("received", "healthz")
+			healthResult := goldpinger.HealthCheck()
+			if *healthResult.OK {
+				return operations.NewHealthzOK().WithPayload(healthResult)
+			} else {
+				return operations.NewHealthzServiceUnavailable().WithPayload(healthResult)
+			}
+		})
+
 	api.ServerShutdown = func() {}
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
@@ -99,6 +110,8 @@ func fileServerMiddleware(next http.Handler) http.Handler {
 		fileServer := http.FileServer(http.Dir(goldpinger.GoldpingerConfig.StaticFilePath))
 		if r.URL.Path == "/" {
 			http.StripPrefix("/", fileServer).ServeHTTP(w, r)
+		} else if r.URL.Path == "/heatmap.png" {
+			goldpinger.HeatmapHandler(w, r)
 		} else if strings.HasPrefix(r.URL.Path, "/static/") {
 			http.StripPrefix("/static/", fileServer).ServeHTTP(w, r)
 		} else {

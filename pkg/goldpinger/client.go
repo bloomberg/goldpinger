@@ -17,6 +17,7 @@ package goldpinger
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	apiclient "github.com/bloomberg/goldpinger/pkg/client"
 	"github.com/bloomberg/goldpinger/pkg/models"
@@ -64,12 +65,14 @@ func PingAllPods(pods map[string]string) models.CheckResults {
 
 			CountCall("made", "ping")
 			timer := GetLabeledPeersCallsTimer("ping", hostIP, podIP)
+			start := time.Now()
 			resp, err := getClient(pickPodHostIP(podIP, hostIP)).Operations.Ping(nil)
 
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
 			var OK = (err == nil)
 			if OK {
-				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200}
+				responseTime := time.Since(start).Nanoseconds() / int64(time.Millisecond)
+				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTimeMs: responseTime}
 				timer.ObserveDuration()
 			} else {
 				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500}
@@ -158,6 +161,17 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 			HostIP: response.hostIPv4,
 			PodIP:  podIPv4,
 		})
+	}
+	return &result
+}
+
+func HealthCheck() *models.HealthCheckResults {
+	ok := true
+	start := time.Now()
+	result := models.HealthCheckResults{
+		OK:          &ok,
+		DurationNs:  time.Since(start).Nanoseconds(),
+		GeneratedAt: strfmt.DateTime(start),
 	}
 	return &result
 }

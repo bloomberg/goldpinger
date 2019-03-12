@@ -57,7 +57,7 @@ Note, that in order to guarantee correct versions of dependencies, the project [
 
 ## Building
 
-The repo comes with two ways of building a `docker` image: compiling locally, and compiling using a multi-stage `Dockerfile` image.
+The repo comes with two ways of building a `docker` image: compiling locally, and compiling using a multi-stage `Dockerfile` image. :warning: Depending on your `docker` setup, you might need to prepend the commands below with `sudo`.
 
 ### Compiling using a multi-stage Dockerfile
 
@@ -192,7 +192,7 @@ You can also see [an example of using `kubeconfig` in the `./extras`](./extras/e
 
 Once you have it running, you can hit any of the nodes (port 30080 in the example above) and see the UI.
 
-![](./extras/screenshot.png)
+![](./extras/screenshot-big.png)
 
 You can click on various nodes to gray out the clutter and see more information.
 
@@ -230,7 +230,7 @@ To get you started, here's a rule that will trigger an alert if there are any no
 
 ```yaml
 alert: goldpinger_nodes_unhealthy
-expr: sum(goldpinger_nodes_healthy_total{status="unhealthy"})
+expr: sum(goldpinger_nodes_health_total{status="unhealthy"})
   BY (goldpinger_instance) > 0
 for: 5m
 annotations:

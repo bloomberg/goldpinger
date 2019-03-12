@@ -34,21 +34,6 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
-  branch = "master"
-  digest = "1:d76f06183572b1eabc33c586fae00b16430091ca48300ec9fdc8450f88df4c35"
-  name = "github.com/bloomberg/goldpinger"
-  packages = [
-    "pkg/client",
-    "pkg/client/operations",
-    "pkg/goldpinger",
-    "pkg/models",
-    "pkg/restapi",
-    "pkg/restapi/operations",
-  ]
-  pruneopts = "UT"
-  revision = "0ebc4eecfa001237308b3c148619ec0f22f21ea1"
-
-[[projects]]
   digest = "1:6f82cacd0af5921e99bf3f46748705239b36489464f4529a1589bc895764fb18"
   name = "github.com/docker/go-units"
   packages = ["."]
@@ -379,6 +364,19 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:09c175055d303dadf3f82513c66e6da0b95ba22bc8e5d267a2674d16d95ea77a"
+  name = "golang.org/x/image"
+  packages = [
+    "font",
+    "font/basicfont",
+    "font/plan9font",
+    "math/fixed",
+  ]
+  pruneopts = "UT"
+  revision = "31aff87c08e9a5e5d524279a564f96968336f886"
+
+[[projects]]
+  branch = "master"
   digest = "1:eb8583d4582ffbc5c6d3ec00132cd0835101edde42b6f24eaafa628d1596f881"
   name = "golang.org/x/net"
   packages = [
@@ -627,12 +625,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/bloomberg/goldpinger/pkg/client",
-    "github.com/bloomberg/goldpinger/pkg/client/operations",
-    "github.com/bloomberg/goldpinger/pkg/goldpinger",
-    "github.com/bloomberg/goldpinger/pkg/models",
-    "github.com/bloomberg/goldpinger/pkg/restapi",
-    "github.com/bloomberg/goldpinger/pkg/restapi/operations",
     "github.com/go-openapi/errors",
     "github.com/go-openapi/loads",
     "github.com/go-openapi/runtime",
@@ -647,7 +639,9 @@
     "github.com/jessevdk/go-flags",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
-    "golang.org/x/net/context",
+    "golang.org/x/image/font",
+    "golang.org/x/image/font/basicfont",
+    "golang.org/x/image/math/fixed",
     "golang.org/x/net/netutil",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/client-go/kubernetes",

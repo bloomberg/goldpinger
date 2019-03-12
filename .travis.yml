@@ -9,7 +9,26 @@ go:
 
 script:
   - docker --version
-  - go get -u github.com/golang/dep/cmd/dep && make vendor && make && make build
+  # dep
+  - go get -u github.com/golang/dep/cmd/dep
+  
+  # build locally and run locally
+  - make clean && make vendor && make && ./bin/goldpinger --help
+  
+  # build an image and run the image
+  - make clean && make vendor && make build
   - docker images
-  - make build-multistage
+  - docker run `make version` --help
+  
+  # build an image using the multistage builder
+  - make clean && make build-multistage
   - docker images
+  - docker run `make version` --help
+
+deploy:
+  provider: script
+  script: bash docker_deploy.sh
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: -n "$DOCKER_PASSWORD"
