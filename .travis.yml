@@ -24,3 +24,11 @@ script:
   - make clean && make build-multistage
   - docker images
   - docker run `make version` --help
+
+deploy:
+  provider: script
+  script: bash docker_deploy.sh
+  skip_cleanup: true
+  on:
+    tags: true
+    condition: -n "$DOCKER_PASSWORD"
