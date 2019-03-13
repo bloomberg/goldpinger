@@ -25,6 +25,11 @@ script:
   - docker images
   - docker run `make version` --help
 
+  # build an image with the vendor folder
+  - make clean && make vendor && make vendor-build
+  - docker images
+  - docker run `make version`-vendor --help
+
 deploy:
   provider: script
   script: bash docker_deploy.sh

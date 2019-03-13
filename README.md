@@ -38,9 +38,18 @@ If you'd like to know more, you can watch [our presentation at Kubecon 2018 Seat
 
 ## Quick start
 
+Getting from sources:
+
 ```sh
 go get github.com/bloomberg/goldpinger/cmd/goldpinger
 goldpinger --help
+```
+
+Getting from [docker hub](https://hub.docker.com/r/bloomberg/goldpinger):
+
+```sh
+# get from docker hub
+docker pull bloomberg/goldpinger
 ```
 
 Note, that in order to guarantee correct versions of dependencies, the project [uses `dep`](./Makefile).
@@ -105,8 +114,6 @@ namespace="docker.io/myhandle/" make push
 
 Here's an example of what you can do (using the in-cluster authentication to `Kubernetes` apiserver).
 
-:warning: Replace `docker.io/mynamespace-replaceme/goldpinger:1.0.0` with the actual tag you built.
-
 ```yaml
 ---
 apiVersion: apps/v1
@@ -143,7 +150,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-          image: "docker.io/mynamespace-replaceme/goldpinger:1.0.0"
+          image: "docker.io/bloomberg/goldpinger:1.4.0"
           ports:
             - containerPort: 80
               name: http
@@ -252,3 +259,5 @@ Before you create that PR, please make sure you read [CONTRIBUTING](./CONTRIBUTI
 ## License
 
 Please read the [LICENSE](./LICENSE) file here.
+
+For each version built by travis, there is also an additional version, appended with `-vendor`, which contains all source code of the dependencies used in `goldpinger`.
