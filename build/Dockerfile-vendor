@@ -1,3 +1,3 @@
 ARG TAG
 FROM $TAG
-COPY ./vendor /goldpinger-vendor-sources
+COPY vendor /goldpinger-vendor-sources
