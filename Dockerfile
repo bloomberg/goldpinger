@@ -22,4 +22,3 @@ FROM scratch
 COPY --from=builder /go/src/github.com/bloomberg/goldpinger/bin/goldpinger /goldpinger
 COPY ./static /static
 ENTRYPOINT ["/goldpinger", "--static-file-path", "/static"]
-
