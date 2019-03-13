@@ -20,6 +20,8 @@ RUN make bin/goldpinger
 
 FROM scratch
 COPY --from=builder /go/src/github.com/bloomberg/goldpinger/bin/goldpinger /goldpinger
+# for lincensing reasons, we include all sources going into the binary
+COPY --from=builder /go/src/github.com/bloomberg/goldpinger/vendor /goldpinger-vendor-sources
 COPY ./static /static
 ENTRYPOINT ["/goldpinger", "--static-file-path", "/static"]
 
