@@ -44,7 +44,7 @@ version:
 
 
 vendor-build:
-	docker build -t $(tag)-vendor -f ./Dockerfile-vendor .
+	docker build -t $(tag)-vendor --build-arg TAG=$(tag) -f ./build/Dockerfile-vendor .
 
 vendor-tag:
 	docker tag $(tag)-vendor $(namespace)$(tag)-vendor
