@@ -254,3 +254,5 @@ Before you create that PR, please make sure you read [CONTRIBUTING](./CONTRIBUTI
 ## License
 
 Please read the [LICENSE](./LICENSE) file here.
+
+For each version built by travis, there is also an additional version, appended with `-vendor`, which contains all source code of the dependencies used in `goldpinger`.
