@@ -42,4 +42,15 @@ run:
 version:
 	@echo $(tag)
 
-.PHONY: clean vendor swagger build build-multistage tag push run version
+
+vendor-build:
+	docker build -t $(tag)-vendor -f ./Dockerfile-vendor .
+
+vendor-tag:
+	docker tag $(tag)-vendor $(namespace)$(tag)-vendor
+
+vendor-push:
+	docker push $(namespace)$(tag)-vendor
+
+
+.PHONY: clean vendor swagger build build-multistage vendor-build vendor-tag vendor-push tag push run version
