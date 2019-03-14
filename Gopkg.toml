@@ -73,6 +73,10 @@
   name = "k8s.io/client-go"
   version = "9.0.0"
 
+[[constraint]]
+  name = "github.com/stuartnelson3/go-rendezvous"
+  version = "0.2.0"
+
 [prune]
   go-tests = true
   unused-packages = true

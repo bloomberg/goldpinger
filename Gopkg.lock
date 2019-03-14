@@ -34,6 +34,14 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
+  digest = "1:998cf998358a303ac2430c386ba3fd3398477d6013153d3c6e11432765cc9ae6"
+  name = "github.com/cespare/xxhash"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3b82fb7d186719faeedd0c2864f868c74fbf79a1"
+  version = "v2.0.0"
+
+[[projects]]
   digest = "1:6f82cacd0af5921e99bf3f46748705239b36489464f4529a1589bc895764fb18"
   name = "github.com/docker/go-units"
   packages = ["."]
@@ -356,6 +364,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:2731ee5852c26a3585f70d1a6cff8422383b98bad405eb6611cd4a2334be1df6"
+  name = "github.com/stuartnelson3/go-rendezvous"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "16dc0292e5f420d89a7dc4319775a1e5e461dc01"
+  version = "v0.2.0"
+
+[[projects]]
   digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -625,6 +641,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/cespare/xxhash",
     "github.com/go-openapi/errors",
     "github.com/go-openapi/loads",
     "github.com/go-openapi/runtime",
@@ -639,6 +656,7 @@
     "github.com/jessevdk/go-flags",
     "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
+    "github.com/stuartnelson3/go-rendezvous",
     "golang.org/x/image/font",
     "golang.org/x/image/font/basicfont",
     "golang.org/x/image/math/fixed",

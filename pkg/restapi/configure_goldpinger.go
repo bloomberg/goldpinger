@@ -47,6 +47,7 @@ func configureFlags(api *operations.GoldpingerAPI) {
 
 func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 	// configure the api here
+	ps := goldpinger.GoldpingerConfig.PodSelecter
 	api.ServeError = errors.ServeError
 
 	api.JSONConsumer = runtime.JSONConsumer()
@@ -61,13 +62,13 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 	api.CheckServicePodsHandler = operations.CheckServicePodsHandlerFunc(
 		func(params operations.CheckServicePodsParams) middleware.Responder {
 			goldpinger.CountCall("received", "check")
-			return operations.NewCheckServicePodsOK().WithPayload(goldpinger.CheckNeighbours())
+			return operations.NewCheckServicePodsOK().WithPayload(goldpinger.CheckNeighbours(ps))
 		})
 
 	api.CheckAllPodsHandler = operations.CheckAllPodsHandlerFunc(
 		func(params operations.CheckAllPodsParams) middleware.Responder {
 			goldpinger.CountCall("received", "check_all")
-			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours())
+			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours(ps))
 		})
 
 	api.HealthzHandler = operations.HealthzHandlerFunc(

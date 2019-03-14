@@ -82,7 +82,7 @@ Building from source code consists of compiling the binary and building a [Docke
 
 ```sh
 # step 0: check out the code into your $GOPATH
-go get github.com/bloomberg/goldpinger/cmd/goldpinger 
+go get github.com/bloomberg/goldpinger/cmd/goldpinger
 cd $GOPATH/src/github.com/bloomberg/goldpinger
 
 # step 1: download the dependencies via dep ensure
@@ -112,7 +112,7 @@ namespace="docker.io/myhandle/" make push
 ### Example YAML
 
 
-Here's an example of what you can do (using the in-cluster authentication to `Kubernetes` apiserver). 
+Here's an example of what you can do (using the in-cluster authentication to `Kubernetes` apiserver).
 
 ```yaml
 ---
@@ -145,6 +145,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            # podIP is used to select a randomized subset of nodes to ping.
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           image: "docker.io/bloomberg/goldpinger:1.4.0"
           ports:
             - containerPort: 80
@@ -198,7 +203,7 @@ You can click on various nodes to gray out the clutter and see more information.
 
 ### API
 
-The API exposed is via a well-defined [`Swagger` spec](./swagger.yml). 
+The API exposed is via a well-defined [`Swagger` spec](./swagger.yml).
 
 The spec is used to generate both the server and the client of `Goldpinger`. If you make changes, you can re-generate them using [go-swagger](https://github.com/go-swagger/go-swagger) via [`make swagger`](./Makefile)
 
