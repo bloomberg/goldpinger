@@ -229,6 +229,7 @@ var main = function(timeout){
 
                 // prepare nodes
                 var nodes = [];
+                var podIPs = [];
                 var resp = data.responses;
                 for (let podIP in resp) {
                         let value = resp[podIP];
@@ -239,8 +240,8 @@ var main = function(timeout){
                                 "y": 0,
                                 _data: value,
                         });
+                        podIPs.push(podIP);
                 };
-                //console.log(nodes);
 
                 // prepare the edges
                 var edges = [];
@@ -257,7 +258,26 @@ var main = function(timeout){
                                 };
                         }
                 };
-                //console.log(edges);
+                console.log(edges);
+                console.log(nodes);
+
+                // if running goldpinger with PING_NUMBER, then we need to add nodes for the edges
+                // that are not reporting but are reported to
+                edges.forEach(function(edge) {
+                        [edge.source, edge.target].forEach(function(value) {
+                                if (podIPs.indexOf(value) == -1){
+                                        nodes.push({
+                                                "label": value,
+                                                "id": value,
+                                                "x": 0,
+                                                "y": 0,
+                                                _data: {},
+                                        });
+                                        podIPs.push(value);
+                                }
+                        })
+                })
+                console.log(nodes);
 
 
                 // build the actual graph
