@@ -126,12 +126,12 @@ spec:
   selector:
     matchLabels:
       app: goldpinger
-      version: "1.0.0"
+      version: "1.5.0"
   template:
     metadata:
       labels:
         app: goldpinger
-        version: "1.0.0"
+        version: "1.5.0"
     spec:
       containers:
         - name: goldpinger
@@ -150,10 +150,22 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-          image: "docker.io/bloomberg/goldpinger:1.4.0"
+          image: "docker.io/bloomberg/goldpinger:1.5.0"
           ports:
             - containerPort: 80
               name: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
