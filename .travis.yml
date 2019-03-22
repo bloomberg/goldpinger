@@ -36,4 +36,5 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
+    go: "1.10.x"
     condition: -n "$DOCKER_PASSWORD"
