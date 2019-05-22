@@ -72,7 +72,7 @@ namespace="docker.io/myhandle/" make tag
 namespace="docker.io/myhandle/" make push
 ```
 
-This was contributed via [@michiel](https://github.com/michiel) - kudos !
+This was contributed via [@michiel](https://github.com/michiel) - kudos!
 
 ### Compiling locally
 
@@ -237,7 +237,7 @@ goldpinger_errors_total
 
 ### Grafana
 
-You can find an example of a `Grafana` dashboard that shows what's going on in your cluster in [extras](./extras/goldpinger-dashboard.json). This should get you started, and once you're on the roll, why not :heart: contribute some kickass dashboards for others to use ?
+You can find an example of a `Grafana` dashboard that shows what's going on in your cluster in [extras](./extras/goldpinger-dashboard.json). This should get you started, and once you're on the roll, why not :heart: contribute some kickass dashboards for others to use?
 
 ### Alert Manager
 
@@ -256,13 +256,13 @@ annotations:
   summary: Instance {{ $labels.instance }} down
 ```
 
-Similarly, why not :heart: contribute some amazing alerts for others to use ?
+Similarly, why not :heart: contribute some amazing alerts for others to use?
 
 ## Contributions
 
 We :heart: contributions.
 
-Have you had a good experience with `Goldpinger` ? Why not share some love and contribute code, dashboards and alerts ?
+Have you had a good experience with `Goldpinger`? Why not share some love and contribute code, dashboards and alerts?
 
 If you're thinking of making some code changes, please be aware that most of the code is auto-generated from the `Swagger` spec. The spec is used to generate both the server and the client of `Goldpinger`. If you make changes, you can re-generate them using [go-swagger](https://github.com/go-swagger/go-swagger) via [`make swagger`](./Makefile).
 
