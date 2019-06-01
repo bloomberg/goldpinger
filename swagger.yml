@@ -12,6 +12,15 @@ definitions:
         type: integer
       ping:
         type: integer
+  DnsResults:
+    properties:
+      host:
+        type: string
+      response-time-ms:
+        type: number
+        format: int64
+      error:
+        type: string
   PingResults:
     type: object
     properties:
@@ -20,6 +29,8 @@ definitions:
         type: string
       received:
           $ref: '#/definitions/CallStats'
+      dnsResults:
+          $ref: '#/definitions/DnsResults'
   PodResult:
     type: object
     properties:
