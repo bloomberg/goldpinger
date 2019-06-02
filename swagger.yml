@@ -12,15 +12,17 @@ definitions:
         type: integer
       ping:
         type: integer
-  DnsResults:
+  DnsResult:
     properties:
-      host:
-        type: string
       response-time-ms:
         type: number
         format: int64
       error:
         type: string
+  DnsResults:
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/DnsResult'
   PingResults:
     type: object
     properties:
