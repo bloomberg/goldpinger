@@ -181,6 +181,23 @@ func init() {
         "$ref": "#/definitions/PodResult"
       }
     },
+    "DnsResult": {
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "response-time-ms": {
+          "type": "number",
+          "format": "int64"
+        }
+      }
+    },
+    "DnsResults": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/DnsResult"
+      }
+    },
     "HealthCheckResults": {
       "type": "object",
       "properties": {
@@ -204,6 +221,9 @@ func init() {
         "boot_time": {
           "type": "string",
           "format": "date-time"
+        },
+        "dnsResults": {
+          "$ref": "#/definitions/DnsResults"
         },
         "received": {
           "$ref": "#/definitions/CallStats"
@@ -404,6 +424,23 @@ func init() {
         "$ref": "#/definitions/PodResult"
       }
     },
+    "DnsResult": {
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "response-time-ms": {
+          "type": "number",
+          "format": "int64"
+        }
+      }
+    },
+    "DnsResults": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/DnsResult"
+      }
+    },
     "HealthCheckResults": {
       "type": "object",
       "properties": {
@@ -427,6 +464,9 @@ func init() {
         "boot_time": {
           "type": "string",
           "format": "date-time"
+        },
+        "dnsResults": {
+          "$ref": "#/definitions/DnsResults"
         },
         "received": {
           "$ref": "#/definitions/CallStats"

@@ -21,6 +21,9 @@ type PingResults struct {
 	// Format: date-time
 	BootTime strfmt.DateTime `json:"boot_time,omitempty"`
 
+	// dns results
+	DNSResults DNSResults `json:"dnsResults,omitempty"`
+
 	// received
 	Received *CallStats `json:"received,omitempty"`
 }
@@ -30,6 +33,10 @@ func (m *PingResults) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBootTime(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDNSResults(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -50,6 +57,22 @@ func (m *PingResults) validateBootTime(formats strfmt.Registry) error {
 	}
 
 	if err := validate.FormatOf("boot_time", "body", "date-time", m.BootTime.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *PingResults) validateDNSResults(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DNSResults) { // not required
+		return nil
+	}
+
+	if err := m.DNSResults.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dnsResults")
+		}
 		return err
 	}
 
