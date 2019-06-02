@@ -16,6 +16,7 @@ package goldpinger
 
 import (
 	"log"
+	"net"
 	"time"
 
 	"github.com/bloomberg/goldpinger/pkg/models"
@@ -97,8 +98,24 @@ func init() {
 
 func GetStats() *models.PingResults {
 	// GetStats no longer populates the received and made calls - use metrics for that instead
+	dnsResults := models.DNSResults{}
+	if len(GoldpingerConfig.DnsHosts) > 0 {
+		for _, host := range GoldpingerConfig.DnsHosts{
+			
+			var dnsResult models.DNSResult
+
+			start := time.Now()
+			_, err := net.LookupIP(host)
+			if err != nil {
+				dnsResult.Error = err.Error()
+			}
+			dnsResult.ResponseTimeMs = time.Since(start).Nanoseconds() / int64(time.Millisecond)
+			dnsResults[host] = dnsResult
+		}
+	}
 	return &models.PingResults{
 		BootTime: strfmt.DateTime(bootTime),
+		DNSResults: dnsResults,
 	}
 }
 
