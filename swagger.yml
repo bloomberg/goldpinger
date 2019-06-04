@@ -31,8 +31,6 @@ definitions:
         type: string
       received:
           $ref: '#/definitions/CallStats'
-      dnsResults:
-          $ref: '#/definitions/DnsResults'
   PodResult:
     type: object
     properties:
@@ -44,6 +42,8 @@ definitions:
         format: ipv4
       response:
           $ref: '#/definitions/PingResults'
+      dnsResults:
+          $ref: '#/definitions/DnsResults'
       error:
         type: string
       status-code:
@@ -96,6 +96,10 @@ definitions:
             podIP:
               type: string
               format: ipv4
+      dnsResults:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/DnsResults'
       responses:
         type: object
         additionalProperties:

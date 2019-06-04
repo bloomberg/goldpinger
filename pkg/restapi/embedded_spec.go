@@ -143,6 +143,12 @@ func init() {
           "type": "boolean",
           "default": false
         },
+        "dnsResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/DnsResults"
+          }
+        },
         "hosts": {
           "type": "array",
           "items": {
@@ -222,9 +228,6 @@ func init() {
           "type": "string",
           "format": "date-time"
         },
-        "dnsResults": {
-          "$ref": "#/definitions/DnsResults"
-        },
         "received": {
           "$ref": "#/definitions/CallStats"
         }
@@ -240,6 +243,9 @@ func init() {
         "OK": {
           "type": "boolean",
           "default": false
+        },
+        "dnsResults": {
+          "$ref": "#/definitions/DnsResults"
         },
         "error": {
           "type": "string"
@@ -386,6 +392,12 @@ func init() {
           "type": "boolean",
           "default": false
         },
+        "dnsResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/DnsResults"
+          }
+        },
         "hosts": {
           "type": "array",
           "items": {
@@ -465,9 +477,6 @@ func init() {
           "type": "string",
           "format": "date-time"
         },
-        "dnsResults": {
-          "$ref": "#/definitions/DnsResults"
-        },
         "received": {
           "$ref": "#/definitions/CallStats"
         }
@@ -483,6 +492,9 @@ func init() {
         "OK": {
           "type": "boolean",
           "default": false
+        },
+        "dnsResults": {
+          "$ref": "#/definitions/DnsResults"
         },
         "error": {
           "type": "string"
