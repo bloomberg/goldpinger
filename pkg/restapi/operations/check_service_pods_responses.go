@@ -25,7 +25,7 @@ type CheckServicePodsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload models.CheckResults `json:"body,omitempty"`
+	Payload *models.CheckResults `json:"body,omitempty"`
 }
 
 // NewCheckServicePodsOK creates CheckServicePodsOK with default headers values
@@ -35,13 +35,13 @@ func NewCheckServicePodsOK() *CheckServicePodsOK {
 }
 
 // WithPayload adds the payload to the check service pods o k response
-func (o *CheckServicePodsOK) WithPayload(payload models.CheckResults) *CheckServicePodsOK {
+func (o *CheckServicePodsOK) WithPayload(payload *models.CheckResults) *CheckServicePodsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the check service pods o k response
-func (o *CheckServicePodsOK) SetPayload(payload models.CheckResults) {
+func (o *CheckServicePodsOK) SetPayload(payload *models.CheckResults) {
 	o.Payload = payload
 }
 
@@ -49,13 +49,10 @@ func (o *CheckServicePodsOK) SetPayload(payload models.CheckResults) {
 func (o *CheckServicePodsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(200)
-	payload := o.Payload
-	if payload == nil {
-		// return empty map
-		payload = models.CheckResults{}
-	}
-
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
 	}
 }

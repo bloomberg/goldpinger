@@ -183,8 +183,16 @@ func init() {
     },
     "CheckResults": {
       "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/PodResult"
+      "properties": {
+        "dnsResults": {
+          "$ref": "#/definitions/DnsResults"
+        },
+        "podResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/PodResult"
+          }
+        }
       }
     },
     "DnsResult": {
@@ -243,9 +251,6 @@ func init() {
         "OK": {
           "type": "boolean",
           "default": false
-        },
-        "dnsResults": {
-          "$ref": "#/definitions/DnsResults"
         },
         "error": {
           "type": "string"
@@ -432,8 +437,16 @@ func init() {
     },
     "CheckResults": {
       "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/PodResult"
+      "properties": {
+        "dnsResults": {
+          "$ref": "#/definitions/DnsResults"
+        },
+        "podResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/PodResult"
+          }
+        }
       }
     },
     "DnsResult": {
@@ -492,9 +505,6 @@ func init() {
         "OK": {
           "type": "boolean",
           "default": false
-        },
-        "dnsResults": {
-          "$ref": "#/definitions/DnsResults"
         },
         "error": {
           "type": "string"

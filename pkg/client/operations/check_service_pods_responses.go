@@ -47,7 +47,7 @@ func NewCheckServicePodsOK() *CheckServicePodsOK {
 Success, return response
 */
 type CheckServicePodsOK struct {
-	Payload models.CheckResults
+	Payload *models.CheckResults
 }
 
 func (o *CheckServicePodsOK) Error() string {
@@ -56,8 +56,10 @@ func (o *CheckServicePodsOK) Error() string {
 
 func (o *CheckServicePodsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
+	o.Payload = new(models.CheckResults)
+
 	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 

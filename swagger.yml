@@ -42,8 +42,6 @@ definitions:
         format: ipv4
       response:
           $ref: '#/definitions/PingResults'
-      dnsResults:
-          $ref: '#/definitions/DnsResults'
       error:
         type: string
       status-code:
@@ -55,8 +53,13 @@ definitions:
         description: wall clock time in milliseconds
   CheckResults:
     type: object
-    additionalProperties:
-      $ref: '#/definitions/PodResult'
+    properties:
+      dnsResults:
+        $ref: '#/definitions/DnsResults'
+      podResults:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/PodResult'
   CheckAllPodResult:
     type: object
     properties:

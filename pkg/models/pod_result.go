@@ -24,9 +24,6 @@ type PodResult struct {
 	// o k
 	OK *bool `json:"OK,omitempty"`
 
-	// dns results
-	DNSResults DNSResults `json:"dnsResults,omitempty"`
-
 	// error
 	Error string `json:"error,omitempty"`
 
@@ -48,10 +45,6 @@ func (m *PodResult) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateDNSResults(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateResponse(formats); err != nil {
 		res = append(res, err)
 	}
@@ -69,22 +62,6 @@ func (m *PodResult) validateHostIP(formats strfmt.Registry) error {
 	}
 
 	if err := validate.FormatOf("HostIP", "body", "ipv4", m.HostIP.String(), formats); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *PodResult) validateDNSResults(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DNSResults) { // not required
-		return nil
-	}
-
-	if err := m.DNSResults.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("dnsResults")
-		}
 		return err
 	}
 
