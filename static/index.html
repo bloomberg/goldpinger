@@ -229,6 +229,7 @@ var main = function(timeout){
 
                 // prepare nodes
                 var nodes = [];
+                var dnsCheckNodes = [];
                 var podIPs = [];
                 var resp = data.responses;
                 for (let podIP in resp) {
@@ -258,6 +259,7 @@ var main = function(timeout){
                                 };
                         }
                 };
+
                 console.log(edges);
                 console.log(nodes);
 
@@ -279,6 +281,34 @@ var main = function(timeout){
                 })
                 console.log(nodes);
 
+                if ('dnsCheckResponses' in data) {
+                    var yoffset = 0;
+                    for (let checkedHost in data.dnsCheckResponses) {
+                        dnsCheckNodes.push({
+                            "label": checkedHost,
+                            "id": checkedHost,
+                            "x": 0,
+                            "y": 0,
+                        });
+                        for (let pod in data.dnsCheckResponses[checkedHost]) {
+                            var podData = data.dnsCheckResponses[checkedHost][pod];
+                            var elapsed = 0;
+                            if ('response-time-ms' in podData) {
+                                elapsed = podData['response-time-ms'];
+                            }
+                            reponseTime = 0 
+                            edges.push({
+                                source: pod,
+                                target: checkedHost,
+                                _data: {
+                                    "OK": (!('error' in podData)),
+                                    "elapsed": elapsed,
+                                    "isDNSCheckNode": true,
+                                }
+                            });
+                        }
+                    }
+                }
 
                 // build the actual graph
                 s = new sigma({
@@ -311,6 +341,16 @@ var main = function(timeout){
                         s.graph.addNode(node);
                 });
 
+                // generate any dns nodes on the graph
+                dnsCheckNodes.forEach(function(node, i, a){
+                        node.x = 3;
+                        node.y = 1.1 * i / a.length;
+                        node.size = 10;
+                        node.color = "#4CC40B";
+                        //console.log(node);
+                        s.graph.addNode(node);
+                });
+
                 // generate the edges
                 edges.forEach(function(edge, i){
                         var color = "#ccc";
@@ -321,6 +361,9 @@ var main = function(timeout){
                         }
                         if (!edge._data.OK) {
                                 color = "red";
+                        }
+                        if ("isDNSCheckNode" in edge._data) {
+                                type = "dashed";
                         }
                         var edge = {
                                 id: "e" + i,
@@ -429,5 +472,6 @@ $("#update-heatmap").click(function (e) {
 </script>
 </body>
 </html>
+
 
 
