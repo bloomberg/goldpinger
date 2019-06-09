@@ -248,7 +248,7 @@ var main = function(timeout){
                 var edges = [];
                 var resp = data.responses;
                 for (let callId in resp) {
-                        var call = resp[callId].response;
+                        var call = resp[callId].response['podResults'];
                         if (typeof call !== 'string'){
                                 for (let target in call) {
                                         edges.push({
@@ -281,17 +281,17 @@ var main = function(timeout){
                 })
                 console.log(nodes);
 
-                if ('dnsCheckResponses' in data) {
+                if ('dnsResults' in data) {
                     var yoffset = 0;
-                    for (let checkedHost in data.dnsCheckResponses) {
+                    for (let checkedHost in data.dnsResults) {
                         dnsCheckNodes.push({
                             "label": checkedHost,
                             "id": checkedHost,
                             "x": 0,
                             "y": 0,
                         });
-                        for (let pod in data.dnsCheckResponses[checkedHost]) {
-                            var podData = data.dnsCheckResponses[checkedHost][pod];
+                        for (let pod in data.dnsResults[checkedHost]) {
+                            var podData = data.dnsResults[checkedHost][pod];
                             var elapsed = 0;
                             if ('response-time-ms' in podData) {
                                 elapsed = podData['response-time-ms'];
