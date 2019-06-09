@@ -343,8 +343,8 @@ var main = function(timeout){
 
                 // generate any dns nodes on the graph
                 dnsCheckNodes.forEach(function(node, i, a){
-                        node.x = 3;
-                        node.y = 1.1 * i / a.length;
+                        node.x = 2;
+                        node.y = (0.6 * i / a.length) - 0.8;
                         node.size = 10;
                         node.color = "#4CC40B";
                         //console.log(node);
