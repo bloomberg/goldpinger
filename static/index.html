@@ -285,6 +285,26 @@ var main = function(timeout){
                     var yoffset = 0;
                     for (let checkedHost in data.dnsResults) {
                         let value = data.dnsResults[checkedHost];
+                        var allOk = true;
+                        for (let pod in value) {
+                            var podData = value[pod];
+                            var elapsed = 0;
+                            if ('response-time-ms' in podData) {
+                                elapsed = podData['response-time-ms'];
+                            }
+                            var podOk = (!('error' in podData));
+                            allOk = allOk && podOk
+                            edges.push({
+                                source: pod,
+                                target: checkedHost,
+                                _data: {
+                                    "OK": podOk,
+                                    "elapsed": elapsed,
+                                    "isDNSCheckNode": true,
+                                }
+                            });
+                        }
+                        value["OK"] = allOk
                         dnsCheckNodes.push({
                             "label": checkedHost,
                             "id": checkedHost,
@@ -292,23 +312,6 @@ var main = function(timeout){
                             "y": 0,
                             _data: value,
                         });
-                        for (let pod in value) {
-                            var podData = value[pod];
-                            var elapsed = 0;
-                            if ('response-time-ms' in podData) {
-                                elapsed = podData['response-time-ms'];
-                            }
-                            reponseTime = 0 
-                            edges.push({
-                                source: pod,
-                                target: checkedHost,
-                                _data: {
-                                    "OK": (!('error' in podData)),
-                                    "elapsed": elapsed,
-                                    "isDNSCheckNode": true,
-                                }
-                            });
-                        }
                     }
                 }
 
@@ -349,6 +352,9 @@ var main = function(timeout){
                         node.y = (0.6 * i / a.length) - 0.8;
                         node.size = 10;
                         node.color = "#4CC40B";
+                        if (!node._data.OK) {
+                                node.color = "red";
+                        }
                         //console.log(node);
                         s.graph.addNode(node);
                 });
