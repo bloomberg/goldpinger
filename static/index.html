@@ -284,14 +284,16 @@ var main = function(timeout){
                 if ('dnsResults' in data) {
                     var yoffset = 0;
                     for (let checkedHost in data.dnsResults) {
+                        let value = data.dnsResults[checkedHost];
                         dnsCheckNodes.push({
                             "label": checkedHost,
                             "id": checkedHost,
                             "x": 0,
                             "y": 0,
+                            _data: value,
                         });
-                        for (let pod in data.dnsResults[checkedHost]) {
-                            var podData = data.dnsResults[checkedHost][pod];
+                        for (let pod in value) {
+                            var podData = value[pod];
                             var elapsed = 0;
                             if ('response-time-ms' in podData) {
                                 elapsed = podData['response-time-ms'];
