@@ -21,7 +21,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "title": "Goldpinger",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "paths": {
     "/check": {
@@ -275,7 +275,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "title": "Goldpinger",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "paths": {
     "/check": {
