@@ -61,6 +61,7 @@ func checkDNS() *models.DNSResults {
 		_, err := net.LookupIP(host)
 		if err != nil {
 			dnsResult.Error = err.Error()
+			CountDnsError(host)
 		}
 		dnsResult.ResponseTimeMs = time.Since(start).Nanoseconds() / int64(time.Millisecond)
 		results[host] = dnsResult
