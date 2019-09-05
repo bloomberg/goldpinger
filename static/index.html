@@ -49,7 +49,7 @@ limitations under the License.
         <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.renderers.parallelEdges.min.js"></script>
         <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.renderers.snapshot.min.js"></script>
         <script type="text/javascript" src="static/sigma.js/1.1.0/plugins/sigma.statistics.HITS.min.js"></script>
-        
+
         <!-- Bootstrap -->
         <link rel="stylesheet" href="static/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
         <link rel="stylesheet" href="static/bootstrap/3.3.7/css/bootstrap-theme.min.css" crossorigin="anonymous">
@@ -219,7 +219,7 @@ var main = function(timeout){
 
         loadingDialog(true);
 
-        fetchJSON("/check_all?timeout="+timeout)
+        fetchJSON("check_all?timeout="+timeout)
         .then(function(data){
 
                 loadingDialog(false);
@@ -372,7 +372,7 @@ var main = function(timeout){
                         $('#modal-title').html(node.id);
                         $('#modal-body').html(prepareJSON(node._data));
 
-                        // show the things                
+                        // show the things
                         $('#modal-window-code').modal('show');
                 });
                 s.bind("clickStage", function (e) {
@@ -388,7 +388,7 @@ var main = function(timeout){
                         $('#modal-title').html(edge.id);
                         $('#modal-body').html(prepareJSON(edge._data));
 
-                        // show the things                
+                        // show the things
                         $('#modal-window-code').modal('show');
                 });
         })
@@ -404,10 +404,10 @@ main();
 
 $("#show-data").click(function (e) {
         // fill the voids
-        $('#modal-title').html("/check_all");
+        $('#modal-title').html("check_all");
         $('#modal-body').html(prepareJSON(global_data));
 
-        // show the things                
+        // show the things
         $('#modal-window-code').modal('show');
 });
 $("#reload-graph").click(function (e) {
