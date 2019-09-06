@@ -32,5 +32,5 @@ var GoldpingerConfig = struct {
 	KubernetesClient *kubernetes.Clientset
 	*PodSelecter
 
-	DnsHosts         []string `long:"host-to-resolve" description:"A host to attempt dns resolve on" env:"HOSTS_TO_RESOLVE" env-delim:" "`
+	DnsHosts         []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
 }{}
