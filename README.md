@@ -208,20 +208,20 @@ You can also see [an example of using `kubeconfig` in the `./extras`](./extras/e
 
 Note, that on top of resolving the other pods, all instances can also try to resolve arbitrary DNS. This allows you to test your DNS setup.
 
-From `--help` (the env var is space-delimited):
+From `--help`:
 
 ```sh
---host-to-resolve=      A host to attempt dns resolve on [$HOSTS_TO_RESOLVE]
+--host-to-resolve=      A host to attempt dns resolve on (space delimited) [$HOSTS_TO_RESOLVE]
 ```
 
-So in order to test two domains, we could add to the example above:
+So in order to test two domains, we could add an extra env var to the example above:
 
 ```yaml
             - name: HOSTS_TO_RESOLVE
               value: "www.bloomberg.com one.two.three"
 ```
 
-Goldpinger should result in something like this:
+and `goldpinger` should show something like this:
 
 ![screenshot-DNS-resolution](./extras/dns-screenshot.png)
 
