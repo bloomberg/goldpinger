@@ -18,6 +18,7 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 - [Installation](#installation)
   - [Authentication with Kubernetes API](#authentication-with-kubernetes-api)
   - [Example YAML](#example-yaml)
+  - [Note on DNS](#note-on-dns)
 - [Usage](#usage)
   - [UI](#ui)
   - [API](#api)
@@ -202,6 +203,28 @@ subjects:
 ```
 
 You can also see [an example of using `kubeconfig` in the `./extras`](./extras/example-with-kubeconfig.yaml).
+
+### Note on DNS
+
+Note, that on top of resolving the other pods, all instances can also try to resolve arbitrary DNS. This allows you to test your DNS setup.
+
+From `--help`:
+
+```sh
+--host-to-resolve=      A host to attempt dns resolve on (space delimited) [$HOSTS_TO_RESOLVE]
+```
+
+So in order to test two domains, we could add an extra env var to the example above:
+
+```yaml
+            - name: HOSTS_TO_RESOLVE
+              value: "www.bloomberg.com one.two.three"
+```
+
+and `goldpinger` should show something like this:
+
+![screenshot-DNS-resolution](./extras/dns-screenshot.png)
+
 
 ## Usage
 
