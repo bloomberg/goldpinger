@@ -1,7 +1,7 @@
 ---
 swagger: '2.0'
 info:
-  version: 1.0.0
+  version: 2.0.0
   title: Goldpinger 
 definitions:
   CallStats:
@@ -12,6 +12,17 @@ definitions:
         type: integer
       ping:
         type: integer
+  DnsResult:
+    properties:
+      response-time-ms:
+        type: number
+        format: int64
+      error:
+        type: string
+  DnsResults:
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/DnsResult'
   PingResults:
     type: object
     properties:
@@ -42,8 +53,13 @@ definitions:
         description: wall clock time in milliseconds
   CheckResults:
     type: object
-    additionalProperties:
-      $ref: '#/definitions/PodResult'
+    properties:
+      dnsResults:
+        $ref: '#/definitions/DnsResults'
+      podResults:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/PodResult'
   CheckAllPodResult:
     type: object
     properties:
@@ -83,6 +99,10 @@ definitions:
             podIP:
               type: string
               format: ipv4
+      dnsResults:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/DnsResults'
       responses:
         type: object
         additionalProperties:

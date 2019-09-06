@@ -22,6 +22,9 @@ type CheckAllResults struct {
 	// o k
 	OK *bool `json:"OK,omitempty"`
 
+	// dns results
+	DNSResults map[string]DNSResults `json:"dnsResults,omitempty"`
+
 	// hosts
 	Hosts []*CheckAllResultsHostsItems0 `json:"hosts"`
 
@@ -39,6 +42,10 @@ type CheckAllResults struct {
 func (m *CheckAllResults) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateDNSResults(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateHosts(formats); err != nil {
 		res = append(res, err)
 	}
@@ -50,6 +57,25 @@ func (m *CheckAllResults) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *CheckAllResults) validateDNSResults(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DNSResults) { // not required
+		return nil
+	}
+
+	for k := range m.DNSResults {
+
+		if val, ok := m.DNSResults[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

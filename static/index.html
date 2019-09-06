@@ -229,6 +229,7 @@ var main = function(timeout){
 
                 // prepare nodes
                 var nodes = [];
+                var dnsCheckNodes = [];
                 var podIPs = [];
                 var resp = data.responses;
                 for (let podIP in resp) {
@@ -247,7 +248,7 @@ var main = function(timeout){
                 var edges = [];
                 var resp = data.responses;
                 for (let callId in resp) {
-                        var call = resp[callId].response;
+                        var call = resp[callId].response['podResults'];
                         if (typeof call !== 'string'){
                                 for (let target in call) {
                                         edges.push({
@@ -258,6 +259,7 @@ var main = function(timeout){
                                 };
                         }
                 };
+
                 console.log(edges);
                 console.log(nodes);
 
@@ -279,6 +281,39 @@ var main = function(timeout){
                 })
                 console.log(nodes);
 
+                if ('dnsResults' in data) {
+                    var yoffset = 0;
+                    for (let checkedHost in data.dnsResults) {
+                        let value = data.dnsResults[checkedHost];
+                        var allOk = true;
+                        for (let pod in value) {
+                            var podData = value[pod];
+                            var elapsed = 0;
+                            if ('response-time-ms' in podData) {
+                                elapsed = podData['response-time-ms'];
+                            }
+                            var podOk = (!('error' in podData));
+                            allOk = allOk && podOk
+                            edges.push({
+                                source: pod,
+                                target: checkedHost,
+                                _data: {
+                                    "OK": podOk,
+                                    "elapsed": elapsed,
+                                    "isDNSCheckNode": true,
+                                }
+                            });
+                        }
+                        value["OK"] = allOk
+                        dnsCheckNodes.push({
+                            "label": checkedHost,
+                            "id": checkedHost,
+                            "x": 0,
+                            "y": 0,
+                            _data: value,
+                        });
+                    }
+                }
 
                 // build the actual graph
                 s = new sigma({
@@ -311,6 +346,19 @@ var main = function(timeout){
                         s.graph.addNode(node);
                 });
 
+                // generate any dns nodes on the graph
+                dnsCheckNodes.forEach(function(node, i, a){
+                        node.x = 2;
+                        node.y = (0.6 * i / a.length) - 0.8;
+                        node.size = 10;
+                        node.color = "#4CC40B";
+                        if (!node._data.OK) {
+                                node.color = "red";
+                        }
+                        //console.log(node);
+                        s.graph.addNode(node);
+                });
+
                 // generate the edges
                 edges.forEach(function(edge, i){
                         var color = "#ccc";
@@ -321,6 +369,9 @@ var main = function(timeout){
                         }
                         if (!edge._data.OK) {
                                 color = "red";
+                        }
+                        if ("isDNSCheckNode" in edge._data) {
+                                type = "dashed";
                         }
                         var edge = {
                                 id: "e" + i,
@@ -429,5 +480,6 @@ $("#update-heatmap").click(function (e) {
 </script>
 </body>
 </html>
+
 
 

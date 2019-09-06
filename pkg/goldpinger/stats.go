@@ -82,6 +82,16 @@ var (
 			"type",
 		},
 	)
+	goldpingerDnsErrorsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "goldpinger_dns_errors_total",
+			Help: "Statistics of DNS errors per instance",
+		},
+		[]string{
+			"goldpinger_instance",
+			"host",
+		},
+	)
 
 	bootTime = time.Now()
 )
@@ -92,6 +102,7 @@ func init() {
 	prometheus.MustRegister(goldpingerResponseTimePeersHistogram)
 	prometheus.MustRegister(goldpingerResponseTimeKubernetesHistogram)
 	prometheus.MustRegister(goldpingerErrorsCounter)
+	prometheus.MustRegister(goldpingerDnsErrorsCounter)
 	log.Println("Metrics setup - see /metrics")
 }
 
@@ -128,6 +139,14 @@ func CountError(errorType string) {
 	goldpingerErrorsCounter.WithLabelValues(
 		GoldpingerConfig.Hostname,
 		errorType,
+	).Inc()
+}
+
+// counts instances of dns errors
+func CountDnsError(host string) {
+	goldpingerDnsErrorsCounter.WithLabelValues(
+		GoldpingerConfig.Hostname,
+		host,
 	).Inc()
 }
 

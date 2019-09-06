@@ -115,7 +115,7 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 	// draw all the boxes
 	for sourceIP, results := range checkResults.Responses {
 		if *results.OK {
-			for destinationIP, response := range results.Response {
+			for destinationIP, response := range results.Response.PodResults {
 				x, y := getPingBoxCoordinates(order[sourceIP], order[destinationIP], boxSize, paddingSize)
 				color := getPingBoxColor(response.ResponseTimeMs, tresholdLatencies)
 				drawPingBox(canvas, boxSize+x, boxSize+y, boxSize, color)

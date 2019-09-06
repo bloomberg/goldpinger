@@ -31,7 +31,7 @@ func StartUpdater() {
 		for {
 			results := PingAllPods(GoldpingerConfig.PodSelecter.SelectPods())
 			var troublemakers []string
-			for podIP, value := range results {
+			for podIP, value := range results.PodResults {
 				if *value.OK != true {
 					troublemakers = append(troublemakers, fmt.Sprintf("%s (%s)", podIP, value.HostIP.String()))
 				}

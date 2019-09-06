@@ -28,7 +28,7 @@ type CheckAllPodResult struct {
 	Error string `json:"error,omitempty"`
 
 	// response
-	Response CheckResults `json:"response,omitempty"`
+	Response *CheckResults `json:"response,omitempty"`
 
 	// status code
 	StatusCode int32 `json:"status-code,omitempty"`
@@ -71,11 +71,13 @@ func (m *CheckAllPodResult) validateResponse(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := m.Response.Validate(formats); err != nil {
-		if ve, ok := err.(*errors.Validation); ok {
-			return ve.ValidateName("response")
+	if m.Response != nil {
+		if err := m.Response.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("response")
+			}
+			return err
 		}
-		return err
 	}
 
 	return nil

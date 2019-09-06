@@ -21,7 +21,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "title": "Goldpinger",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "paths": {
     "/check": {
@@ -143,6 +143,12 @@ func init() {
           "type": "boolean",
           "default": false
         },
+        "dnsResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/DnsResults"
+          }
+        },
         "hosts": {
           "type": "array",
           "items": {
@@ -177,8 +183,33 @@ func init() {
     },
     "CheckResults": {
       "type": "object",
+      "properties": {
+        "dnsResults": {
+          "$ref": "#/definitions/DnsResults"
+        },
+        "podResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/PodResult"
+          }
+        }
+      }
+    },
+    "DnsResult": {
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "response-time-ms": {
+          "type": "number",
+          "format": "int64"
+        }
+      }
+    },
+    "DnsResults": {
+      "type": "object",
       "additionalProperties": {
-        "$ref": "#/definitions/PodResult"
+        "$ref": "#/definitions/DnsResult"
       }
     },
     "HealthCheckResults": {
@@ -244,7 +275,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "title": "Goldpinger",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "paths": {
     "/check": {
@@ -366,6 +397,12 @@ func init() {
           "type": "boolean",
           "default": false
         },
+        "dnsResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/DnsResults"
+          }
+        },
         "hosts": {
           "type": "array",
           "items": {
@@ -400,8 +437,33 @@ func init() {
     },
     "CheckResults": {
       "type": "object",
+      "properties": {
+        "dnsResults": {
+          "$ref": "#/definitions/DnsResults"
+        },
+        "podResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/PodResult"
+          }
+        }
+      }
+    },
+    "DnsResult": {
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "response-time-ms": {
+          "type": "number",
+          "format": "int64"
+        }
+      }
+    },
+    "DnsResults": {
+      "type": "object",
       "additionalProperties": {
-        "$ref": "#/definitions/PodResult"
+        "$ref": "#/definitions/DnsResult"
       }
     },
     "HealthCheckResults": {

@@ -16,6 +16,7 @@ package goldpinger
 
 import (
 	"fmt"
+	"net"
 	"sync"
 	"time"
 
@@ -27,7 +28,7 @@ import (
 
 // CheckNeighbours queries the kubernetes API server for all other goldpinger pods
 // then calls Ping() on each one
-func CheckNeighbours(ps *PodSelecter) models.CheckResults {
+func CheckNeighbours(ps *PodSelecter) *models.CheckResults {
 	return PingAllPods(ps.SelectPods())
 }
 
@@ -50,7 +51,25 @@ func pickPodHostIP(podIP, hostIP string) string {
 	return podIP
 }
 
-func PingAllPods(pods map[string]string) models.CheckResults {
+func checkDNS() *models.DNSResults {
+	results := models.DNSResults{}
+	for _, host := range GoldpingerConfig.DnsHosts{
+		
+		var dnsResult models.DNSResult
+
+		start := time.Now()
+		_, err := net.LookupIP(host)
+		if err != nil {
+			dnsResult.Error = err.Error()
+			CountDnsError(host)
+		}
+		dnsResult.ResponseTimeMs = time.Since(start).Nanoseconds() / int64(time.Millisecond)
+		results[host] = dnsResult
+	}
+	return &results
+}
+
+func PingAllPods(pods map[string]string) *models.CheckResults {
 
 	result := models.CheckResults{}
 
@@ -84,11 +103,15 @@ func PingAllPods(pods map[string]string) models.CheckResults {
 			wg.Done()
 		}(podIP, hostIP)
 	}
+	if len(GoldpingerConfig.DnsHosts) > 0 {
+		result.DNSResults = *checkDNS()
+	}
 	wg.Wait()
 	close(ch)
 
 	counterHealthy, counterUnhealthy := 0.0, 0.0
 
+	result.PodResults = make(map[string]models.PodResult)
 	for response := range ch {
 		var podIPv4 strfmt.IPv4
 		podIPv4.UnmarshalText([]byte(response.podIP))
@@ -97,10 +120,10 @@ func PingAllPods(pods map[string]string) models.CheckResults {
 		} else {
 			counterUnhealthy++
 		}
-		result[response.podIP] = response.podResult
+		result.PodResults[response.podIP] = response.podResult
 	}
 	CountHealthyUnhealthyNodes(counterHealthy, counterUnhealthy)
-	return result
+	return &result
 }
 
 type CheckServicePodsResult struct {
@@ -161,6 +184,18 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 			HostIP: response.hostIPv4,
 			PodIP:  podIPv4,
 		})
+		if response.checkAllPodResult.Response != nil &&
+		   response.checkAllPodResult.Response.DNSResults != nil {
+			if result.DNSResults == nil {
+				result.DNSResults = make(map[string]models.DNSResults)
+			}
+			for host := range response.checkAllPodResult.Response.DNSResults {
+				if result.DNSResults[host] == nil {
+					result.DNSResults[host] = make(map[string]models.DNSResult)
+				}
+				result.DNSResults[host][response.podIP] = response.checkAllPodResult.Response.DNSResults[host]
+			}
+		}
 	}
 	return &result
 }

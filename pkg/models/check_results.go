@@ -9,23 +9,67 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // CheckResults check results
 // swagger:model CheckResults
-type CheckResults map[string]PodResult
+type CheckResults struct {
+
+	// dns results
+	DNSResults DNSResults `json:"dnsResults,omitempty"`
+
+	// pod results
+	PodResults map[string]PodResult `json:"podResults,omitempty"`
+}
 
 // Validate validates this check results
-func (m CheckResults) Validate(formats strfmt.Registry) error {
+func (m *CheckResults) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	for k := range m {
+	if err := m.validateDNSResults(formats); err != nil {
+		res = append(res, err)
+	}
 
-		if err := validate.Required(k, "body", m[k]); err != nil {
+	if err := m.validatePodResults(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *CheckResults) validateDNSResults(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DNSResults) { // not required
+		return nil
+	}
+
+	if err := m.DNSResults.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("dnsResults")
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *CheckResults) validatePodResults(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.PodResults) { // not required
+		return nil
+	}
+
+	for k := range m.PodResults {
+
+		if err := validate.Required("podResults"+"."+k, "body", m.PodResults[k]); err != nil {
 			return err
 		}
-		if val, ok := m[k]; ok {
+		if val, ok := m.PodResults[k]; ok {
 			if err := val.Validate(formats); err != nil {
 				return err
 			}
@@ -33,8 +77,23 @@ func (m CheckResults) Validate(formats strfmt.Registry) error {
 
 	}
 
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *CheckResults) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
 	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *CheckResults) UnmarshalBinary(b []byte) error {
+	var res CheckResults
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
 	return nil
 }
