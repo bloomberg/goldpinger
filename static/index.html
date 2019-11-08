@@ -248,6 +248,9 @@ var main = function(timeout){
                 var edges = [];
                 var resp = data.responses;
                 for (let callId in resp) {
+                        if (!resp[callId].OK) {
+                            continue
+                        }
                         var call = resp[callId].response['podResults'];
                         if (typeof call !== 'string'){
                                 for (let target in call) {
