@@ -10,23 +10,25 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 
 ## On the menu
 
-- [Rationale](#rationale)
-- [Quick start](#quick-start)
-- [Building](#building)
-  - [Compiling using a multi-stage Dockerfile](#compiling-using-a-multi-stage-dockerfile)
-  - [Compiling locally](#compiling-locally)
-- [Installation](#installation)
-  - [Authentication with Kubernetes API](#authentication-with-kubernetes-api)
-  - [Example YAML](#example-yaml)
-  - [Note on DNS](#note-on-dns)
-- [Usage](#usage)
-  - [UI](#ui)
-  - [API](#api)
-  - [Prometheus](#prometheus)
-  - [Grafana](#grafana)
-  - [Alert Manager](#alert-manager)
-- [Contributions](#contributions)
-- [License](#license)
+- [Goldpinger ![Build Status](https://travis-ci.com/bloomberg/goldpinger)](#goldpinger-build-statushttpstravis-cicombloomberggoldpinger)
+  - [On the menu](#on-the-menu)
+  - [Rationale](#rationale)
+  - [Quick start](#quick-start)
+  - [Building](#building)
+    - [Compiling using a multi-stage Dockerfile](#compiling-using-a-multi-stage-dockerfile)
+    - [Compiling locally](#compiling-locally)
+  - [Installation](#installation)
+    - [Authentication with Kubernetes API](#authentication-with-kubernetes-api)
+    - [Example YAML](#example-yaml)
+    - [Note on DNS](#note-on-dns)
+  - [Usage](#usage)
+    - [UI](#ui)
+    - [API](#api)
+    - [Prometheus](#prometheus)
+    - [Grafana](#grafana)
+    - [Alert Manager](#alert-manager)
+  - [Contributions](#contributions)
+  - [License](#license)
 
 ## Rationale
 
@@ -121,26 +123,32 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: goldpinger
+  namespace: default
+  labels:
+    app: goldpinger
 spec:
   updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
       app: goldpinger
-      version: "1.5.0"
   template:
     metadata:
       labels:
         app: goldpinger
-        version: "1.5.0"
     spec:
+      serviceAccount: "goldpinger-serviceaccount"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
       containers:
         - name: goldpinger
           env:
             - name: HOST
               value: "0.0.0.0"
             - name: PORT
-              value: "80"
+              value: "8080"
             # injecting real hostname will make for easier to understand graphs/metrics
             - name: HOSTNAME
               valueFrom:
@@ -151,20 +159,30 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-          image: "docker.io/bloomberg/goldpinger:1.5.0"
+          image: "docker.io/bloomberg/goldpinger:2.0.0"
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          resources:
+            limits:
+              memory: 80Mi
+            requests:
+              cpu: 1m
+              memory: 40Mi
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
           readinessProbe:
             httpGet:
               path: /healthz
-              port: 80
+              port: 8080
             initialDelaySeconds: 20
             periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 80
+              port: 8080
             initialDelaySeconds: 20
             periodSeconds: 5
 ---
@@ -172,12 +190,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: goldpinger
+  namespace: default
   labels:
     app: goldpinger
 spec:
   type: NodePort
   ports:
-    - port: 80
+    - port: 8080
       nodePort: 30080
       name: http
   selector:
