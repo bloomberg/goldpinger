@@ -138,6 +138,9 @@ spec:
         app: goldpinger
     spec:
       serviceAccount: "goldpinger-serviceaccount"
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
