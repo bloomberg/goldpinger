@@ -134,10 +134,16 @@ spec:
       app: goldpinger
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
       labels:
         app: goldpinger
     spec:
       serviceAccount: "goldpinger-serviceaccount"
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
