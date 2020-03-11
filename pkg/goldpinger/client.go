@@ -53,8 +53,8 @@ func pickPodHostIP(podIP, hostIP string) string {
 
 func checkDNS() *models.DNSResults {
 	results := models.DNSResults{}
-	for _, host := range GoldpingerConfig.DnsHosts{
-		
+	for _, host := range GoldpingerConfig.DnsHosts {
+
 		var dnsResult models.DNSResult
 
 		start := time.Now()
@@ -185,7 +185,7 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 			PodIP:  podIPv4,
 		})
 		if response.checkAllPodResult.Response != nil &&
-		   response.checkAllPodResult.Response.DNSResults != nil {
+			response.checkAllPodResult.Response.DNSResults != nil {
 			if result.DNSResults == nil {
 				result.DNSResults = make(map[string]models.DNSResults)
 			}
