@@ -81,24 +81,36 @@ func PingAllPods(pods map[string]string) *models.CheckResults {
 	for podIP, hostIP := range pods {
 
 		go func(podIP string, hostIP string) {
-			var channelResult PingAllPodsResult
 
+			// metrics
 			CountCall("made", "ping")
 			timer := GetLabeledPeersCallsTimer("ping", hostIP, podIP)
 			start := time.Now()
-			resp, err := getClient(pickPodHostIP(podIP, hostIP)).Operations.Ping(nil)
 
+			// setup
+			var channelResult PingAllPodsResult
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
-			responseTime := time.Since(start).Nanoseconds() / int64(time.Millisecond)
-			var OK = (err == nil)
-			if OK {
-				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTimeMs: responseTime}
-				timer.ObserveDuration()
-			} else {
+			channelResult.podIP = podIP
+
+			OK := false
+			var responseTime int64
+			client, err := getClient(pickPodHostIP(podIP, hostIP))
+
+			if err != nil {
 				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500, ResponseTimeMs: responseTime}
 				CountError("ping")
+			} else {
+				resp, err := client.Operations.Ping(nil)
+				responseTime = time.Since(start).Nanoseconds() / int64(time.Millisecond)
+				OK = (err == nil)
+				if OK {
+					channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTimeMs: responseTime}
+					timer.ObserveDuration()
+				} else {
+					channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 504, ResponseTimeMs: responseTime}
+					CountError("ping")
+				}
 			}
-			channelResult.podIP = podIP
 
 			ch <- channelResult
 			wg.Done()
