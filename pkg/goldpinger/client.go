@@ -88,13 +88,13 @@ func PingAllPods(pods map[string]string) *models.CheckResults {
 			resp, err := getClient(pickPodHostIP(podIP, hostIP)).Operations.Ping(nil)
 
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
+			responseTime := time.Since(start).Nanoseconds() / int64(time.Millisecond)
 			var OK = (err == nil)
 			if OK {
-				responseTime := time.Since(start).Nanoseconds() / int64(time.Millisecond)
 				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTimeMs: responseTime}
 				timer.ObserveDuration()
 			} else {
-				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500}
+				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500, ResponseTimeMs: responseTime}
 				CountError("ping")
 			}
 			channelResult.podIP = podIP
