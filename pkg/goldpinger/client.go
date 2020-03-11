@@ -164,28 +164,36 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 			// setup
 			var channelResult CheckServicePodsResult
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
+			channelResult.podIP = podIP
 			client, err := getClient(pickPodHostIP(podIP, hostIP))
 			OK := false
 
-			if err == nil {
-				resp, err := client.Operations.CheckServicePods(nil)
-				OK = (err == nil)
-				channelResult.checkAllPodResult = models.CheckAllPodResult{
-					OK:       &OK,
-					HostIP:   channelResult.hostIPv4,
-					Response: resp.Payload,
-				}
-				timer.ObserveDuration()
-			}
-			if OK == false {
+			if err != nil {
 				channelResult.checkAllPodResult = models.CheckAllPodResult{
 					OK:     &OK,
 					HostIP: channelResult.hostIPv4,
 					Error:  err.Error(),
 				}
 				CountError("checkAll")
+			} else {
+				resp, err := client.Operations.CheckServicePods(nil)
+				OK = (err == nil)
+				if OK {
+					channelResult.checkAllPodResult = models.CheckAllPodResult{
+						OK:       &OK,
+						HostIP:   channelResult.hostIPv4,
+						Response: resp.Payload,
+					}
+					timer.ObserveDuration()
+				} else {
+					channelResult.checkAllPodResult = models.CheckAllPodResult{
+						OK:     &OK,
+						HostIP: channelResult.hostIPv4,
+						Error:  err.Error(),
+					}
+					CountError("checkAll")
+				}
 			}
-			channelResult.podIP = podIP
 
 			ch <- channelResult
 			wg.Done()
