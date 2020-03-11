@@ -15,6 +15,7 @@
 package goldpinger
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -143,22 +144,28 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 	for podIP, hostIP := range pods {
 
 		go func(podIP string, hostIP string) {
-			var channelResult CheckServicePodsResult
 
+			// stats
 			CountCall("made", "check")
 			timer := GetLabeledPeersCallsTimer("check", hostIP, podIP)
-			resp, err := getClient(pickPodHostIP(podIP, hostIP)).Operations.CheckServicePods(nil)
 
+			// setup
+			var channelResult CheckServicePodsResult
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
-			var OK = (err == nil)
-			if OK {
+			client, err := getClient(pickPodHostIP(podIP, hostIP))
+			OK := false
+
+			if err == nil {
+				resp, err := client.Operations.CheckServicePods(nil)
+				OK = (err == nil)
 				channelResult.checkAllPodResult = models.CheckAllPodResult{
 					OK:       &OK,
 					HostIP:   channelResult.hostIPv4,
 					Response: resp.Payload,
 				}
 				timer.ObserveDuration()
-			} else {
+			}
+			if OK == false {
 				channelResult.checkAllPodResult = models.CheckAllPodResult{
 					OK:     &OK,
 					HostIP: channelResult.hostIPv4,
@@ -211,11 +218,14 @@ func HealthCheck() *models.HealthCheckResults {
 	return &result
 }
 
-func getClient(hostIP string) *apiclient.Goldpinger {
+func getClient(hostIP string) (*apiclient.Goldpinger, error) {
+	if hostIP == "" {
+		return nil, errors.New("Host or pod IP empty, can't make a call")
+	}
 	host := fmt.Sprintf("%s:%d", hostIP, GoldpingerConfig.Port)
 	transport := httptransport.New(host, "", nil)
 	client := apiclient.New(transport, strfmt.Default)
 	apiclient.Default.SetTransport(transport)
 
-	return client
+	return client, nil
 }
