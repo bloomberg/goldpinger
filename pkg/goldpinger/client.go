@@ -15,6 +15,7 @@
 package goldpinger
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -53,8 +54,8 @@ func pickPodHostIP(podIP, hostIP string) string {
 
 func checkDNS() *models.DNSResults {
 	results := models.DNSResults{}
-	for _, host := range GoldpingerConfig.DnsHosts{
-		
+	for _, host := range GoldpingerConfig.DnsHosts {
+
 		var dnsResult models.DNSResult
 
 		start := time.Now()
@@ -80,24 +81,37 @@ func PingAllPods(pods map[string]string) *models.CheckResults {
 	for podIP, hostIP := range pods {
 
 		go func(podIP string, hostIP string) {
-			var channelResult PingAllPodsResult
 
+			// metrics
 			CountCall("made", "ping")
 			timer := GetLabeledPeersCallsTimer("ping", hostIP, podIP)
 			start := time.Now()
-			resp, err := getClient(pickPodHostIP(podIP, hostIP)).Operations.Ping(nil)
 
+			// setup
+			var channelResult PingAllPodsResult
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
-			var OK = (err == nil)
-			if OK {
-				responseTime := time.Since(start).Nanoseconds() / int64(time.Millisecond)
-				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTimeMs: responseTime}
-				timer.ObserveDuration()
-			} else {
-				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500}
-				CountError("ping")
-			}
 			channelResult.podIP = podIP
+
+			OK := false
+			var responseTime int64
+			client, err := getClient(pickPodHostIP(podIP, hostIP))
+
+			if err != nil {
+				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500, ResponseTimeMs: responseTime}
+				channelResult.podIP = hostIP
+				CountError("ping")
+			} else {
+				resp, err := client.Operations.Ping(nil)
+				responseTime = time.Since(start).Nanoseconds() / int64(time.Millisecond)
+				OK = (err == nil)
+				if OK {
+					channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Response: resp.Payload, StatusCode: 200, ResponseTimeMs: responseTime}
+					timer.ObserveDuration()
+				} else {
+					channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 504, ResponseTimeMs: responseTime}
+					CountError("ping")
+				}
+			}
 
 			ch <- channelResult
 			wg.Done()
@@ -143,30 +157,45 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 	for podIP, hostIP := range pods {
 
 		go func(podIP string, hostIP string) {
-			var channelResult CheckServicePodsResult
 
+			// stats
 			CountCall("made", "check")
 			timer := GetLabeledPeersCallsTimer("check", hostIP, podIP)
-			resp, err := getClient(pickPodHostIP(podIP, hostIP)).Operations.CheckServicePods(nil)
 
+			// setup
+			var channelResult CheckServicePodsResult
 			channelResult.hostIPv4.UnmarshalText([]byte(hostIP))
-			var OK = (err == nil)
-			if OK {
-				channelResult.checkAllPodResult = models.CheckAllPodResult{
-					OK:       &OK,
-					HostIP:   channelResult.hostIPv4,
-					Response: resp.Payload,
-				}
-				timer.ObserveDuration()
-			} else {
+			channelResult.podIP = podIP
+			client, err := getClient(pickPodHostIP(podIP, hostIP))
+			OK := false
+
+			if err != nil {
 				channelResult.checkAllPodResult = models.CheckAllPodResult{
 					OK:     &OK,
 					HostIP: channelResult.hostIPv4,
 					Error:  err.Error(),
 				}
+				channelResult.podIP = hostIP
 				CountError("checkAll")
+			} else {
+				resp, err := client.Operations.CheckServicePods(nil)
+				OK = (err == nil)
+				if OK {
+					channelResult.checkAllPodResult = models.CheckAllPodResult{
+						OK:       &OK,
+						HostIP:   channelResult.hostIPv4,
+						Response: resp.Payload,
+					}
+					timer.ObserveDuration()
+				} else {
+					channelResult.checkAllPodResult = models.CheckAllPodResult{
+						OK:     &OK,
+						HostIP: channelResult.hostIPv4,
+						Error:  err.Error(),
+					}
+					CountError("checkAll")
+				}
 			}
-			channelResult.podIP = podIP
 
 			ch <- channelResult
 			wg.Done()
@@ -185,7 +214,7 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 			PodIP:  podIPv4,
 		})
 		if response.checkAllPodResult.Response != nil &&
-		   response.checkAllPodResult.Response.DNSResults != nil {
+			response.checkAllPodResult.Response.DNSResults != nil {
 			if result.DNSResults == nil {
 				result.DNSResults = make(map[string]models.DNSResults)
 			}
@@ -211,11 +240,14 @@ func HealthCheck() *models.HealthCheckResults {
 	return &result
 }
 
-func getClient(hostIP string) *apiclient.Goldpinger {
+func getClient(hostIP string) (*apiclient.Goldpinger, error) {
+	if hostIP == "" {
+		return nil, errors.New("Host or pod IP empty, can't make a call")
+	}
 	host := fmt.Sprintf("%s:%d", hostIP, GoldpingerConfig.Port)
 	transport := httptransport.New(host, "", nil)
 	client := apiclient.New(transport, strfmt.Default)
 	apiclient.Default.SetTransport(transport)
 
-	return client
+	return client, nil
 }
