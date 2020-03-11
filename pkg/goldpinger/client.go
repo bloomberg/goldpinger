@@ -98,6 +98,7 @@ func PingAllPods(pods map[string]string) *models.CheckResults {
 
 			if err != nil {
 				channelResult.podResult = models.PodResult{HostIP: channelResult.hostIPv4, OK: &OK, Error: err.Error(), StatusCode: 500, ResponseTimeMs: responseTime}
+				channelResult.podIP = hostIP
 				CountError("ping")
 			} else {
 				resp, err := client.Operations.Ping(nil)
@@ -174,6 +175,7 @@ func CheckAllPods(pods map[string]string) *models.CheckAllResults {
 					HostIP: channelResult.hostIPv4,
 					Error:  err.Error(),
 				}
+				channelResult.podIP = hostIP
 				CountError("checkAll")
 			} else {
 				resp, err := client.Operations.CheckServicePods(nil)
