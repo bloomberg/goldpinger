@@ -4,22 +4,20 @@ services:
   - docker
 
 go:
-  - "1.10.x"
+  - "1.14.x"
   - master
 
 script:
   - docker --version
-  # dep
-  - go get -u github.com/golang/dep/cmd/dep
-  
+
   # build locally and run locally
   - make clean && make vendor && make && ./bin/goldpinger --help
-  
+
   # build an image and run the image
   - make clean && make vendor && make build
   - docker images
   - docker run `make version` --help
-  
+
   # build an image using the multistage builder
   - make clean && make build-multistage
   - docker images
@@ -36,5 +34,5 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    go: "1.10.x"
+    go: "1.14.x"
     condition: -n "$DOCKER_PASSWORD"
