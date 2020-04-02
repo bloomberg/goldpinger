@@ -55,9 +55,6 @@ Getting from [docker hub](https://hub.docker.com/r/bloomberg/goldpinger):
 docker pull bloomberg/goldpinger
 ```
 
-Note, that in order to guarantee correct versions of dependencies, the project [uses `dep`](./Makefile).
-
-
 ## Building
 
 The repo comes with two ways of building a `docker` image: compiling locally, and compiling using a multi-stage `Dockerfile` image. :warning: Depending on your `docker` setup, you might need to prepend the commands below with `sudo`.
@@ -79,27 +76,24 @@ This was contributed via [@michiel](https://github.com/michiel) - kudos !
 
 ### Compiling locally
 
-In order to build `Goldpinger`, you are going to need `go` version 1.10+, `dep`, and `docker`.
+In order to build `Goldpinger`, you are going to need `go` version 1.13+ and `docker`.
 
 Building from source code consists of compiling the binary and building a [Docker image](./build/Dockerfile-simple):
 
 ```sh
-# step 0: check out the code into your $GOPATH
-go get github.com/bloomberg/goldpinger/cmd/goldpinger
-cd $GOPATH/src/github.com/bloomberg/goldpinger
+# step 0: check out the code
+git clone https://github.com/bloomberg/goldpinger.git
+cd goldpinger
 
-# step 1: download the dependencies via dep ensure
-make vendor
-
-# step 2: compile the binary for the desired architecture
+# step 1: compile the binary for the desired architecture
 make bin/goldpinger
 # at this stage you should be able to run the binary
 ./bin/goldpinger --help
 
-# step 3: build the docker image containing the binary
+# step 2: build the docker image containing the binary
 make build
 
-# step 4: push the image somewhere
+# step 3: push the image somewhere
 namespace="docker.io/myhandle/" make tag
 namespace="docker.io/myhandle/" make push
 ```
