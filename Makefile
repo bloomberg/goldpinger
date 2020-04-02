@@ -1,5 +1,5 @@
 name ?= goldpinger
-version ?= 2.0.2
+version ?= v2.1.0
 bin ?= goldpinger
 pkg ?= "github.com/bloomberg/goldpinger"
 tag = $(name):$(version)
