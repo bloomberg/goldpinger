@@ -23,6 +23,7 @@ var GoldpingerConfig = struct {
 	StaticFilePath   string `long:"static-file-path" description:"Folder for serving static files" env:"STATIC_FILE_PATH"`
 	KubeConfigPath   string `long:"kubeconfig" description:"Path to kubeconfig file" env:"KUBECONFIG"`
 	RefreshInterval  int    `long:"refresh-interval" description:"If > 0, will create a thread and collect stats every n seconds" env:"REFRESH_INTERVAL" default:"30"`
+	JitterFactor     float64 `long:"jitter-factor" description:"The amount of jitter to add while pinging clients" env:"JITTER_FACTOR" default:"0.05"`
 	Hostname         string `long:"hostname" description:"Hostname to use" env:"HOSTNAME"`
 	PodIP            string `long:"pod-ip" description:"Pod IP to use" env:"POD_IP"`
 	PodName          string `long:"pod-name" description:"The name of this pod - used to select --ping-number of pods using rendezvous hashing" env:"POD_NAME"`
