@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/bloomberg/goldpinger/pkg/models"
+	"github.com/bloomberg/goldpinger/v3/pkg/models"
 )
 
 // CheckServicePodsReader is a Reader for the CheckServicePods structure.

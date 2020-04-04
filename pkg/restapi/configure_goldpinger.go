@@ -27,8 +27,8 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github.com/bloomberg/goldpinger/pkg/goldpinger"
-	"github.com/bloomberg/goldpinger/pkg/restapi/operations"
+	"github.com/bloomberg/goldpinger/v3/pkg/goldpinger"
+	"github.com/bloomberg/goldpinger/v3/pkg/restapi/operations"
 	"github.com/go-openapi/swag"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

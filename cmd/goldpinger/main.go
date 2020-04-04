@@ -23,9 +23,9 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/bloomberg/goldpinger/pkg/goldpinger"
-	"github.com/bloomberg/goldpinger/pkg/restapi"
-	"github.com/bloomberg/goldpinger/pkg/restapi/operations"
+	"github.com/bloomberg/goldpinger/v3/pkg/goldpinger"
+	"github.com/bloomberg/goldpinger/v3/pkg/restapi"
+	"github.com/bloomberg/goldpinger/v3/pkg/restapi/operations"
 	flags "github.com/jessevdk/go-flags"
 )
 

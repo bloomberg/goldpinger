@@ -21,8 +21,8 @@ import (
 	"sync"
 	"time"
 
-	apiclient "github.com/bloomberg/goldpinger/pkg/client"
-	"github.com/bloomberg/goldpinger/pkg/models"
+	apiclient "github.com/bloomberg/goldpinger/v3/pkg/client"
+	"github.com/bloomberg/goldpinger/v3/pkg/models"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 )

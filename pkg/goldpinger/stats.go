@@ -18,7 +18,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/bloomberg/goldpinger/pkg/models"
+	"github.com/bloomberg/goldpinger/v3/pkg/models"
 	"github.com/go-openapi/strfmt"
 	"github.com/prometheus/client_golang/prometheus"
 )

@@ -25,7 +25,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/net/netutil"
 
-	"github.com/bloomberg/goldpinger/pkg/restapi/operations"
+	"github.com/bloomberg/goldpinger/v3/pkg/restapi/operations"
 )
 
 const (
