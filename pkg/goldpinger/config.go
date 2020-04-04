@@ -30,7 +30,6 @@ var GoldpingerConfig = struct {
 	UseHostIP        bool   `long:"use-host-ip" description:"When making the calls, use host ip (defaults to pod ip)" env:"USE_HOST_IP"`
 	LabelSelector    string `long:"label-selector" description:"label selector to use to discover goldpinger pods in the cluster" env:"LABEL_SELECTOR" default:"app=goldpinger"`
 	KubernetesClient *kubernetes.Clientset
-	*PodSelecter
 
-	DnsHosts         []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
+	DnsHosts []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
 }{}
