@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	models "github.com/bloomberg/goldpinger/pkg/models"
+	"github.com/bloomberg/goldpinger/pkg/models"
 )
 
 // HealthzOKCode is the HTTP code returned for type HealthzOK

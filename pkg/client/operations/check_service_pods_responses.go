@@ -10,10 +10,9 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/bloomberg/goldpinger/pkg/models"
+	"github.com/bloomberg/goldpinger/pkg/models"
 )
 
 // CheckServicePodsReader is a Reader for the CheckServicePods structure.
@@ -24,7 +23,6 @@ type CheckServicePodsReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *CheckServicePodsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewCheckServicePodsOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +50,10 @@ type CheckServicePodsOK struct {
 
 func (o *CheckServicePodsOK) Error() string {
 	return fmt.Sprintf("[GET /check][%d] checkServicePodsOK  %+v", 200, o.Payload)
+}
+
+func (o *CheckServicePodsOK) GetPayload() *models.CheckResults {
+	return o.Payload
 }
 
 func (o *CheckServicePodsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -19,6 +19,7 @@ vendor:
 	rm -rf ./vendor
 	go mod vendor
 
+# Download the latest swagger releases from: https://github.com/go-swagger/go-swagger/releases/
 swagger:
 	swagger generate server -t pkg -f ./swagger.yml --exclude-main -A goldpinger && \
 	swagger generate client -t pkg -f ./swagger.yml -A goldpinger
