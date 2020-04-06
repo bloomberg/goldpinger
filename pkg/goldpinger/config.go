@@ -33,4 +33,9 @@ var GoldpingerConfig = struct {
 	KubernetesClient *kubernetes.Clientset
 
 	DnsHosts []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
+
+	// Timeouts
+	PingTimeoutMs     int64 `long:"ping-timeout-ms" description:"The timeout in milliseconds for a ping call to other goldpinger pods" env:"PING_TIMEOUT_MS" default:"300"`
+	CheckTimeoutMs    int64 `long:"check-timeout-ms" description:"The timeout in milliseconds for a check call to other goldpinger pods" env:"CHECK_TIMEOUT_MS" default:"1000"`
+	CheckAllTimeoutMs int64 `long:"check-all-timeout-ms" description:"The timeout in milliseconds for a check-all call to other goldpinger pods" env:"CHECK_ALL_TIMEOUT_MS" default:"5000"`
 }{}
