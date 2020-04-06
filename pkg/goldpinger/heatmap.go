@@ -18,6 +18,7 @@ package goldpinger
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"image"
 	"image/color"
@@ -26,6 +27,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
@@ -79,8 +81,14 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 	// parse the query to set the parameters
 	query := r.URL.Query()
 
+	ctx, cancel := context.WithTimeout(
+		r.Context(),
+		time.Duration(GoldpingerConfig.CheckAllTimeoutMs)*time.Millisecond,
+	)
+	defer cancel()
+
 	// get the results
-	checkResults := CheckAllPods(GetAllPods())
+	checkResults := CheckAllPods(ctx, GetAllPods())
 
 	// set some sizes
 	numberOfPods := len(checkResults.Responses)
