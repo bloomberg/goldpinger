@@ -15,6 +15,7 @@
 package goldpinger
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -22,6 +23,7 @@ import (
 	"time"
 
 	apiclient "github.com/bloomberg/goldpinger/v3/pkg/client"
+	"github.com/bloomberg/goldpinger/v3/pkg/client/operations"
 	"github.com/bloomberg/goldpinger/v3/pkg/models"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
@@ -29,14 +31,14 @@ import (
 
 // CheckNeighbours queries the kubernetes API server for all other goldpinger pods
 // then calls Ping() on each one
-func CheckNeighbours() *models.CheckResults {
-	return PingAllPods(SelectPods())
+func CheckNeighbours(ctx context.Context) *models.CheckResults {
+	return PingAllPods(ctx, SelectPods())
 }
 
 // CheckNeighboursNeighbours queries the kubernetes API server for all other goldpinger
 // pods then calls Check() on each one
-func CheckNeighboursNeighbours() *models.CheckAllResults {
-	return CheckAllPods(SelectPods())
+func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
+	return CheckAllPods(ctx, SelectPods())
 }
 
 type PingAllPodsResult struct {
@@ -71,7 +73,7 @@ func checkDNS() *models.DNSResults {
 	return &results
 }
 
-func PingAllPods(pods map[string]*GoldpingerPod) *models.CheckResults {
+func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *models.CheckResults {
 
 	result := models.CheckResults{}
 
@@ -109,7 +111,14 @@ func PingAllPods(pods map[string]*GoldpingerPod) *models.CheckResults {
 				}
 				CountError("ping")
 			} else {
-				resp, err := client.Operations.Ping(nil)
+				pingCtx, cancel := context.WithTimeout(
+					pingAllCtx,
+					time.Duration(GoldpingerConfig.PingTimeoutMs)*time.Millisecond,
+				)
+				defer cancel()
+
+				params := operations.NewPingParamsWithContext(pingCtx)
+				resp, err := client.Operations.Ping(params)
 				responseTime = time.Since(start).Nanoseconds() / int64(time.Millisecond)
 				OK = (err == nil)
 				if OK {
@@ -167,7 +176,7 @@ type CheckServicePodsResult struct {
 	podIPv4           strfmt.IPv4
 }
 
-func CheckAllPods(pods map[string]*GoldpingerPod) *models.CheckAllResults {
+func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *models.CheckAllResults {
 
 	result := models.CheckAllResults{Responses: make(map[string]models.CheckAllPodResult)}
 
@@ -200,7 +209,14 @@ func CheckAllPods(pods map[string]*GoldpingerPod) *models.CheckAllResults {
 				}
 				CountError("checkAll")
 			} else {
-				resp, err := client.Operations.CheckServicePods(nil)
+				checkCtx, cancel := context.WithTimeout(
+					checkAllCtx,
+					time.Duration(GoldpingerConfig.CheckTimeoutMs)*time.Millisecond,
+				)
+				defer cancel()
+
+				params := operations.NewCheckServicePodsParamsWithContext(checkCtx)
+				resp, err := client.Operations.CheckServicePods(params)
 				OK = (err == nil)
 				if OK {
 					channelResult.checkAllPodResult = models.CheckAllPodResult{
