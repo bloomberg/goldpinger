@@ -45,8 +45,7 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 type PingAllPodsResult struct {
 	podName   string
 	podResult models.PodResult
-	hostIPv4  strfmt.IPv4
-	podIPv4   strfmt.IPv4
+	deleted   bool
 }
 
 func pickPodHostIP(podIP, hostIP string) string {
@@ -99,20 +98,22 @@ func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *mo
 			start := time.Now()
 
 			// setup
-			var channelResult PingAllPodsResult
-			channelResult.podName = pod.Name
-			channelResult.hostIPv4.UnmarshalText([]byte(pod.HostIP))
-			channelResult.podIPv4.UnmarshalText([]byte(pod.PodIP))
-
+			channelResult := PingAllPodsResult{podName: pod.Name}
 			OK := false
-			var responseTime int64
-			client, err := getClient(pickPodHostIP(pod.PodIP, pod.HostIP))
 
+			var responseTime int64
+			var hostIPv4 strfmt.IPv4
+			var podIPv4 strfmt.IPv4
+
+			hostIPv4.UnmarshalText([]byte(pod.HostIP))
+			podIPv4.UnmarshalText([]byte(pod.PodIP))
+
+			client, err := getClient(pickPodHostIP(pod.PodIP, pod.HostIP))
 			if err != nil {
 				logger.Warn("Couldn't get a client for Ping", zap.Error(err))
 				channelResult.podResult = models.PodResult{
-					PodIP:          channelResult.podIPv4,
-					HostIP:         channelResult.hostIPv4,
+					PodIP:          podIPv4,
+					HostIP:         hostIPv4,
 					OK:             &OK,
 					Error:          err.Error(),
 					StatusCode:     500,
@@ -133,8 +134,8 @@ func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *mo
 				if OK {
 					logger.Debug("Pink Ok", zap.Int64("responseTime", responseTime))
 					channelResult.podResult = models.PodResult{
-						PodIP:          channelResult.podIPv4,
-						HostIP:         channelResult.hostIPv4,
+						PodIP:          podIPv4,
+						HostIP:         hostIPv4,
 						OK:             &OK,
 						Response:       resp.Payload,
 						StatusCode:     200,
@@ -144,8 +145,8 @@ func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *mo
 				} else {
 					logger.Warn("Ping returned error", zap.Int64("responseTime", responseTime), zap.Error(err))
 					channelResult.podResult = models.PodResult{
-						PodIP:          channelResult.podIPv4,
-						HostIP:         channelResult.hostIPv4,
+						PodIP:          podIPv4,
+						HostIP:         hostIPv4,
 						OK:             &OK,
 						Error:          err.Error(),
 						StatusCode:     504,
