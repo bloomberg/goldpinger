@@ -16,6 +16,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/go-openapi/loads"
 	"go.uber.org/zap"
@@ -35,7 +36,16 @@ var (
 )
 
 func getLogger() *zap.Logger {
-	logger, err := zap.NewProduction()
+	var logger *zap.Logger
+	var err error
+
+	// We haven't parsed flags at this stage and that might be error prone
+	// so just use an envvar
+	if debug, err := strconv.ParseBool(os.Getenv("DEBUG")); err == nil && debug {
+		logger, err = zap.NewDevelopment()
+	} else {
+		logger, err = zap.NewProduction()
+	}
 	if err != nil {
 		panic(err)
 	}
