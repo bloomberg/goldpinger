@@ -16,12 +16,12 @@ package goldpinger
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/bloomberg/goldpinger/v3/pkg/models"
 	"github.com/go-openapi/strfmt"
 	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/zap"
 )
 
 var (
@@ -104,7 +104,7 @@ func init() {
 	prometheus.MustRegister(goldpingerResponseTimeKubernetesHistogram)
 	prometheus.MustRegister(goldpingerErrorsCounter)
 	prometheus.MustRegister(goldpingerDnsErrorsCounter)
-	log.Println("Metrics setup - see /metrics")
+	zap.L().Info("Metrics setup - see /metrics")
 }
 
 func GetStats(ctx context.Context) *models.PingResults {
