@@ -248,15 +248,19 @@ var main = function(timeout){
                 var edges = [];
                 var resp = data.responses;
                 for (let callId in resp) {
-                        var call = resp[callId].response['podResults'];
-                        if (typeof call !== 'string'){
-                                for (let target in call) {
-                                        edges.push({
-                                                source: callId,
-                                                target: target,
-                                                _data: call[target]
-                                        });
-                                };
+                        // If there was an error, the response can be undefined,
+                        // especially if there was a timeout/context exceeded
+                        if (resp[callId].response !== undefined) {
+                                var call = resp[callId].response['podResults'];
+                                if (typeof call !== 'string'){
+                                        for (let target in call) {
+                                                edges.push({
+                                                        source: callId,
+                                                        target: target,
+                                                        _data: call[target]
+                                                });
+                                        };
+                                }
                         }
                 };
 
@@ -480,6 +484,3 @@ $("#update-heatmap").click(function (e) {
 </script>
 </body>
 </html>
-
-
-
