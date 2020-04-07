@@ -1,5 +1,5 @@
 name ?= goldpinger
-version ?= v2.1.0
+version ?= v3.0.0
 bin ?= goldpinger
 pkg ?= "github.com/bloomberg/goldpinger"
 tag = $(name):$(version)
@@ -19,6 +19,7 @@ vendor:
 	rm -rf ./vendor
 	go mod vendor
 
+# Download the latest swagger releases from: https://github.com/go-swagger/go-swagger/releases/
 swagger:
 	swagger generate server -t pkg -f ./swagger.yml --exclude-main -A goldpinger && \
 	swagger generate client -t pkg -f ./swagger.yml -A goldpinger

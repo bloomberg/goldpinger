@@ -1,4 +1,4 @@
-module github.com/bloomberg/goldpinger
+module github.com/bloomberg/goldpinger/v3
 
 go 1.14
 
@@ -36,14 +36,12 @@ require (
 	github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d // indirect
 	github.com/spf13/pflag v1.0.1 // indirect
 	github.com/stuartnelson3/go-rendezvous v0.2.0
-	golang.org/x/crypto v0.0.0-20180808211826-de0752318171 // indirect
+	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
 	golang.org/x/image v0.0.0-20190220214146-31aff87c08e9
-	golang.org/x/net v0.0.0-20181106065722-10aee1819953
-	golang.org/x/oauth2 v0.0.0-20170412232759-a6bd8cefa181 // indirect
+	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
-	golang.org/x/sys v0.0.0-20181106073832-7155702f2d47 // indirect
 	golang.org/x/time v0.0.0-20161028155119-f51c12702a4d // indirect
-	google.golang.org/appengine v1.3.0 // indirect
 	gopkg.in/inf.v0 v0.9.0 // indirect
 	k8s.io/api v0.0.0-20181004124137-fd83cbc87e76 // indirect
 	k8s.io/apimachinery v0.0.0-20180913025736-6dd46049f395

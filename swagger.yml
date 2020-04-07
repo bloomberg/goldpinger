@@ -1,8 +1,8 @@
 ---
 swagger: '2.0'
 info:
-  version: 2.0.0
-  title: Goldpinger 
+  version: 3.0.0
+  title: Goldpinger
 definitions:
   CallStats:
     properties:
@@ -37,6 +37,9 @@ definitions:
       OK:
         type: boolean
         default: false
+      PodIP:
+        type: string
+        format: ipv4
       HostIP:
         type: string
         format: ipv4
@@ -66,6 +69,9 @@ definitions:
       OK:
         type: boolean
         default: false
+      PodIP:
+        type: string
+        format: ipv4
       HostIP:
         type: string
         format: ipv4
@@ -83,16 +89,18 @@ definitions:
         type: boolean
         default: false
       hosts-healthy:
-        type: integer 
+        type: integer
         format: int32
       hosts-number:
-        type: integer 
+        type: integer
         format: int32
       hosts:
         type: array
         items:
           type: object
           properties:
+            podName:
+              type: string
             hostIP:
               type: string
               format: ipv4
@@ -124,8 +132,8 @@ paths:
     get:
       description: return query stats
       produces:
-        - application/json 
-      operationId: ping 
+        - application/json
+      operationId: ping
       responses:
         200:
           description: return success
@@ -136,11 +144,11 @@ paths:
       description: Queries the API server for all other pods in this service,
                    and pings them via their pods IPs. Calls their /ping endpoint
       produces:
-        - application/json 
-      operationId: checkServicePods 
+        - application/json
+      operationId: checkServicePods
       responses:
         200:
-          description: Success, return response 
+          description: Success, return response
           schema:
             $ref: '#/definitions/CheckResults'
   /check_all:
@@ -149,11 +157,11 @@ paths:
                    and makes all of them query all of their neighbours,
                    using their pods IPs. Calls their /check endpoint.
       produces:
-        - application/json 
-      operationId: checkAllPods 
+        - application/json
+      operationId: checkAllPods
       responses:
         200:
-          description: Success, return response 
+          description: Success, return response
           schema:
             $ref: '#/definitions/CheckAllResults'
   /healthz:

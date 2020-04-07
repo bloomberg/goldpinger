@@ -25,12 +25,12 @@ var GoldpingerConfig = struct {
 	RefreshInterval  int    `long:"refresh-interval" description:"If > 0, will create a thread and collect stats every n seconds" env:"REFRESH_INTERVAL" default:"30"`
 	Hostname         string `long:"hostname" description:"Hostname to use" env:"HOSTNAME"`
 	PodIP            string `long:"pod-ip" description:"Pod IP to use" env:"POD_IP"`
+	PodName          string `long:"pod-name" description:"The name of this pod - used to select --ping-number of pods using rendezvous hashing" env:"POD_NAME"`
 	PingNumber       uint   `long:"ping-number" description:"Number of peers to ping. A value of 0 indicates all peers should be pinged." default:"0" env:"PING_NUMBER"`
 	Port             int    `long:"client-port-override" description:"(for testing) use this port when calling other instances" env:"CLIENT_PORT_OVERRIDE"`
 	UseHostIP        bool   `long:"use-host-ip" description:"When making the calls, use host ip (defaults to pod ip)" env:"USE_HOST_IP"`
 	LabelSelector    string `long:"label-selector" description:"label selector to use to discover goldpinger pods in the cluster" env:"LABEL_SELECTOR" default:"app=goldpinger"`
 	KubernetesClient *kubernetes.Clientset
-	*PodSelecter
 
-	DnsHosts         []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
+	DnsHosts []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
 }{}

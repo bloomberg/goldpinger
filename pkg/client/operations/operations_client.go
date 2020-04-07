@@ -6,13 +6,14 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"github.com/go-openapi/runtime"
+	"fmt"
 
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new operations API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -24,8 +25,21 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientService is the interface for Client methods
+type ClientService interface {
+	CheckAllPods(params *CheckAllPodsParams) (*CheckAllPodsOK, error)
+
+	CheckServicePods(params *CheckServicePodsParams) (*CheckServicePodsOK, error)
+
+	Healthz(params *HealthzParams) (*HealthzOK, error)
+
+	Ping(params *PingParams) (*PingOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
 /*
-CheckAllPods Queries the API server for all other pods in this service, and makes all of them query all of their neighbours, using their pods IPs. Calls their /check endpoint.
+  CheckAllPods Queries the API server for all other pods in this service, and makes all of them query all of their neighbours, using their pods IPs. Calls their /check endpoint.
 */
 func (a *Client) CheckAllPods(params *CheckAllPodsParams) (*CheckAllPodsOK, error) {
 	// TODO: Validate the params before sending
@@ -38,7 +52,7 @@ func (a *Client) CheckAllPods(params *CheckAllPodsParams) (*CheckAllPodsOK, erro
 		Method:             "GET",
 		PathPattern:        "/check_all",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &CheckAllPodsReader{formats: a.formats},
@@ -48,12 +62,18 @@ func (a *Client) CheckAllPods(params *CheckAllPodsParams) (*CheckAllPodsOK, erro
 	if err != nil {
 		return nil, err
 	}
-	return result.(*CheckAllPodsOK), nil
-
+	success, ok := result.(*CheckAllPodsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for checkAllPods: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
-CheckServicePods Queries the API server for all other pods in this service, and pings them via their pods IPs. Calls their /ping endpoint
+  CheckServicePods Queries the API server for all other pods in this service, and pings them via their pods IPs. Calls their /ping endpoint
 */
 func (a *Client) CheckServicePods(params *CheckServicePodsParams) (*CheckServicePodsOK, error) {
 	// TODO: Validate the params before sending
@@ -66,7 +86,7 @@ func (a *Client) CheckServicePods(params *CheckServicePodsParams) (*CheckService
 		Method:             "GET",
 		PathPattern:        "/check",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &CheckServicePodsReader{formats: a.formats},
@@ -76,12 +96,18 @@ func (a *Client) CheckServicePods(params *CheckServicePodsParams) (*CheckService
 	if err != nil {
 		return nil, err
 	}
-	return result.(*CheckServicePodsOK), nil
-
+	success, ok := result.(*CheckServicePodsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for checkServicePods: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
-Healthz The healthcheck endpoint provides detailed information about the health of a web service. If each of the components required by the service are healthy, then the service is considered healthy and will return a 200 OK response. If any of the components needed by the service are unhealthy, then a 503 Service Unavailable response will be provided.
+  Healthz The healthcheck endpoint provides detailed information about the health of a web service. If each of the components required by the service are healthy, then the service is considered healthy and will return a 200 OK response. If any of the components needed by the service are unhealthy, then a 503 Service Unavailable response will be provided.
 */
 func (a *Client) Healthz(params *HealthzParams) (*HealthzOK, error) {
 	// TODO: Validate the params before sending
@@ -94,7 +120,7 @@ func (a *Client) Healthz(params *HealthzParams) (*HealthzOK, error) {
 		Method:             "GET",
 		PathPattern:        "/healthz",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &HealthzReader{formats: a.formats},
@@ -104,12 +130,18 @@ func (a *Client) Healthz(params *HealthzParams) (*HealthzOK, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result.(*HealthzOK), nil
-
+	success, ok := result.(*HealthzOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for healthz: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
-Ping return query stats
+  Ping return query stats
 */
 func (a *Client) Ping(params *PingParams) (*PingOK, error) {
 	// TODO: Validate the params before sending
@@ -122,7 +154,7 @@ func (a *Client) Ping(params *PingParams) (*PingOK, error) {
 		Method:             "GET",
 		PathPattern:        "/ping",
 		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{""},
+		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
 		Reader:             &PingReader{formats: a.formats},
@@ -132,8 +164,14 @@ func (a *Client) Ping(params *PingParams) (*PingOK, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PingOK), nil
-
+	success, ok := result.(*PingOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for ping: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

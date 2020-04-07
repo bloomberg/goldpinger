@@ -19,43 +19,22 @@ import (
 	rendezvous "github.com/stuartnelson3/go-rendezvous"
 )
 
-// PodSelecter selects the result of getPods() down to count instances
-// according to a rendezvous hash.
-type PodSelecter struct {
-	count   uint
-	podIP   string
-	getPods func() map[string]string
-}
-
-// NewPodSelecter creates a new PodSelecter struct.
-func NewPodSelecter(count uint, podIP string, getPods func() map[string]string) *PodSelecter {
-	if podIP == "" {
-		// If podIP is blank, then we can't use the rendezvous hash to
-		// assign the IP correctly. Setting count=0 will force all pods
-		// to be pinged.
-		count = 0
-	}
-	return &PodSelecter{
-		count:   count,
-		podIP:   podIP,
-		getPods: getPods,
-	}
-}
-
-// SelectPods returns a map of pods filtered according to its configuration.
-func (p *PodSelecter) SelectPods() map[string]string {
-	allPods := p.getPods()
-	if p.count == 0 || p.count >= uint(len(allPods)) {
+// SelectPods selects a set of pods from the results of GetAllPods
+// depending on the count according to a rendezvous hash
+func SelectPods() map[string]*GoldpingerPod {
+	allPods := GetAllPods()
+	if GoldpingerConfig.PingNumber <= 0 || int(GoldpingerConfig.PingNumber) >= len(allPods) {
 		return allPods
 	}
+
 	rzv := rendezvous.New([]string{}, rendezvous.Hasher(xxhash.Sum64String))
-	for podIP := range allPods {
-		rzv.Add(podIP)
+	for podName := range allPods {
+		rzv.Add(podName)
 	}
-	matches := rzv.LookupN(p.podIP, p.count)
-	toPing := make(map[string]string)
-	for _, podIP := range matches {
-		toPing[podIP] = allPods[podIP]
+	matches := rzv.LookupN(GoldpingerConfig.PodName, GoldpingerConfig.PingNumber)
+	toPing := make(map[string]*GoldpingerPod)
+	for _, podName := range matches {
+		toPing[podName] = allPods[podName]
 	}
 	return toPing
 }

@@ -21,7 +21,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "title": "Goldpinger",
-    "version": "2.0.0"
+    "version": "3.0.0"
   },
   "paths": {
     "/check": {
@@ -124,6 +124,10 @@ func init() {
           "type": "boolean",
           "default": false
         },
+        "PodIP": {
+          "type": "string",
+          "format": "ipv4"
+        },
         "error": {
           "type": "string"
         },
@@ -161,6 +165,9 @@ func init() {
               "podIP": {
                 "type": "string",
                 "format": "ipv4"
+              },
+              "podName": {
+                "type": "string"
               }
             }
           }
@@ -251,6 +258,10 @@ func init() {
         "OK": {
           "type": "boolean",
           "default": false
+        },
+        "PodIP": {
+          "type": "string",
+          "format": "ipv4"
         },
         "error": {
           "type": "string"
@@ -275,7 +286,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "title": "Goldpinger",
-    "version": "2.0.0"
+    "version": "3.0.0"
   },
   "paths": {
     "/check": {
@@ -378,6 +389,10 @@ func init() {
           "type": "boolean",
           "default": false
         },
+        "PodIP": {
+          "type": "string",
+          "format": "ipv4"
+        },
         "error": {
           "type": "string"
         },
@@ -406,17 +421,7 @@ func init() {
         "hosts": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "hostIP": {
-                "type": "string",
-                "format": "ipv4"
-              },
-              "podIP": {
-                "type": "string",
-                "format": "ipv4"
-              }
-            }
+            "$ref": "#/definitions/CheckAllResultsHostsItems0"
           }
         },
         "hosts-healthy": {
@@ -432,6 +437,22 @@ func init() {
           "additionalProperties": {
             "$ref": "#/definitions/CheckAllPodResult"
           }
+        }
+      }
+    },
+    "CheckAllResultsHostsItems0": {
+      "type": "object",
+      "properties": {
+        "hostIP": {
+          "type": "string",
+          "format": "ipv4"
+        },
+        "podIP": {
+          "type": "string",
+          "format": "ipv4"
+        },
+        "podName": {
+          "type": "string"
         }
       }
     },
@@ -505,6 +526,10 @@ func init() {
         "OK": {
           "type": "boolean",
           "default": false
+        },
+        "PodIP": {
+          "type": "string",
+          "format": "ipv4"
         },
         "error": {
           "type": "string"

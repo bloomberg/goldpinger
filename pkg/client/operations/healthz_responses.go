@@ -10,10 +10,9 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/bloomberg/goldpinger/pkg/models"
+	"github.com/bloomberg/goldpinger/v3/pkg/models"
 )
 
 // HealthzReader is a Reader for the Healthz structure.
@@ -24,14 +23,12 @@ type HealthzReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *HealthzReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewHealthzOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
 		return result, nil
-
 	case 503:
 		result := NewHealthzServiceUnavailable()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -61,6 +58,10 @@ func (o *HealthzOK) Error() string {
 	return fmt.Sprintf("[GET /healthz][%d] healthzOK  %+v", 200, o.Payload)
 }
 
+func (o *HealthzOK) GetPayload() *models.HealthCheckResults {
+	return o.Payload
+}
+
 func (o *HealthzOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.HealthCheckResults)
@@ -88,6 +89,10 @@ type HealthzServiceUnavailable struct {
 
 func (o *HealthzServiceUnavailable) Error() string {
 	return fmt.Sprintf("[GET /healthz][%d] healthzServiceUnavailable  %+v", 503, o.Payload)
+}
+
+func (o *HealthzServiceUnavailable) GetPayload() *models.HealthCheckResults {
+	return o.Payload
 }
 
 func (o *HealthzServiceUnavailable) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

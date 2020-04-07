@@ -29,7 +29,7 @@ func StartUpdater() {
 	// start the updater
 	go func() {
 		for {
-			results := PingAllPods(GoldpingerConfig.PodSelecter.SelectPods())
+			results := PingAllPods(SelectPods())
 			var troublemakers []string
 			for podIP, value := range results.PodResults {
 				if *value.OK != true {

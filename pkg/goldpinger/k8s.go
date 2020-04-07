@@ -15,10 +15,18 @@
 package goldpinger
 
 import (
-	"log"
 	"io/ioutil"
+	"log"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+// GoldpingerPod contains just the basic info needed to ping and keep track of a given goldpinger pod
+type GoldpingerPod struct {
+	Name   string // Name is the name of the pod
+	PodIP  string // PodIP is the IP address of the pod
+	HostIP string // HostIP is the IP address of the host where the pod lives
+}
 
 func getNamespace() string {
 	b, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
@@ -30,8 +38,8 @@ func getNamespace() string {
 	return namespace
 }
 
-// GetAllPods returns a map of Pod IP to Host IP based on a label selector defined in config
-func GetAllPods() map[string]string {
+// GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s)
+func GetAllPods() map[string]*GoldpingerPod {
 	timer := GetLabeledKubernetesCallsTimer()
 	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(getNamespace()).List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
 	if err != nil {
@@ -41,9 +49,13 @@ func GetAllPods() map[string]string {
 		timer.ObserveDuration()
 	}
 
-	var podsreturn = make(map[string]string)
+	var podMap = make(map[string]*GoldpingerPod)
 	for _, pod := range pods.Items {
-		podsreturn[pod.Status.PodIP] = pod.Status.HostIP
+		podMap[pod.Name] = &GoldpingerPod{
+			Name:   pod.Name,
+			PodIP:  pod.Status.PodIP,
+			HostIP: pod.Status.HostIP,
+		}
 	}
-	return podsreturn
+	return podMap
 }

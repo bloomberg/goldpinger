@@ -10,10 +10,9 @@ import (
 	"io"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/strfmt"
 
-	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/bloomberg/goldpinger/pkg/models"
+	"github.com/bloomberg/goldpinger/v3/pkg/models"
 )
 
 // PingReader is a Reader for the Ping structure.
@@ -24,7 +23,6 @@ type PingReader struct {
 // ReadResponse reads a server response into the received o.
 func (o *PingReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
-
 	case 200:
 		result := NewPingOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -52,6 +50,10 @@ type PingOK struct {
 
 func (o *PingOK) Error() string {
 	return fmt.Sprintf("[GET /ping][%d] pingOK  %+v", 200, o.Payload)
+}
+
+func (o *PingOK) GetPayload() *models.PingResults {
+	return o.Payload
 }
 
 func (o *PingOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

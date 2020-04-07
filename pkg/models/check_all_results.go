@@ -8,14 +8,14 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
 // CheckAllResults check all results
+//
 // swagger:model CheckAllResults
 type CheckAllResults struct {
 
@@ -145,6 +145,7 @@ func (m *CheckAllResults) UnmarshalBinary(b []byte) error {
 }
 
 // CheckAllResultsHostsItems0 check all results hosts items0
+//
 // swagger:model CheckAllResultsHostsItems0
 type CheckAllResultsHostsItems0 struct {
 
@@ -155,6 +156,9 @@ type CheckAllResultsHostsItems0 struct {
 	// pod IP
 	// Format: ipv4
 	PodIP strfmt.IPv4 `json:"podIP,omitempty"`
+
+	// pod name
+	PodName string `json:"podName,omitempty"`
 }
 
 // Validate validates this check all results hosts items0
