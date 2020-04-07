@@ -45,6 +45,11 @@ func getLogger() *zap.Logger {
 
 func main() {
 	logger := getLogger()
+	defer logger.Sync()
+
+	undo := zap.RedirectStdLog(logger)
+	defer undo()
+
 	logger.Info("Goldpinger", zap.String("version", Version), zap.String("build", Build))
 
 	// load embedded swagger file
