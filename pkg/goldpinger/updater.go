@@ -15,6 +15,7 @@
 package goldpinger
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -26,10 +27,14 @@ func StartUpdater() {
 		return
 	}
 
+	updateInterval := time.Duration(GoldpingerConfig.RefreshInterval) * time.Second
+
 	// start the updater
 	go func() {
 		for {
-			results := PingAllPods(SelectPods())
+			ctx, cancel := context.WithTimeout(context.Background(), updateInterval)
+
+			results := PingAllPods(ctx, SelectPods())
 			var troublemakers []string
 			for podIP, value := range results.PodResults {
 				if *value.OK != true {
@@ -39,7 +44,9 @@ func StartUpdater() {
 			if len(troublemakers) > 0 {
 				log.Println("Updater ran into trouble with these peers: ", troublemakers)
 			}
-			time.Sleep(time.Duration(GoldpingerConfig.RefreshInterval) * time.Second)
+
+			cancel()
+			time.Sleep(updateInterval)
 		}
 	}()
 }

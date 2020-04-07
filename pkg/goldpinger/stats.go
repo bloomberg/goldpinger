@@ -15,6 +15,7 @@
 package goldpinger
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -106,7 +107,7 @@ func init() {
 	log.Println("Metrics setup - see /metrics")
 }
 
-func GetStats() *models.PingResults {
+func GetStats(ctx context.Context) *models.PingResults {
 	// GetStats no longer populates the received and made calls - use metrics for that instead
 	return &models.PingResults{
 		BootTime: strfmt.DateTime(bootTime),

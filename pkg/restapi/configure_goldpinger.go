@@ -17,9 +17,11 @@
 package restapi
 
 import (
+	"context"
 	"crypto/tls"
 	"log"
 	"net/http"
+	"time"
 
 	"strings"
 
@@ -55,19 +57,40 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 	api.PingHandler = operations.PingHandlerFunc(
 		func(params operations.PingParams) middleware.Responder {
 			goldpinger.CountCall("received", "ping")
-			return operations.NewPingOK().WithPayload(goldpinger.GetStats())
+
+			ctx, cancel := context.WithTimeout(
+				params.HTTPRequest.Context(),
+				time.Duration(goldpinger.GoldpingerConfig.PingTimeoutMs)*time.Millisecond,
+			)
+			defer cancel()
+
+			return operations.NewPingOK().WithPayload(goldpinger.GetStats(ctx))
 		})
 
 	api.CheckServicePodsHandler = operations.CheckServicePodsHandlerFunc(
 		func(params operations.CheckServicePodsParams) middleware.Responder {
 			goldpinger.CountCall("received", "check")
-			return operations.NewCheckServicePodsOK().WithPayload(goldpinger.CheckNeighbours())
+
+			ctx, cancel := context.WithTimeout(
+				params.HTTPRequest.Context(),
+				time.Duration(goldpinger.GoldpingerConfig.CheckTimeoutMs)*time.Millisecond,
+			)
+			defer cancel()
+
+			return operations.NewCheckServicePodsOK().WithPayload(goldpinger.CheckNeighbours(ctx))
 		})
 
 	api.CheckAllPodsHandler = operations.CheckAllPodsHandlerFunc(
 		func(params operations.CheckAllPodsParams) middleware.Responder {
 			goldpinger.CountCall("received", "check_all")
-			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours())
+
+			ctx, cancel := context.WithTimeout(
+				params.HTTPRequest.Context(),
+				time.Duration(goldpinger.GoldpingerConfig.CheckAllTimeoutMs)*time.Millisecond,
+			)
+			defer cancel()
+
+			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours(ctx))
 		})
 
 	api.HealthzHandler = operations.HealthzHandlerFunc(
