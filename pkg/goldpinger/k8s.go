@@ -16,10 +16,13 @@ package goldpinger
 
 import (
 	"io/ioutil"
-	"log"
 
+	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+// namespace is the namespace for the goldpinger pod
+var namespace = getNamespace()
 
 // GoldpingerPod contains just the basic info needed to ping and keep track of a given goldpinger pod
 type GoldpingerPod struct {
@@ -31,7 +34,7 @@ type GoldpingerPod struct {
 func getNamespace() string {
 	b, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 	if err != nil {
-		log.Println("Unable to determine namespace: ", err.Error())
+		zap.L().Warn("Unable to determine namespace", zap.Error(err))
 		return ""
 	}
 	namespace := string(b)
@@ -41,9 +44,9 @@ func getNamespace() string {
 // GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s)
 func GetAllPods() map[string]*GoldpingerPod {
 	timer := GetLabeledKubernetesCallsTimer()
-	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(getNamespace()).List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
+	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
 	if err != nil {
-		log.Println("Error getting pods for selector: ", err.Error())
+		zap.L().Error("Error getting pods for selector", zap.String("selector", GoldpingerConfig.LabelSelector), zap.Error(err))
 		CountError("kubernetes_api")
 	} else {
 		timer.ObserveDuration()

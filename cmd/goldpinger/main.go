@@ -15,10 +15,11 @@
 package main
 
 import (
-	"log"
 	"os"
+	"strconv"
 
 	"github.com/go-openapi/loads"
+	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -34,14 +35,37 @@ var (
 	Version, Build string
 )
 
-func main() {
+func getLogger() *zap.Logger {
+	var logger *zap.Logger
+	var err error
 
-	log.Println("Goldpinger version:", Version, "build:", Build)
+	// We haven't parsed flags at this stage and that might be error prone
+	// so just use an envvar
+	if debug, err := strconv.ParseBool(os.Getenv("DEBUG")); err == nil && debug {
+		logger, err = zap.NewDevelopment()
+	} else {
+		logger, err = zap.NewProduction()
+	}
+	if err != nil {
+		panic(err)
+	}
+	zap.ReplaceGlobals(logger)
+	return logger
+}
+
+func main() {
+	logger := getLogger()
+	defer logger.Sync()
+
+	undo := zap.RedirectStdLog(logger)
+	defer undo()
+
+	logger.Info("Goldpinger", zap.String("version", Version), zap.String("build", Build))
 
 	// load embedded swagger file
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
-		log.Fatalln(err)
+		logger.Error("Coud not parse swagger", zap.Error(err))
 	}
 
 	// create new service API
@@ -58,7 +82,7 @@ func main() {
 	for _, optsGroup := range api.CommandLineOptionsGroups {
 		_, err := parser.AddGroup(optsGroup.ShortDescription, optsGroup.LongDescription, optsGroup.Options)
 		if err != nil {
-			log.Fatalln(err)
+			logger.Error("Coud not add flag group", zap.Error(err))
 		}
 	}
 
@@ -75,19 +99,19 @@ func main() {
 	// make a kubernetes client
 	var config *rest.Config
 	if goldpinger.GoldpingerConfig.KubeConfigPath == "" {
-		log.Println("Kubeconfig not specified, trying to use in cluster config")
+		logger.Info("Kubeconfig not specified, trying to use in cluster config")
 		config, err = rest.InClusterConfig()
 	} else {
-		log.Println("Kubeconfig specified in ", goldpinger.GoldpingerConfig.KubeConfigPath)
+		logger.Info("Kubeconfig specified", zap.String("path", goldpinger.GoldpingerConfig.KubeConfigPath))
 		config, err = clientcmd.BuildConfigFromFlags("", goldpinger.GoldpingerConfig.KubeConfigPath)
 	}
 	if err != nil {
-		log.Fatalln("Error getting config ", err.Error())
+		logger.Fatal("Error getting config ", zap.Error(err))
 	}
 	// create the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Fatalln("kubernetes.NewForConfig error ", err.Error())
+		logger.Fatal("kubernetes.NewForConfig error ", zap.Error(err))
 	}
 	goldpinger.GoldpingerConfig.KubernetesClient = clientset
 
@@ -97,19 +121,19 @@ func main() {
 	}
 
 	if goldpinger.GoldpingerConfig.PodIP == "" {
-		log.Println("PodIP not set: pinging all pods")
+		logger.Info("PodIP not set: pinging all pods")
 	}
 	if goldpinger.GoldpingerConfig.PingNumber == 0 {
-		log.Println("--ping-number set to 0: pinging all pods")
+		logger.Info("--ping-number set to 0: pinging all pods")
 	}
 
 	server.ConfigureAPI()
 	goldpinger.StartUpdater()
 
-	log.Println("All good, starting serving the API")
+	logger.Info("All good, starting serving the API")
 
 	// serve API
 	if err := server.Serve(); err != nil {
-		log.Fatalln(err)
+		logger.Fatal("Error serving the API", zap.Error(err))
 	}
 }

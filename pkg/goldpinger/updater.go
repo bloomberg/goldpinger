@@ -17,13 +17,14 @@ package goldpinger
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func StartUpdater() {
 	if GoldpingerConfig.RefreshInterval <= 0 {
-		log.Println("Not creating updater, period is 0")
+		zap.L().Info("Not creating updater, refresh interval is negative", zap.Int("RefreshInterval", GoldpingerConfig.RefreshInterval))
 		return
 	}
 
@@ -42,7 +43,7 @@ func StartUpdater() {
 				}
 			}
 			if len(troublemakers) > 0 {
-				log.Println("Updater ran into trouble with these peers: ", troublemakers)
+				zap.L().Warn("Updater ran into trouble with these peers", zap.Strings("troublemakers", troublemakers))
 			}
 
 			cancel()

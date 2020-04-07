@@ -23,12 +23,12 @@ import (
 	"image"
 	"image/color"
 	"image/png"
-	"log"
 	"net/http"
 	"sort"
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
@@ -143,12 +143,12 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 
 	buffer := new(bytes.Buffer)
 	if err := png.Encode(buffer, canvas); err != nil {
-		log.Println("error encoding png", err)
+		zap.L().Error("error encoding png", zap.Error(err))
 	}
 
 	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("Content-Length", strconv.Itoa(len(buffer.Bytes())))
 	if _, err := w.Write(buffer.Bytes()); err != nil {
-		log.Println("error writing heatmap buffer out", err)
+		zap.L().Error("error writing heatmap buffer out", zap.Error(err))
 	}
 }

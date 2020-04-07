@@ -19,7 +19,6 @@ package restapi
 import (
 	"context"
 	"crypto/tls"
-	"log"
 	"net/http"
 	"time"
 
@@ -28,6 +27,7 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"go.uber.org/zap"
 
 	"github.com/bloomberg/goldpinger/v3/pkg/goldpinger"
 	"github.com/bloomberg/goldpinger/v3/pkg/restapi/operations"
@@ -49,6 +49,7 @@ func configureFlags(api *operations.GoldpingerAPI) {
 
 func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 	// configure the api here
+	api.Logger = zap.S().Infof
 	api.ServeError = errors.ServeError
 
 	api.JSONConsumer = runtime.JSONConsumer()
@@ -128,7 +129,7 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 }
 
 func fileServerMiddleware(next http.Handler) http.Handler {
-	log.Println("Added the static middleware")
+	zap.L().Info("Added the static middleware")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fileServer := http.FileServer(http.Dir(goldpinger.GoldpingerConfig.StaticFilePath))
 		if r.URL.Path == "/" {
@@ -145,7 +146,7 @@ func fileServerMiddleware(next http.Handler) http.Handler {
 }
 
 func prometheusMetricsMiddleware(next http.Handler) http.Handler {
-	log.Println("Added the prometheus middleware")
+	zap.L().Info("Added the prometheus middleware")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/metrics" {
 			http.StripPrefix("/metrics", promhttp.Handler()).ServeHTTP(w, r)

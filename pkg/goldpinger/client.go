@@ -27,6 +27,7 @@ import (
 	"github.com/bloomberg/goldpinger/v3/pkg/models"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"go.uber.org/zap"
 )
 
 // CheckNeighbours queries the kubernetes API server for all other goldpinger pods
@@ -85,6 +86,13 @@ func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *mo
 
 		go func(pod *GoldpingerPod) {
 
+			logger := zap.L().With(
+				zap.String("op", "ping"),
+				zap.String("name", pod.Name),
+				zap.String("hostIP", pod.HostIP),
+				zap.String("podIP", pod.PodIP),
+			)
+
 			// metrics
 			CountCall("made", "ping")
 			timer := GetLabeledPeersCallsTimer("ping", pod.HostIP, pod.PodIP)
@@ -101,6 +109,7 @@ func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *mo
 			client, err := getClient(pickPodHostIP(pod.PodIP, pod.HostIP))
 
 			if err != nil {
+				logger.Warn("Couldn't get a client for Ping", zap.Error(err))
 				channelResult.podResult = models.PodResult{
 					PodIP:          channelResult.podIPv4,
 					HostIP:         channelResult.hostIPv4,
@@ -122,6 +131,7 @@ func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *mo
 				responseTime = time.Since(start).Nanoseconds() / int64(time.Millisecond)
 				OK = (err == nil)
 				if OK {
+					logger.Debug("Pink Ok", zap.Int64("responseTime", responseTime))
 					channelResult.podResult = models.PodResult{
 						PodIP:          channelResult.podIPv4,
 						HostIP:         channelResult.hostIPv4,
@@ -132,6 +142,7 @@ func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *mo
 					}
 					timer.ObserveDuration()
 				} else {
+					logger.Warn("Ping returned error", zap.Int64("responseTime", responseTime), zap.Error(err))
 					channelResult.podResult = models.PodResult{
 						PodIP:          channelResult.podIPv4,
 						HostIP:         channelResult.hostIPv4,
@@ -188,6 +199,14 @@ func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *
 
 		go func(pod *GoldpingerPod) {
 
+			// logger
+			logger := zap.L().With(
+				zap.String("op", "check"),
+				zap.String("name", pod.Name),
+				zap.String("hostIP", pod.HostIP),
+				zap.String("podIP", pod.PodIP),
+			)
+
 			// stats
 			CountCall("made", "check")
 			timer := GetLabeledPeersCallsTimer("check", pod.HostIP, pod.PodIP)
@@ -201,6 +220,7 @@ func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *
 			OK := false
 
 			if err != nil {
+				logger.Warn("Couldn't get a client for Check", zap.Error(err))
 				channelResult.checkAllPodResult = models.CheckAllPodResult{
 					OK:     &OK,
 					PodIP:  channelResult.podIPv4,
@@ -219,6 +239,7 @@ func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *
 				resp, err := client.Operations.CheckServicePods(params)
 				OK = (err == nil)
 				if OK {
+					logger.Debug("Check Ok")
 					channelResult.checkAllPodResult = models.CheckAllPodResult{
 						OK:       &OK,
 						PodIP:    channelResult.podIPv4,
@@ -227,6 +248,7 @@ func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *
 					}
 					timer.ObserveDuration()
 				} else {
+					logger.Warn("Check returned error", zap.Error(err))
 					channelResult.checkAllPodResult = models.CheckAllPodResult{
 						OK:     &OK,
 						PodIP:  channelResult.podIPv4,

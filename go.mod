@@ -36,6 +36,7 @@ require (
 	github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d // indirect
 	github.com/spf13/pflag v1.0.1 // indirect
 	github.com/stuartnelson3/go-rendezvous v0.2.0
+	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
 	golang.org/x/image v0.0.0-20190220214146-31aff87c08e9
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
