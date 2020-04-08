@@ -26,9 +26,6 @@ import (
 // checkResults holds the latest results of checking the pods
 var checkResults = models.CheckResults{PodResults: make(map[string]models.PodResult)}
 
-// counterHealthy is the number of healthy pods
-var counterHealthy = float64(0.0)
-
 // checkResultsMux controls concurrent access to checkResults
 var checkResultsMux = sync.Mutex{}
 
@@ -144,54 +141,40 @@ func destroyPingers(pingers map[string]*Pinger, deletedPods map[string]*Goldping
 	}
 }
 
-// updateCounters updates the value of health and unhealthy nodes as the results come in
-func updateCounters(podName string, result *models.PodResult) {
-	// Get the previous value of ok
-	old, oldExists := checkResults.PodResults[podName]
-	switch {
-	case result == nil:
-		// This pod was just deleted
-		// If the previous value seen was ok, decrement
-		// the counter
-		if oldExists && old.OK != nil && *old.OK {
-			counterHealthy--
-		}
-	case !oldExists || old.OK == nil:
-		// If there is no previous response, this is an initialization step for this pod name
-		// The default is unhealthy, so:
-		// - if this pod is healthy, increment the count
-		// - if this pod is unhealthy, do not touch the count
-		if *result.OK {
+// updateCounters updates the count of health and unhealthy nodes
+func updateCounters() {
+	checkResultsMux.Lock()
+	defer checkResultsMux.Unlock()
+
+	var counterHealthy float64
+	for _, result := range checkResults.PodResults {
+		if result.OK != nil && *result.OK {
 			counterHealthy++
 		}
-	case *old.OK == *result.OK:
-		// The old value is equal to the new value
-		// Do nothing!
-	case *result.OK:
-		// The value was previously false and just became true
-		// Increment the counter
-		counterHealthy++
-	default:
-		// The value was previously true and just became false
-		// Decrement the counter
-		counterHealthy--
 	}
 	CountHealthyUnhealthyNodes(counterHealthy, float64(len(checkResults.PodResults))-counterHealthy)
 }
 
 // collectResults simply reads results from the results channel and saves them in a map
 func collectResults(resultsChan <-chan PingAllPodsResult) {
-	for response := range resultsChan {
-		checkResultsMux.Lock()
-		if response.deleted {
-			updateCounters(response.podName, nil)
-			delete(checkResults.PodResults, response.podName)
-		} else {
-			result := response.podResult
-			updateCounters(response.podName, &result)
-			checkResults.PodResults[response.podName] = result
+	refreshPeriod := time.Duration(GoldpingerConfig.RefreshInterval) * time.Second
+	updateTicker := time.NewTicker(refreshPeriod)
+	for {
+		select {
+		case <-updateTicker.C:
+			// Every time our update ticker ticks, update the count of healthy/unhealthy nodes
+			updateCounters()
+		case response := <-resultsChan:
+			// On getting a ping response, if the pinger is not being deleted,
+			// simply save it for later
+			checkResultsMux.Lock()
+			if response.deleted {
+				delete(checkResults.PodResults, response.podName)
+			} else {
+				checkResults.PodResults[response.podName] = response.podResult
+			}
+			checkResultsMux.Unlock()
 		}
-		checkResultsMux.Unlock()
 	}
 }
 
