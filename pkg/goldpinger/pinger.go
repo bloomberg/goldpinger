@@ -86,6 +86,7 @@ func (p *Pinger) getClient() (*apiclient.Goldpinger, error) {
 		p.resultsChan <- PingAllPodsResult{
 			podName: p.pod.Name,
 			podResult: models.PodResult{
+				PingTime:       strfmt.DateTime(time.Now()),
 				PodIP:          p.podIPv4,
 				HostIP:         p.hostIPv4,
 				OK:             &OK,
@@ -124,6 +125,7 @@ func (p *Pinger) Ping() {
 		p.resultsChan <- PingAllPodsResult{
 			podName: p.pod.Name,
 			podResult: models.PodResult{
+				PingTime:       strfmt.DateTime(start),
 				PodIP:          p.podIPv4,
 				HostIP:         p.hostIPv4,
 				OK:             &OK,
@@ -137,6 +139,7 @@ func (p *Pinger) Ping() {
 		p.resultsChan <- PingAllPodsResult{
 			podName: p.pod.Name,
 			podResult: models.PodResult{
+				PingTime:       strfmt.DateTime(start),
 				PodIP:          p.podIPv4,
 				HostIP:         p.hostIPv4,
 				OK:             &OK,
