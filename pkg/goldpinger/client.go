@@ -33,7 +33,19 @@ import (
 // CheckNeighbours queries the kubernetes API server for all other goldpinger pods
 // then calls Ping() on each one
 func CheckNeighbours(ctx context.Context) *models.CheckResults {
-	return PingAllPods(ctx, SelectPods())
+	// Mux to prevent concurrent map address
+	checkResultsMux.Lock()
+	defer checkResultsMux.Unlock()
+
+	final := models.CheckResults{}
+	final.PodResults = make(map[string]models.PodResult)
+	for podName, podResult := range checkResults.PodResults {
+		final.PodResults[podName] = podResult
+	}
+	if len(GoldpingerConfig.DnsHosts) > 0 {
+		final.DNSResults = *checkDNS()
+	}
+	return &final
 }
 
 // CheckNeighboursNeighbours queries the kubernetes API server for all other goldpinger
@@ -45,8 +57,7 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 type PingAllPodsResult struct {
 	podName   string
 	podResult models.PodResult
-	hostIPv4  strfmt.IPv4
-	podIPv4   strfmt.IPv4
+	deleted   bool
 }
 
 func pickPodHostIP(podIP, hostIP string) string {
@@ -72,112 +83,6 @@ func checkDNS() *models.DNSResults {
 		results[host] = dnsResult
 	}
 	return &results
-}
-
-func PingAllPods(pingAllCtx context.Context, pods map[string]*GoldpingerPod) *models.CheckResults {
-
-	result := models.CheckResults{}
-
-	ch := make(chan PingAllPodsResult, len(pods))
-	wg := sync.WaitGroup{}
-	wg.Add(len(pods))
-
-	for _, pod := range pods {
-
-		go func(pod *GoldpingerPod) {
-
-			logger := zap.L().With(
-				zap.String("op", "ping"),
-				zap.String("name", pod.Name),
-				zap.String("hostIP", pod.HostIP),
-				zap.String("podIP", pod.PodIP),
-			)
-
-			// metrics
-			CountCall("made", "ping")
-			timer := GetLabeledPeersCallsTimer("ping", pod.HostIP, pod.PodIP)
-			start := time.Now()
-
-			// setup
-			var channelResult PingAllPodsResult
-			channelResult.podName = pod.Name
-			channelResult.hostIPv4.UnmarshalText([]byte(pod.HostIP))
-			channelResult.podIPv4.UnmarshalText([]byte(pod.PodIP))
-
-			OK := false
-			var responseTime int64
-			client, err := getClient(pickPodHostIP(pod.PodIP, pod.HostIP))
-
-			if err != nil {
-				logger.Warn("Couldn't get a client for Ping", zap.Error(err))
-				channelResult.podResult = models.PodResult{
-					PodIP:          channelResult.podIPv4,
-					HostIP:         channelResult.hostIPv4,
-					OK:             &OK,
-					Error:          err.Error(),
-					StatusCode:     500,
-					ResponseTimeMs: responseTime,
-				}
-				CountError("ping")
-			} else {
-				pingCtx, cancel := context.WithTimeout(
-					pingAllCtx,
-					time.Duration(GoldpingerConfig.PingTimeoutMs)*time.Millisecond,
-				)
-				defer cancel()
-
-				params := operations.NewPingParamsWithContext(pingCtx)
-				resp, err := client.Operations.Ping(params)
-				responseTime = time.Since(start).Nanoseconds() / int64(time.Millisecond)
-				OK = (err == nil)
-				if OK {
-					logger.Debug("Pink Ok", zap.Int64("responseTime", responseTime))
-					channelResult.podResult = models.PodResult{
-						PodIP:          channelResult.podIPv4,
-						HostIP:         channelResult.hostIPv4,
-						OK:             &OK,
-						Response:       resp.Payload,
-						StatusCode:     200,
-						ResponseTimeMs: responseTime,
-					}
-					timer.ObserveDuration()
-				} else {
-					logger.Warn("Ping returned error", zap.Int64("responseTime", responseTime), zap.Error(err))
-					channelResult.podResult = models.PodResult{
-						PodIP:          channelResult.podIPv4,
-						HostIP:         channelResult.hostIPv4,
-						OK:             &OK,
-						Error:          err.Error(),
-						StatusCode:     504,
-						ResponseTimeMs: responseTime,
-					}
-					CountError("ping")
-				}
-			}
-
-			ch <- channelResult
-			wg.Done()
-		}(pod)
-	}
-	if len(GoldpingerConfig.DnsHosts) > 0 {
-		result.DNSResults = *checkDNS()
-	}
-	wg.Wait()
-	close(ch)
-
-	counterHealthy, counterUnhealthy := 0.0, 0.0
-
-	result.PodResults = make(map[string]models.PodResult)
-	for response := range ch {
-		if *response.podResult.OK {
-			counterHealthy++
-		} else {
-			counterUnhealthy++
-		}
-		result.PodResults[response.podName] = response.podResult
-	}
-	CountHealthyUnhealthyNodes(counterHealthy, counterUnhealthy)
-	return &result
 }
 
 type CheckServicePodsResult struct {

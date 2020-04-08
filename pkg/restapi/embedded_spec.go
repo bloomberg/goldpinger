@@ -259,6 +259,10 @@ func init() {
           "type": "boolean",
           "default": false
         },
+        "PingTime": {
+          "type": "string",
+          "format": "date-time"
+        },
         "PodIP": {
           "type": "string",
           "format": "ipv4"
@@ -526,6 +530,10 @@ func init() {
         "OK": {
           "type": "boolean",
           "default": false
+        },
+        "PingTime": {
+          "type": "string",
+          "format": "date-time"
         },
         "PodIP": {
           "type": "string",

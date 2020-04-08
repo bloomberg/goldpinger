@@ -37,6 +37,9 @@ definitions:
       OK:
         type: boolean
         default: false
+      PingTime:
+        format: date-time
+        type: string
       PodIP:
         type: string
         format: ipv4
