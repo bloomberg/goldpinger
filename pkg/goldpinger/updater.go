@@ -182,6 +182,7 @@ func updateCounters(podName string, result *models.PodResult) {
 // collectResults simply reads results from the results channel and saves them in a map
 func collectResults(resultsChan <-chan PingAllPodsResult) {
 	for response := range resultsChan {
+		checkResultsMux.Lock()
 		if response.deleted {
 			updateCounters(response.podName, nil)
 			delete(checkResults.PodResults, response.podName)
@@ -190,6 +191,7 @@ func collectResults(resultsChan <-chan PingAllPodsResult) {
 			updateCounters(response.podName, &result)
 			checkResults.PodResults[response.podName] = result
 		}
+		checkResultsMux.Unlock()
 	}
 }
 
