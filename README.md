@@ -159,7 +159,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-          image: "docker.io/bloomberg/goldpinger:2.0.2"
+          image: "docker.io/bloomberg/goldpinger:v3.0.0"
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
