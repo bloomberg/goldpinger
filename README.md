@@ -1,4 +1,6 @@
-# Goldpinger [![Build Status](https://travis-ci.com/bloomberg/goldpinger.svg?branch=master)](https://travis-ci.com/bloomberg/goldpinger)
+# Goldpinger
+
+[![Build Status](https://travis-ci.com/bloomberg/goldpinger.svg?branch=master)](https://travis-ci.com/bloomberg/goldpinger)
 
 __Goldpinger__ makes calls between its instances for visibility and alerting.
 It runs as a `DaemonSet` on `Kubernetes` and produces `Prometheus` metrics that can be scraped, visualised and alerted on.
@@ -8,9 +10,11 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 ![](./extras/screenshot.png)
 
 
+[:party: 1M+ pulls!](https://hub.docker.com/r/bloomberg/goldpinger/tags)
+
 ## On the menu
 
-- [Goldpinger ![Build Status](https://travis-ci.com/bloomberg/goldpinger)](#goldpinger-build-statushttpstravis-cicombloomberggoldpinger)
+- [Goldpinger](#goldpinger)
   - [On the menu](#on-the-menu)
   - [Rationale](#rationale)
   - [Quick start](#quick-start)
@@ -52,7 +56,7 @@ Getting from [docker hub](https://hub.docker.com/r/bloomberg/goldpinger):
 
 ```sh
 # get from docker hub
-docker pull bloomberg/goldpinger
+docker pull bloomberg/goldpinger:v3.0.0
 ```
 
 ## Building
