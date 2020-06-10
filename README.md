@@ -31,6 +31,8 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
     - [Prometheus](#prometheus)
     - [Grafana](#grafana)
     - [Alert Manager](#alert-manager)
+    - [Chaos Engineering](#chaos-engineering)
+  - [Authors](#authors)
   - [Contributions](#contributions)
   - [License](#license)
 
@@ -303,6 +305,15 @@ annotations:
 ```
 
 Similarly, why not :heart: contribute some amazing alerts for others to use ?
+
+### Chaos Engineering
+
+Goldpinger also makes for a pretty good monitoring tool in when practicing Chaos Engineering. Check out [PowerfulSeal](https://github.com/bloomberg/powerfulseal), if you'd like to do some Chaos Engineering for Kubernetes.
+
+## Authors
+
+Goldpinger was created by [Mikolaj Pawlikowski](https://github.com/seeker89) and ported to Go by Chris Green.
+
 
 ## Contributions
 
