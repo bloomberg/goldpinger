@@ -10,7 +10,7 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 ![](./extras/screenshot.png)
 
 
-[:party: 1M+ pulls!](https://hub.docker.com/r/bloomberg/goldpinger/tags)
+[:tada: 1M+ pulls from docker hub!](https://hub.docker.com/r/bloomberg/goldpinger/tags)
 
 ## On the menu
 
