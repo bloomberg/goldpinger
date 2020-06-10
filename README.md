@@ -40,7 +40,7 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 
 We built __Goldpinger__ to troubleshoot, visualise and alert on our networking layer while adopting `Kubernetes` at Bloomberg. It has since become the go-to tool to see connectivity and slowness issues.
 
-It's small, simple and you'll wonder why you hadn't had it before.
+It's small (~16MB), simple and you'll wonder why you hadn't had it before.
 
 If you'd like to know more, you can watch [our presentation at Kubecon 2018 Seattle](https://youtu.be/DSFxRz_0TU4).
 
