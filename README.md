@@ -1,16 +1,20 @@
-# Goldpinger [![Build Status](https://travis-ci.com/bloomberg/goldpinger.svg?branch=master)](https://travis-ci.com/bloomberg/goldpinger)
+# Goldpinger
 
-__Goldpinger__ makes calls between its instances for visibility and alerting.
-It runs as a `DaemonSet` on `Kubernetes` and produces `Prometheus` metrics that can be scraped, visualised and alerted on.
+[![Build Status](https://travis-ci.com/bloomberg/goldpinger.svg?branch=master)](https://travis-ci.com/bloomberg/goldpinger)
+
+__Goldpinger__ makes calls between its instances to monitor your networking.
+It runs as a [`DaemonSet`](#example-yaml) on `Kubernetes` and produces `Prometheus` metrics that can be [scraped](#prometheus), [visualised](#grafana) and [alerted](#alert-manager) on.
 
 Oh, and it gives you the graph below for your cluster. Check out the [video explainer](https://youtu.be/DSFxRz_0TU4).
 
 ![](./extras/screenshot.png)
 
 
+[:tada: 1M+ pulls from docker hub!](https://hub.docker.com/r/bloomberg/goldpinger/tags)
+
 ## On the menu
 
-- [Goldpinger ![Build Status](https://travis-ci.com/bloomberg/goldpinger)](#goldpinger-build-statushttpstravis-cicombloomberggoldpinger)
+- [Goldpinger](#goldpinger)
   - [On the menu](#on-the-menu)
   - [Rationale](#rationale)
   - [Quick start](#quick-start)
@@ -27,6 +31,8 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
     - [Prometheus](#prometheus)
     - [Grafana](#grafana)
     - [Alert Manager](#alert-manager)
+    - [Chaos Engineering](#chaos-engineering)
+  - [Authors](#authors)
   - [Contributions](#contributions)
   - [License](#license)
 
@@ -34,7 +40,7 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 
 We built __Goldpinger__ to troubleshoot, visualise and alert on our networking layer while adopting `Kubernetes` at Bloomberg. It has since become the go-to tool to see connectivity and slowness issues.
 
-It's small, simple and you'll wonder why you hadn't had it before.
+It's small (~16MB), simple and you'll wonder why you hadn't had it before.
 
 If you'd like to know more, you can watch [our presentation at Kubecon 2018 Seattle](https://youtu.be/DSFxRz_0TU4).
 
@@ -52,7 +58,7 @@ Getting from [docker hub](https://hub.docker.com/r/bloomberg/goldpinger):
 
 ```sh
 # get from docker hub
-docker pull bloomberg/goldpinger
+docker pull bloomberg/goldpinger:v3.0.0
 ```
 
 ## Building
@@ -299,6 +305,15 @@ annotations:
 ```
 
 Similarly, why not :heart: contribute some amazing alerts for others to use ?
+
+### Chaos Engineering
+
+Goldpinger also makes for a pretty good monitoring tool in when practicing Chaos Engineering. Check out [PowerfulSeal](https://github.com/bloomberg/powerfulseal), if you'd like to do some Chaos Engineering for Kubernetes.
+
+## Authors
+
+Goldpinger was created by [Mikolaj Pawlikowski](https://github.com/seeker89) and ported to Go by Chris Green.
+
 
 ## Contributions
 
