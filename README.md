@@ -9,7 +9,6 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
 
 ![](./extras/screenshot.png)
 
-
 [:tada: 1M+ pulls from docker hub!](https://hub.docker.com/r/bloomberg/goldpinger/tags)
 
 ## On the menu
@@ -43,7 +42,6 @@ We built __Goldpinger__ to troubleshoot, visualise and alert on our networking l
 It's small (~16MB), simple and you'll wonder why you hadn't had it before.
 
 If you'd like to know more, you can watch [our presentation at Kubecon 2018 Seattle](https://youtu.be/DSFxRz_0TU4).
-
 
 ## Quick start
 
@@ -114,10 +112,14 @@ namespace="docker.io/myhandle/" make push
 
 ### Example YAML
 
-
 Here's an example of what you can do (using the in-cluster authentication to `Kubernetes` apiserver).
 
 ```yaml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: goldpinger-serviceaccount
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -140,7 +142,7 @@ spec:
       labels:
         app: goldpinger
     spec:
-      serviceAccount: "goldpinger-serviceaccount"
+      serviceAccount: goldpinger-serviceaccount
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
@@ -223,7 +225,7 @@ roleRef:
   name: view
 subjects:
   - kind: ServiceAccount
-    name: default
+    name: goldpinger-serviceaccount
     namespace: default
 ```
 
