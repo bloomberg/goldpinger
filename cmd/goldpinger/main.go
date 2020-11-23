@@ -96,6 +96,12 @@ func main() {
 		os.Exit(code)
 	}
 
+	if goldpinger.GoldpingerConfig.Namespace == nil {
+		goldpinger.GoldpingerConfig.Namespace = &goldpinger.PodNamespace
+	} else {
+		logger.Info("Using configured namespace", zap.String("namespace", *goldpinger.GoldpingerConfig.Namespace))
+	}
+
 	// make a kubernetes client
 	var config *rest.Config
 	if goldpinger.GoldpingerConfig.KubeConfigPath == "" {
