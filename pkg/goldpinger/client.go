@@ -62,30 +62,29 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 	response := models.ClusterHealthResults{
 		GeneratedAt: strfmt.DateTime(start),
 	}
+	selectedPods := SelectPods()
+
+	// precompute the expected set of nodes
 	expectedNodes := []string{}
+	for _, peer := range selectedPods {
+		expectedNodes = append(expectedNodes, peer.HostIP)
+	}
+	sort.Strings(expectedNodes)
 
 	// get the response we serve for check_all
-	checkAll := CheckNeighboursNeighbours(ctx)
+	checkAll := CheckAllPods(ctx, selectedPods)
 
 	// 1. check that all nodes report OK
-	for node, resp := range checkAll.Responses {
+	for _, resp := range checkAll.Responses {
 		if *resp.OK {
-			response.NodesHealthy = append(response.NodesHealthy, node)
+			response.NodesHealthy = append(response.NodesHealthy, resp.HostIP.String())
 		} else {
-			response.NodesUnhealthy = append(response.NodesUnhealthy, node)
+			response.NodesUnhealthy = append(response.NodesUnhealthy, resp.HostIP.String())
 			response.OK = false
 		}
-		// pick the first node that has responses and fill it in with the peers it saw
-		if len(expectedNodes) == 0 {
-			for peer := range resp.Response.PodResults {
-				expectedNodes = append(expectedNodes, peer)
-			}
-			sort.Strings(expectedNodes)
-		}
-		// count the nodes reported by the instance
 		response.NodesTotal++
 	}
-	// 2. check that all nodes report the same peers
+	// 2. check that all nodes report the expected peers
 	if len(checkAll.Responses) < 1 {
 		response.OK = false
 	} else {
