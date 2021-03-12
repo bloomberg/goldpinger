@@ -89,6 +89,12 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 		response.OK = false
 	} else {
 		for _, resp := range checkAll.Responses {
+			// on error, there might be no response from the node
+			if resp.Response == nil {
+				response.OK = false
+				break
+			}
+			// if we get a response, let's check we get the expected nodes
 			observedNodes := []string{}
 			for peer := range resp.Response.PodResults {
 				observedNodes = append(observedNodes, peer)
