@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sort"
 	"sync"
 	"time"
 
@@ -55,10 +56,55 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 }
 
 // CheckCluster does a CheckNeighboursNeighbours and analyses results to produce a binary OK or not OK
-func CheckCluster(ctx context.Context) (bool, *models.ClusterHealthResults) {
+func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 
+	start := time.Now()
 	response := models.ClusterHealthResults{}
-	return true, &response
+	expectedNodes := []string{}
+
+	// get the response we serve for check_all
+	checkAll := CheckNeighboursNeighbours(ctx)
+
+	// 1. check that all nodes report OK
+	for node, resp := range checkAll.Responses {
+		if *resp.OK {
+			response.NodesHealthy = append(response.NodesHealthy, node)
+		} else {
+			response.NodesUnhealthy = append(response.NodesUnhealthy, node)
+			response.OK = false
+		}
+		// pick the first node that has responses and fill it in with the peers it saw
+		if len(expectedNodes) == 0 {
+			for peer := range resp.Response.PodResults {
+				expectedNodes = append(expectedNodes, peer)
+			}
+			sort.Strings(expectedNodes)
+		}
+	}
+	// 2. check that all nodes report the same peers
+	if len(checkAll.Responses) < 1 {
+		response.OK = false
+		return &response
+	}
+	for _, resp := range checkAll.Responses {
+		observedNodes := []string{}
+		for peer := range resp.Response.PodResults {
+			observedNodes = append(observedNodes, peer)
+		}
+		sort.Strings(observedNodes)
+		if len(observedNodes) != len(expectedNodes) {
+			response.OK = false
+			break
+		}
+		for i, val := range observedNodes {
+			if val != expectedNodes[i] {
+				response.OK = false
+				break
+			}
+		}
+	}
+	response.DurationNs = time.Since(start).Nanoseconds()
+	return &response
 }
 
 type PingAllPodsResult struct {
