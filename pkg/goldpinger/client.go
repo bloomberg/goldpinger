@@ -88,22 +88,22 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 	// 2. check that all nodes report the same peers
 	if len(checkAll.Responses) < 1 {
 		response.OK = false
-		return &response
-	}
-	for _, resp := range checkAll.Responses {
-		observedNodes := []string{}
-		for peer := range resp.Response.PodResults {
-			observedNodes = append(observedNodes, peer)
-		}
-		sort.Strings(observedNodes)
-		if len(observedNodes) != len(expectedNodes) {
-			response.OK = false
-			break
-		}
-		for i, val := range observedNodes {
-			if val != expectedNodes[i] {
+	} else {
+		for _, resp := range checkAll.Responses {
+			observedNodes := []string{}
+			for peer := range resp.Response.PodResults {
+				observedNodes = append(observedNodes, peer)
+			}
+			sort.Strings(observedNodes)
+			if len(observedNodes) != len(expectedNodes) {
 				response.OK = false
 				break
+			}
+			for i, val := range observedNodes {
+				if val != expectedNodes[i] {
+					response.OK = false
+					break
+				}
 			}
 		}
 	}
