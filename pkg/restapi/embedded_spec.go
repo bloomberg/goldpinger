@@ -249,13 +249,25 @@ func init() {
           "type": "string",
           "format": "date-time"
         },
-        "instancesHealthy": {
+        "hostsHealthy": {
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "instancesUnealthy": {
+        "hostsUnhealthy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "podsHealthy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "podsUnhealthy": {
           "type": "array",
           "items": {
             "type": "string"
@@ -582,13 +594,25 @@ func init() {
           "type": "string",
           "format": "date-time"
         },
-        "instancesHealthy": {
+        "hostsHealthy": {
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "instancesUnealthy": {
+        "hostsUnhealthy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "podsHealthy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "podsUnhealthy": {
           "type": "array",
           "items": {
             "type": "string"

@@ -33,11 +33,17 @@ type ClusterHealthResults struct {
 	// Format: date-time
 	GeneratedAt strfmt.DateTime `json:"generated-at,omitempty"`
 
-	// instances healthy
-	InstancesHealthy []string `json:"instancesHealthy"`
+	// hosts healthy
+	HostsHealthy []string `json:"hostsHealthy"`
 
-	// instances unealthy
-	InstancesUnealthy []string `json:"instancesUnealthy"`
+	// hosts unhealthy
+	HostsUnhealthy []string `json:"hostsUnhealthy"`
+
+	// pods healthy
+	PodsHealthy []string `json:"podsHealthy"`
+
+	// pods unhealthy
+	PodsUnhealthy []string `json:"podsUnhealthy"`
 }
 
 // Validate validates this cluster health results
