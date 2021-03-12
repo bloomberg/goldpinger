@@ -130,6 +130,32 @@ definitions:
       duration-ns:
         type: integer
         format: int64
+  ClusterHealthResults:
+    type: object
+    properties:
+      OK:
+        type: boolean
+        default: false
+      instancesHealthy:
+        type: array
+        items:
+          type: string
+      instancesUnealthy:
+        type: array
+        items:
+          type: string
+      DNS:
+        type: array
+        items:
+          type: string
+      generated-at:
+        type: string
+        format: date-time
+      duration-ns:
+        type: integer
+        format: int64
+    required:
+    - OK
 paths:
   /ping:
     get:
@@ -167,6 +193,21 @@ paths:
           description: Success, return response
           schema:
             $ref: '#/definitions/CheckAllResults'
+  /cluster_health:
+    get:
+      description: Checks the full graph. Returns a binary OK or not OK.
+      produces:
+        - application/json
+      operationId: clusterHealth
+      responses:
+        200:
+          description: Healthy cluster
+          schema:
+            $ref: '#/definitions/ClusterHealthResults'
+        503:
+          description: Unhealthy cluster
+          schema:
+            $ref: '#/definitions/ClusterHealthResults'
   /healthz:
     get:
       description:  The healthcheck endpoint provides detailed information about
