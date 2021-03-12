@@ -82,6 +82,8 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 			}
 			sort.Strings(expectedNodes)
 		}
+		// count the nodes reported by the instance
+		response.NodesTotal++
 	}
 	// 2. check that all nodes report the same peers
 	if len(checkAll.Responses) < 1 {
