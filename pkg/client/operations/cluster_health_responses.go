@@ -29,8 +29,8 @@ func (o *ClusterHealthReader) ReadResponse(response runtime.ClientResponse, cons
 			return nil, err
 		}
 		return result, nil
-	case 503:
-		result := NewClusterHealthServiceUnavailable()
+	case 418:
+		result := NewClusterHealthIMATeapot()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -72,27 +72,27 @@ func (o *ClusterHealthOK) readResponse(response runtime.ClientResponse, consumer
 	return nil
 }
 
-// NewClusterHealthServiceUnavailable creates a ClusterHealthServiceUnavailable with default headers values
-func NewClusterHealthServiceUnavailable() *ClusterHealthServiceUnavailable {
-	return &ClusterHealthServiceUnavailable{}
+// NewClusterHealthIMATeapot creates a ClusterHealthIMATeapot with default headers values
+func NewClusterHealthIMATeapot() *ClusterHealthIMATeapot {
+	return &ClusterHealthIMATeapot{}
 }
 
-/* ClusterHealthServiceUnavailable describes a response with status code 503, with default header values.
+/* ClusterHealthIMATeapot describes a response with status code 418, with default header values.
 
 Unhealthy cluster
 */
-type ClusterHealthServiceUnavailable struct {
+type ClusterHealthIMATeapot struct {
 	Payload *models.ClusterHealthResults
 }
 
-func (o *ClusterHealthServiceUnavailable) Error() string {
-	return fmt.Sprintf("[GET /cluster_health][%d] clusterHealthServiceUnavailable  %+v", 503, o.Payload)
+func (o *ClusterHealthIMATeapot) Error() string {
+	return fmt.Sprintf("[GET /cluster_health][%d] clusterHealthIMATeapot  %+v", 418, o.Payload)
 }
-func (o *ClusterHealthServiceUnavailable) GetPayload() *models.ClusterHealthResults {
+func (o *ClusterHealthIMATeapot) GetPayload() *models.ClusterHealthResults {
 	return o.Payload
 }
 
-func (o *ClusterHealthServiceUnavailable) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *ClusterHealthIMATeapot) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.ClusterHealthResults)
 

@@ -57,14 +57,14 @@ func (o *ClusterHealthOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	}
 }
 
-// ClusterHealthServiceUnavailableCode is the HTTP code returned for type ClusterHealthServiceUnavailable
-const ClusterHealthServiceUnavailableCode int = 503
+// ClusterHealthIMATeapotCode is the HTTP code returned for type ClusterHealthIMATeapot
+const ClusterHealthIMATeapotCode int = 418
 
-/*ClusterHealthServiceUnavailable Unhealthy cluster
+/*ClusterHealthIMATeapot Unhealthy cluster
 
-swagger:response clusterHealthServiceUnavailable
+swagger:response clusterHealthIMATeapot
 */
-type ClusterHealthServiceUnavailable struct {
+type ClusterHealthIMATeapot struct {
 
 	/*
 	  In: Body
@@ -72,27 +72,27 @@ type ClusterHealthServiceUnavailable struct {
 	Payload *models.ClusterHealthResults `json:"body,omitempty"`
 }
 
-// NewClusterHealthServiceUnavailable creates ClusterHealthServiceUnavailable with default headers values
-func NewClusterHealthServiceUnavailable() *ClusterHealthServiceUnavailable {
+// NewClusterHealthIMATeapot creates ClusterHealthIMATeapot with default headers values
+func NewClusterHealthIMATeapot() *ClusterHealthIMATeapot {
 
-	return &ClusterHealthServiceUnavailable{}
+	return &ClusterHealthIMATeapot{}
 }
 
-// WithPayload adds the payload to the cluster health service unavailable response
-func (o *ClusterHealthServiceUnavailable) WithPayload(payload *models.ClusterHealthResults) *ClusterHealthServiceUnavailable {
+// WithPayload adds the payload to the cluster health i m a teapot response
+func (o *ClusterHealthIMATeapot) WithPayload(payload *models.ClusterHealthResults) *ClusterHealthIMATeapot {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the cluster health service unavailable response
-func (o *ClusterHealthServiceUnavailable) SetPayload(payload *models.ClusterHealthResults) {
+// SetPayload sets the payload to the cluster health i m a teapot response
+func (o *ClusterHealthIMATeapot) SetPayload(payload *models.ClusterHealthResults) {
 	o.Payload = payload
 }
 
 // WriteResponse to the client
-func (o *ClusterHealthServiceUnavailable) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+func (o *ClusterHealthIMATeapot) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.WriteHeader(503)
+	rw.WriteHeader(418)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {

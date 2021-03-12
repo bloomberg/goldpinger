@@ -203,7 +203,7 @@ paths:
           description: Healthy cluster
           schema:
             $ref: '#/definitions/ClusterHealthResults'
-        503:
+        418:
           description: Unhealthy cluster
           schema:
             $ref: '#/definitions/ClusterHealthResults'

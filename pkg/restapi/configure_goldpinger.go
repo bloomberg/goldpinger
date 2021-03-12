@@ -108,7 +108,7 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 			if payload.OK {
 				return operations.NewClusterHealthOK().WithPayload(payload)
 			} else {
-				return operations.NewClusterHealthServiceUnavailable().WithPayload(payload)
+				return operations.NewClusterHealthIMATeapot().WithPayload(payload)
 			}
 		})
 

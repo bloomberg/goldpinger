@@ -72,7 +72,7 @@ func init() {
               "$ref": "#/definitions/ClusterHealthResults"
             }
           },
-          "503": {
+          "418": {
             "description": "Unhealthy cluster",
             "schema": {
               "$ref": "#/definitions/ClusterHealthResults"
@@ -400,7 +400,7 @@ func init() {
               "$ref": "#/definitions/ClusterHealthResults"
             }
           },
-          "503": {
+          "418": {
             "description": "Unhealthy cluster",
             "schema": {
               "$ref": "#/definitions/ClusterHealthResults"
