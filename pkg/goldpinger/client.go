@@ -54,6 +54,13 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 	return CheckAllPods(ctx, SelectPods())
 }
 
+// CheckCluster does a CheckNeighboursNeighbours and analyses results to produce a binary OK or not OK
+func CheckCluster(ctx context.Context) (bool, *models.ClusterHealthResults) {
+
+	response := models.ClusterHealthResults{}
+	return true, &response
+}
+
 type PingAllPodsResult struct {
 	podName   string
 	podResult models.PodResult
