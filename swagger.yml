@@ -136,11 +136,19 @@ definitions:
       OK:
         type: boolean
         default: false
-      instancesHealthy:
+      podsHealthy:
         type: array
         items:
           type: string
-      instancesUnealthy:
+      podsUnhealthy:
+        type: array
+        items:
+          type: string
+      hostsHealthy:
+        type: array
+        items:
+          type: string
+      hostsUnhealthy:
         type: array
         items:
           type: string
