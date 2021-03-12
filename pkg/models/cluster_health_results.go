@@ -19,9 +19,6 @@ import (
 // swagger:model ClusterHealthResults
 type ClusterHealthResults struct {
 
-	// DNS
-	DNS []string `json:"DNS"`
-
 	// o k
 	// Required: true
 	OK bool `json:"OK"`
@@ -33,17 +30,11 @@ type ClusterHealthResults struct {
 	// Format: date-time
 	GeneratedAt strfmt.DateTime `json:"generated-at,omitempty"`
 
-	// hosts healthy
-	HostsHealthy []string `json:"hostsHealthy"`
+	// nodes healthy
+	NodesHealthy []string `json:"nodesHealthy"`
 
-	// hosts unhealthy
-	HostsUnhealthy []string `json:"hostsUnhealthy"`
-
-	// pods healthy
-	PodsHealthy []string `json:"podsHealthy"`
-
-	// pods unhealthy
-	PodsUnhealthy []string `json:"podsUnhealthy"`
+	// nodes unhealthy
+	NodesUnhealthy []string `json:"nodesUnhealthy"`
 }
 
 // Validate validates this cluster health results

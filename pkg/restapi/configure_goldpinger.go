@@ -104,8 +104,8 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 			)
 			defer cancel()
 
-			ok, payload := goldpinger.CheckCluster(ctx)
-			if ok {
+			payload := goldpinger.CheckCluster(ctx)
+			if payload.OK {
 				return operations.NewClusterHealthOK().WithPayload(payload)
 			} else {
 				return operations.NewClusterHealthServiceUnavailable().WithPayload(payload)

@@ -231,12 +231,6 @@ func init() {
         "OK"
       ],
       "properties": {
-        "DNS": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "OK": {
           "type": "boolean",
           "default": false
@@ -249,25 +243,13 @@ func init() {
           "type": "string",
           "format": "date-time"
         },
-        "hostsHealthy": {
+        "nodesHealthy": {
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "hostsUnhealthy": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "podsHealthy": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "podsUnhealthy": {
+        "nodesUnhealthy": {
           "type": "array",
           "items": {
             "type": "string"
@@ -576,12 +558,6 @@ func init() {
         "OK"
       ],
       "properties": {
-        "DNS": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "OK": {
           "type": "boolean",
           "default": false
@@ -594,25 +570,13 @@ func init() {
           "type": "string",
           "format": "date-time"
         },
-        "hostsHealthy": {
+        "nodesHealthy": {
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "hostsUnhealthy": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "podsHealthy": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "podsUnhealthy": {
+        "nodesUnhealthy": {
           "type": "array",
           "items": {
             "type": "string"
