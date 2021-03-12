@@ -249,6 +249,10 @@ func init() {
             "type": "string"
           }
         },
+        "nodesTotal": {
+          "type": "integer",
+          "format": "int64"
+        },
         "nodesUnhealthy": {
           "type": "array",
           "items": {
@@ -575,6 +579,10 @@ func init() {
           "items": {
             "type": "string"
           }
+        },
+        "nodesTotal": {
+          "type": "integer",
+          "format": "int64"
         },
         "nodesUnhealthy": {
           "type": "array",

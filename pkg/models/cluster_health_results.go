@@ -33,6 +33,9 @@ type ClusterHealthResults struct {
 	// nodes healthy
 	NodesHealthy []string `json:"nodesHealthy"`
 
+	// nodes total
+	NodesTotal int64 `json:"nodesTotal,omitempty"`
+
 	// nodes unhealthy
 	NodesUnhealthy []string `json:"nodesUnhealthy"`
 }

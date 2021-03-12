@@ -144,6 +144,9 @@ definitions:
         type: array
         items:
           type: string
+      nodesTotal:
+        type: integer
+        format: int64
       generated-at:
         type: string
         format: date-time
