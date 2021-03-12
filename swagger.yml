@@ -136,23 +136,11 @@ definitions:
       OK:
         type: boolean
         default: false
-      podsHealthy:
+      nodesHealthy:
         type: array
         items:
           type: string
-      podsUnhealthy:
-        type: array
-        items:
-          type: string
-      hostsHealthy:
-        type: array
-        items:
-          type: string
-      hostsUnhealthy:
-        type: array
-        items:
-          type: string
-      DNS:
+      nodesUnhealthy:
         type: array
         items:
           type: string
