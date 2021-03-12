@@ -59,7 +59,9 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 
 	start := time.Now()
-	response := models.ClusterHealthResults{}
+	response := models.ClusterHealthResults{
+		GeneratedAt: strfmt.DateTime(start),
+	}
 	expectedNodes := []string{}
 
 	// get the response we serve for check_all
