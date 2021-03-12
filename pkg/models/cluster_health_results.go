@@ -14,13 +14,17 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// HealthCheckResults health check results
+// ClusterHealthResults cluster health results
 //
-// swagger:model HealthCheckResults
-type HealthCheckResults struct {
+// swagger:model ClusterHealthResults
+type ClusterHealthResults struct {
+
+	// DNS
+	DNS []string `json:"DNS"`
 
 	// o k
-	OK *bool `json:"OK,omitempty"`
+	// Required: true
+	OK bool `json:"OK"`
 
 	// duration ns
 	DurationNs int64 `json:"duration-ns,omitempty"`
@@ -28,11 +32,21 @@ type HealthCheckResults struct {
 	// generated at
 	// Format: date-time
 	GeneratedAt strfmt.DateTime `json:"generated-at,omitempty"`
+
+	// instances healthy
+	InstancesHealthy []string `json:"instancesHealthy"`
+
+	// instances unealthy
+	InstancesUnealthy []string `json:"instancesUnealthy"`
 }
 
-// Validate validates this health check results
-func (m *HealthCheckResults) Validate(formats strfmt.Registry) error {
+// Validate validates this cluster health results
+func (m *ClusterHealthResults) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateOK(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateGeneratedAt(formats); err != nil {
 		res = append(res, err)
@@ -44,7 +58,16 @@ func (m *HealthCheckResults) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *HealthCheckResults) validateGeneratedAt(formats strfmt.Registry) error {
+func (m *ClusterHealthResults) validateOK(formats strfmt.Registry) error {
+
+	if err := validate.Required("OK", "body", bool(m.OK)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterHealthResults) validateGeneratedAt(formats strfmt.Registry) error {
 	if swag.IsZero(m.GeneratedAt) { // not required
 		return nil
 	}
@@ -56,13 +79,13 @@ func (m *HealthCheckResults) validateGeneratedAt(formats strfmt.Registry) error 
 	return nil
 }
 
-// ContextValidate validates this health check results based on context it is used
-func (m *HealthCheckResults) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validates this cluster health results based on context it is used
+func (m *ClusterHealthResults) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *HealthCheckResults) MarshalBinary() ([]byte, error) {
+func (m *ClusterHealthResults) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -70,8 +93,8 @@ func (m *HealthCheckResults) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *HealthCheckResults) UnmarshalBinary(b []byte) error {
-	var res HealthCheckResults
+func (m *ClusterHealthResults) UnmarshalBinary(b []byte) error {
+	var res ClusterHealthResults
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

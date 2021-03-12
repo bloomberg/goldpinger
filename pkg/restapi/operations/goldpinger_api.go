@@ -32,6 +32,7 @@ func NewGoldpingerAPI(spec *loads.Document) *GoldpingerAPI {
 		PreServerShutdown:   func() {},
 		ServerShutdown:      func() {},
 		spec:                spec,
+		useSwaggerUI:        false,
 		ServeError:          errors.ServeError,
 		BasicAuthenticator:  security.BasicAuth,
 		APIKeyAuthenticator: security.APIKeyAuth,
@@ -46,6 +47,9 @@ func NewGoldpingerAPI(spec *loads.Document) *GoldpingerAPI {
 		}),
 		CheckServicePodsHandler: CheckServicePodsHandlerFunc(func(params CheckServicePodsParams) middleware.Responder {
 			return middleware.NotImplemented("operation CheckServicePods has not yet been implemented")
+		}),
+		ClusterHealthHandler: ClusterHealthHandlerFunc(func(params ClusterHealthParams) middleware.Responder {
+			return middleware.NotImplemented("operation ClusterHealth has not yet been implemented")
 		}),
 		HealthzHandler: HealthzHandlerFunc(func(params HealthzParams) middleware.Responder {
 			return middleware.NotImplemented("operation Healthz has not yet been implemented")
@@ -67,13 +71,16 @@ type GoldpingerAPI struct {
 	defaultConsumes string
 	defaultProduces string
 	Middleware      func(middleware.Builder) http.Handler
+	useSwaggerUI    bool
 
 	// BasicAuthenticator generates a runtime.Authenticator from the supplied basic auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	BasicAuthenticator func(security.UserPassAuthentication) runtime.Authenticator
+
 	// APIKeyAuthenticator generates a runtime.Authenticator from the supplied token auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	APIKeyAuthenticator func(string, string, security.TokenAuthentication) runtime.Authenticator
+
 	// BearerAuthenticator generates a runtime.Authenticator from the supplied bearer token auth function.
 	// It has a default implementation in the security package, however you can replace it for your particular usage.
 	BearerAuthenticator func(string, security.ScopedTokenAuthentication) runtime.Authenticator
@@ -90,10 +97,13 @@ type GoldpingerAPI struct {
 	CheckAllPodsHandler CheckAllPodsHandler
 	// CheckServicePodsHandler sets the operation handler for the check service pods operation
 	CheckServicePodsHandler CheckServicePodsHandler
+	// ClusterHealthHandler sets the operation handler for the cluster health operation
+	ClusterHealthHandler ClusterHealthHandler
 	// HealthzHandler sets the operation handler for the healthz operation
 	HealthzHandler HealthzHandler
 	// PingHandler sets the operation handler for the ping operation
 	PingHandler PingHandler
+
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -111,6 +121,16 @@ type GoldpingerAPI struct {
 
 	// User defined logger function.
 	Logger func(string, ...interface{})
+}
+
+// UseRedoc for documentation at /docs
+func (o *GoldpingerAPI) UseRedoc() {
+	o.useSwaggerUI = false
+}
+
+// UseSwaggerUI for documentation at /docs
+func (o *GoldpingerAPI) UseSwaggerUI() {
+	o.useSwaggerUI = true
 }
 
 // SetDefaultProduces sets the default produces media type
@@ -165,6 +185,9 @@ func (o *GoldpingerAPI) Validate() error {
 	}
 	if o.CheckServicePodsHandler == nil {
 		unregistered = append(unregistered, "CheckServicePodsHandler")
+	}
+	if o.ClusterHealthHandler == nil {
+		unregistered = append(unregistered, "ClusterHealthHandler")
 	}
 	if o.HealthzHandler == nil {
 		unregistered = append(unregistered, "HealthzHandler")
@@ -271,6 +294,10 @@ func (o *GoldpingerAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/cluster_health"] = NewClusterHealth(o.context, o.ClusterHealthHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/healthz"] = NewHealthz(o.context, o.HealthzHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -285,6 +312,9 @@ func (o *GoldpingerAPI) Serve(builder middleware.Builder) http.Handler {
 
 	if o.Middleware != nil {
 		return o.Middleware(builder)
+	}
+	if o.useSwaggerUI {
+		return o.context.APIHandlerSwaggerUI(builder)
 	}
 	return o.context.APIHandler(builder)
 }

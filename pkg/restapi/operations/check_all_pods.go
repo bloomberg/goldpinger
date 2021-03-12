@@ -29,7 +29,7 @@ func NewCheckAllPods(ctx *middleware.Context, handler CheckAllPodsHandler) *Chec
 	return &CheckAllPods{Context: ctx, Handler: handler}
 }
 
-/*CheckAllPods swagger:route GET /check_all checkAllPods
+/* CheckAllPods swagger:route GET /check_all checkAllPods
 
 Queries the API server for all other pods in this service, and makes all of them query all of their neighbours, using their pods IPs. Calls their /check endpoint.
 
@@ -45,14 +45,12 @@ func (o *CheckAllPods) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewCheckAllPodsParams()
-
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
 	res := o.Handler.Handle(Params) // actually handle the request
-
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }

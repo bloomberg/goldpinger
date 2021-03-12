@@ -6,6 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -61,7 +62,6 @@ func (m *CheckAllResults) Validate(formats strfmt.Registry) error {
 }
 
 func (m *CheckAllResults) validateDNSResults(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.DNSResults) { // not required
 		return nil
 	}
@@ -80,7 +80,6 @@ func (m *CheckAllResults) validateDNSResults(formats strfmt.Registry) error {
 }
 
 func (m *CheckAllResults) validateHosts(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Hosts) { // not required
 		return nil
 	}
@@ -105,7 +104,6 @@ func (m *CheckAllResults) validateHosts(formats strfmt.Registry) error {
 }
 
 func (m *CheckAllResults) validateResponses(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Responses) { // not required
 		return nil
 	}
@@ -117,6 +115,76 @@ func (m *CheckAllResults) validateResponses(formats strfmt.Registry) error {
 		}
 		if val, ok := m.Responses[k]; ok {
 			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// ContextValidate validate this check all results based on the context it is used
+func (m *CheckAllResults) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateDNSResults(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateHosts(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.contextValidateResponses(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *CheckAllResults) contextValidateDNSResults(ctx context.Context, formats strfmt.Registry) error {
+
+	for k := range m.DNSResults {
+
+		if val, ok := m.DNSResults[k]; ok {
+			if err := val.ContextValidate(ctx, formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *CheckAllResults) contextValidateHosts(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Hosts); i++ {
+
+		if m.Hosts[i] != nil {
+			if err := m.Hosts[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("hosts" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *CheckAllResults) contextValidateResponses(ctx context.Context, formats strfmt.Registry) error {
+
+	for k := range m.Responses {
+
+		if val, ok := m.Responses[k]; ok {
+			if err := val.ContextValidate(ctx, formats); err != nil {
 				return err
 			}
 		}
@@ -180,7 +248,6 @@ func (m *CheckAllResultsHostsItems0) Validate(formats strfmt.Registry) error {
 }
 
 func (m *CheckAllResultsHostsItems0) validateHostIP(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.HostIP) { // not required
 		return nil
 	}
@@ -193,7 +260,6 @@ func (m *CheckAllResultsHostsItems0) validateHostIP(formats strfmt.Registry) err
 }
 
 func (m *CheckAllResultsHostsItems0) validatePodIP(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.PodIP) { // not required
 		return nil
 	}
@@ -202,6 +268,11 @@ func (m *CheckAllResultsHostsItems0) validatePodIP(formats strfmt.Registry) erro
 		return err
 	}
 
+	return nil
+}
+
+// ContextValidate validates this check all results hosts items0 based on context it is used
+func (m *CheckAllResultsHostsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

@@ -12,19 +12,19 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 )
 
-// NewPingParams creates a new PingParams object
+// NewClusterHealthParams creates a new ClusterHealthParams object
 //
 // There are no default values defined in the spec.
-func NewPingParams() PingParams {
+func NewClusterHealthParams() ClusterHealthParams {
 
-	return PingParams{}
+	return ClusterHealthParams{}
 }
 
-// PingParams contains all the bound params for the ping operation
+// ClusterHealthParams contains all the bound params for the cluster health operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters ping
-type PingParams struct {
+// swagger:parameters clusterHealth
+type ClusterHealthParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
@@ -33,8 +33,8 @@ type PingParams struct {
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewPingParams() beforehand.
-func (o *PingParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewClusterHealthParams() beforehand.
+func (o *ClusterHealthParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
