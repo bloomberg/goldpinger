@@ -61,6 +61,7 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 	start := time.Now()
 	response := models.ClusterHealthResults{
 		GeneratedAt: strfmt.DateTime(start),
+		OK:          true,
 	}
 	selectedPods := SelectPods()
 
