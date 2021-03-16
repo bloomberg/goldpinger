@@ -75,8 +75,12 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 	// get the response we serve for check_all
 	checkAll := CheckAllPods(ctx, selectedPods)
 
-	// 1. check that all nodes report OK
+	// we should at the very least have a response from ourselves
+	if len(checkAll.Responses) < 1 {
+		response.OK = false
+	}
 	for _, resp := range checkAll.Responses {
+		// 1. check that all nodes report OK
 		if *resp.OK {
 			response.NodesHealthy = append(response.NodesHealthy, resp.HostIP.String())
 		} else {
@@ -84,32 +88,26 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 			response.OK = false
 		}
 		response.NodesTotal++
-	}
-	// 2. check that all nodes report the expected peers
-	if len(checkAll.Responses) < 1 {
-		response.OK = false
-	} else {
-		for _, resp := range checkAll.Responses {
-			// on error, there might be no response from the node
-			if resp.Response == nil {
+		// 2. check that all nodes report the expected peers
+		// on error, there might be no response from the node
+		if resp.Response == nil {
+			response.OK = false
+			break
+		}
+		// if we get a response, let's check we get the expected nodes
+		observedNodes := []string{}
+		for peer := range resp.Response.PodResults {
+			observedNodes = append(observedNodes, peer)
+		}
+		sort.Strings(observedNodes)
+		if len(observedNodes) != len(expectedNodes) {
+			response.OK = false
+			break
+		}
+		for i, val := range observedNodes {
+			if val != expectedNodes[i] {
 				response.OK = false
 				break
-			}
-			// if we get a response, let's check we get the expected nodes
-			observedNodes := []string{}
-			for peer := range resp.Response.PodResults {
-				observedNodes = append(observedNodes, peer)
-			}
-			sort.Strings(observedNodes)
-			if len(observedNodes) != len(expectedNodes) {
-				response.OK = false
-				break
-			}
-			for i, val := range observedNodes {
-				if val != expectedNodes[i] {
-					response.OK = false
-					break
-				}
 			}
 		}
 	}
