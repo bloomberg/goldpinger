@@ -92,6 +92,7 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 		// on error, there might be no response from the node
 		if resp.Response == nil {
 			output.OK = false
+			continue
 		}
 		// if we get a response, let's check we get the expected nodes
 		observedNodes := []string{}
@@ -105,6 +106,7 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 		for i, val := range observedNodes {
 			if val != expectedNodes[i] {
 				output.OK = false
+				break
 			}
 		}
 	}
