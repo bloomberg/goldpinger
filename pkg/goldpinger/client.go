@@ -96,8 +96,8 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 		}
 		// if we get a response, let's check we get the expected nodes
 		observedNodes := []string{}
-		for peer := range resp.Response.PodResults {
-			observedNodes = append(observedNodes, peer)
+		for _, peer := range resp.Response.PodResults {
+			observedNodes = append(observedNodes, string(peer.HostIP))
 		}
 		sort.Strings(observedNodes)
 		if len(observedNodes) != len(expectedNodes) {
