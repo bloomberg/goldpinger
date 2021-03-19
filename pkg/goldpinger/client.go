@@ -59,7 +59,7 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 
 	start := time.Now()
-	response := models.ClusterHealthResults{
+	output := models.ClusterHealthResults{
 		GeneratedAt: strfmt.DateTime(start),
 		OK:          true,
 	}
@@ -77,22 +77,21 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 
 	// we should at the very least have a response from ourselves
 	if len(checkAll.Responses) < 1 {
-		response.OK = false
+		output.OK = false
 	}
 	for _, resp := range checkAll.Responses {
 		// 1. check that all nodes report OK
 		if *resp.OK {
-			response.NodesHealthy = append(response.NodesHealthy, resp.HostIP.String())
+			output.NodesHealthy = append(output.NodesHealthy, resp.HostIP.String())
 		} else {
-			response.NodesUnhealthy = append(response.NodesUnhealthy, resp.HostIP.String())
-			response.OK = false
+			output.NodesUnhealthy = append(output.NodesUnhealthy, resp.HostIP.String())
+			output.OK = false
 		}
-		response.NodesTotal++
+		output.NodesTotal++
 		// 2. check that all nodes report the expected peers
 		// on error, there might be no response from the node
 		if resp.Response == nil {
-			response.OK = false
-			break
+			output.OK = false
 		}
 		// if we get a response, let's check we get the expected nodes
 		observedNodes := []string{}
@@ -101,18 +100,16 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 		}
 		sort.Strings(observedNodes)
 		if len(observedNodes) != len(expectedNodes) {
-			response.OK = false
-			break
+			output.OK = false
 		}
 		for i, val := range observedNodes {
 			if val != expectedNodes[i] {
-				response.OK = false
-				break
+				output.OK = false
 			}
 		}
 	}
-	response.DurationNs = time.Since(start).Nanoseconds()
-	return &response
+	output.DurationNs = time.Since(start).Nanoseconds()
+	return &output
 }
 
 // PingAllPodsResult holds results from pinging all nodes
