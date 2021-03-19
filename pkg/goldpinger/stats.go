@@ -149,7 +149,7 @@ func CountHealthyUnhealthyNodes(healthy, unhealthy float64) {
 // SetClusterHealth sets the cluster health gauge to 1 (healthy) or 0 (unhealthy)
 func SetClusterHealth(healthy bool) {
 	value := 1.0
-	if healthy {
+	if !healthy {
 		value = 0
 	}
 	goldpingerClusterHealthGauge.WithLabelValues(
