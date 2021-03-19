@@ -48,6 +48,16 @@ var (
 		},
 	)
 
+	goldpingerClusterHealthGauge = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "goldpinger_cluster_health_total",
+			Help: "1 if all check pass, 0 otherwise",
+		},
+		[]string{
+			"goldpinger_instance",
+		},
+	)
+
 	goldpingerResponseTimePeersHistogram = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "goldpinger_peers_response_time_s",
@@ -100,6 +110,7 @@ var (
 func init() {
 	prometheus.MustRegister(goldpingerStatsCounter)
 	prometheus.MustRegister(goldpingerNodesHealthGauge)
+	prometheus.MustRegister(goldpingerClusterHealthGauge)
 	prometheus.MustRegister(goldpingerResponseTimePeersHistogram)
 	prometheus.MustRegister(goldpingerResponseTimeKubernetesHistogram)
 	prometheus.MustRegister(goldpingerErrorsCounter)
@@ -133,6 +144,17 @@ func CountHealthyUnhealthyNodes(healthy, unhealthy float64) {
 		GoldpingerConfig.Hostname,
 		"unhealthy",
 	).Set(unhealthy)
+}
+
+// SetClusterHealth sets the cluster health gauge to 1 (healthy) or 0 (unhealthy)
+func SetClusterHealth(healthy bool) {
+	value := 1.0
+	if healthy {
+		value = 0
+	}
+	goldpingerClusterHealthGauge.WithLabelValues(
+		GoldpingerConfig.Hostname,
+	).Set(value)
 }
 
 // counts instances of various errors
