@@ -29,7 +29,7 @@ func NewHealthz(ctx *middleware.Context, handler HealthzHandler) *Healthz {
 	return &Healthz{Context: ctx, Handler: handler}
 }
 
-/*Healthz swagger:route GET /healthz healthz
+/* Healthz swagger:route GET /healthz healthz
 
 The healthcheck endpoint provides detailed information about the health of a web service. If each of the components required by the service are healthy, then the service is considered healthy and will return a 200 OK response. If any of the components needed by the service are unhealthy, then a 503 Service Unavailable response will be provided.
 
@@ -45,14 +45,12 @@ func (o *Healthz) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		r = rCtx
 	}
 	var Params = NewHealthzParams()
-
 	if err := o.Context.BindValidRequest(r, route, &Params); err != nil { // bind params
 		o.Context.Respond(rw, r, route.Produces, route, err)
 		return
 	}
 
 	res := o.Handler.Handle(Params) // actually handle the request
-
 	o.Context.Respond(rw, r, route.Produces, route, res)
 
 }

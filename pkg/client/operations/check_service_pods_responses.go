@@ -29,9 +29,8 @@ func (o *CheckServicePodsReader) ReadResponse(response runtime.ClientResponse, c
 			return nil, err
 		}
 		return result, nil
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
 }
 
@@ -40,7 +39,7 @@ func NewCheckServicePodsOK() *CheckServicePodsOK {
 	return &CheckServicePodsOK{}
 }
 
-/*CheckServicePodsOK handles this case with default header values.
+/* CheckServicePodsOK describes a response with status code 200, with default header values.
 
 Success, return response
 */
@@ -51,7 +50,6 @@ type CheckServicePodsOK struct {
 func (o *CheckServicePodsOK) Error() string {
 	return fmt.Sprintf("[GET /check][%d] checkServicePodsOK  %+v", 200, o.Payload)
 }
-
 func (o *CheckServicePodsOK) GetPayload() *models.CheckResults {
 	return o.Payload
 }

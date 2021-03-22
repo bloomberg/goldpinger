@@ -13,7 +13,8 @@ import (
 )
 
 // NewCheckServicePodsParams creates a new CheckServicePodsParams object
-// no default values defined in spec.
+//
+// There are no default values defined in the spec.
 func NewCheckServicePodsParams() CheckServicePodsParams {
 
 	return CheckServicePodsParams{}

@@ -6,6 +6,8 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
+
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
@@ -72,7 +74,6 @@ func (m *PodResult) Validate(formats strfmt.Registry) error {
 }
 
 func (m *PodResult) validateHostIP(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.HostIP) { // not required
 		return nil
 	}
@@ -85,7 +86,6 @@ func (m *PodResult) validateHostIP(formats strfmt.Registry) error {
 }
 
 func (m *PodResult) validatePingTime(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.PingTime) { // not required
 		return nil
 	}
@@ -98,7 +98,6 @@ func (m *PodResult) validatePingTime(formats strfmt.Registry) error {
 }
 
 func (m *PodResult) validatePodIP(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.PodIP) { // not required
 		return nil
 	}
@@ -111,13 +110,40 @@ func (m *PodResult) validatePodIP(formats strfmt.Registry) error {
 }
 
 func (m *PodResult) validateResponse(formats strfmt.Registry) error {
-
 	if swag.IsZero(m.Response) { // not required
 		return nil
 	}
 
 	if m.Response != nil {
 		if err := m.Response.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("response")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ContextValidate validate this pod result based on the context it is used
+func (m *PodResult) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateResponse(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *PodResult) contextValidateResponse(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Response != nil {
+		if err := m.Response.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("response")
 			}

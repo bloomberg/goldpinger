@@ -153,6 +153,19 @@ func updateCounters() {
 		}
 	}
 	CountHealthyUnhealthyNodes(counterHealthy, float64(len(checkResults.PodResults))-counterHealthy)
+	// check DNS, but don't block the access to checkResultsMux
+	nodesHealthy := int(counterHealthy) == len(checkResults.PodResults)
+	go func(healthySoFar bool) {
+		if healthySoFar {
+			for _, response := range *checkDNS() {
+				if response.Error != "" {
+					healthySoFar = false
+					break
+				}
+			}
+		}
+		SetClusterHealth(healthySoFar)
+	}(nodesHealthy)
 }
 
 // collectResults simply reads results from the results channel and saves them in a map

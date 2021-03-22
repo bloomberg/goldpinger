@@ -6,17 +6,13 @@ require (
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect
 	github.com/cespare/xxhash v1.1.0
 	github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680 // indirect
-	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8 // indirect
-	github.com/go-openapi/analysis v0.17.2 // indirect
-	github.com/go-openapi/errors v0.17.2
-	github.com/go-openapi/jsonpointer v0.17.2 // indirect
-	github.com/go-openapi/jsonreference v0.17.2 // indirect
-	github.com/go-openapi/loads v0.17.2
-	github.com/go-openapi/runtime v0.17.2
-	github.com/go-openapi/spec v0.17.2
-	github.com/go-openapi/strfmt v0.17.2
-	github.com/go-openapi/swag v0.17.2
-	github.com/go-openapi/validate v0.17.2
+	github.com/go-openapi/errors v0.20.0
+	github.com/go-openapi/loads v0.19.5
+	github.com/go-openapi/runtime v0.19.26
+	github.com/go-openapi/spec v0.19.8
+	github.com/go-openapi/strfmt v0.20.0
+	github.com/go-openapi/swag v0.19.9
+	github.com/go-openapi/validate v0.19.10
 	github.com/gogo/protobuf v0.0.0-20170330071051-c0656edd0d9e // indirect
 	github.com/golang/glog v0.0.0-20141105023935-44145f04b68c // indirect
 	github.com/google/btree v1.0.0 // indirect
@@ -34,12 +30,11 @@ require (
 	github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910 // indirect
 	github.com/prometheus/common v0.0.0-20181020173914-7e9e6cabbd39 // indirect
 	github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d // indirect
-	github.com/spf13/pflag v1.0.1 // indirect
 	github.com/stuartnelson3/go-rendezvous v0.2.0
 	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
 	golang.org/x/image v0.0.0-20190220214146-31aff87c08e9
-	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
+	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
 	golang.org/x/time v0.0.0-20161028155119-f51c12702a4d // indirect

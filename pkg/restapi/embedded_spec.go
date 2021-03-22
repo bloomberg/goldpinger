@@ -58,6 +58,29 @@ func init() {
         }
       }
     },
+    "/cluster_health": {
+      "get": {
+        "description": "Checks the full graph. Returns a binary OK or not OK.",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "clusterHealth",
+        "responses": {
+          "200": {
+            "description": "Healthy cluster",
+            "schema": {
+              "$ref": "#/definitions/ClusterHealthResults"
+            }
+          },
+          "418": {
+            "description": "Unhealthy cluster",
+            "schema": {
+              "$ref": "#/definitions/ClusterHealthResults"
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "description": "The healthcheck endpoint provides detailed information about the health of a web service. If each of the components required by the service are healthy, then the service is considered healthy and will return a 200 OK response. If any of the components needed by the service are unhealthy, then a 503 Service Unavailable response will be provided.",
@@ -202,6 +225,42 @@ func init() {
         }
       }
     },
+    "ClusterHealthResults": {
+      "type": "object",
+      "required": [
+        "OK"
+      ],
+      "properties": {
+        "OK": {
+          "type": "boolean",
+          "default": false
+        },
+        "duration-ns": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "generated-at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nodesHealthy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nodesTotal": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "nodesUnhealthy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "DnsResult": {
       "properties": {
         "error": {
@@ -322,6 +381,29 @@ func init() {
             "description": "Success, return response",
             "schema": {
               "$ref": "#/definitions/CheckAllResults"
+            }
+          }
+        }
+      }
+    },
+    "/cluster_health": {
+      "get": {
+        "description": "Checks the full graph. Returns a binary OK or not OK.",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "clusterHealth",
+        "responses": {
+          "200": {
+            "description": "Healthy cluster",
+            "schema": {
+              "$ref": "#/definitions/ClusterHealthResults"
+            }
+          },
+          "418": {
+            "description": "Unhealthy cluster",
+            "schema": {
+              "$ref": "#/definitions/ClusterHealthResults"
             }
           }
         }
@@ -470,6 +552,42 @@ func init() {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/PodResult"
+          }
+        }
+      }
+    },
+    "ClusterHealthResults": {
+      "type": "object",
+      "required": [
+        "OK"
+      ],
+      "properties": {
+        "OK": {
+          "type": "boolean",
+          "default": false
+        },
+        "duration-ns": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "generated-at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nodesHealthy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nodesTotal": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "nodesUnhealthy": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         }
       }

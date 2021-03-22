@@ -94,6 +94,24 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 			return operations.NewCheckAllPodsOK().WithPayload(goldpinger.CheckNeighboursNeighbours(ctx))
 		})
 
+	api.ClusterHealthHandler = operations.ClusterHealthHandlerFunc(
+		func(params operations.ClusterHealthParams) middleware.Responder {
+			goldpinger.CountCall("received", "cluster_health")
+
+			ctx, cancel := context.WithTimeout(
+				params.HTTPRequest.Context(),
+				time.Duration(goldpinger.GoldpingerConfig.CheckAllTimeoutMs)*time.Millisecond,
+			)
+			defer cancel()
+
+			payload := goldpinger.CheckCluster(ctx)
+			if payload.OK {
+				return operations.NewClusterHealthOK().WithPayload(payload)
+			} else {
+				return operations.NewClusterHealthIMATeapot().WithPayload(payload)
+			}
+		})
+
 	api.HealthzHandler = operations.HealthzHandlerFunc(
 		func(params operations.HealthzParams) middleware.Responder {
 			goldpinger.CountCall("received", "healthz")

@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sort"
 	"sync"
 	"time"
 
@@ -54,6 +55,66 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 	return CheckAllPods(ctx, SelectPods())
 }
 
+// CheckCluster does a CheckNeighboursNeighbours and analyses results to produce a binary OK or not OK
+func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
+
+	start := time.Now()
+	output := models.ClusterHealthResults{
+		GeneratedAt: strfmt.DateTime(start),
+		OK:          true,
+	}
+	selectedPods := SelectPods()
+
+	// precompute the expected set of nodes
+	expectedNodes := []string{}
+	for _, peer := range selectedPods {
+		expectedNodes = append(expectedNodes, peer.HostIP)
+	}
+	sort.Strings(expectedNodes)
+
+	// get the response we serve for check_all
+	checkAll := CheckAllPods(ctx, selectedPods)
+
+	// we should at the very least have a response from ourselves
+	if len(checkAll.Responses) < 1 {
+		output.OK = false
+	}
+	for _, resp := range checkAll.Responses {
+		// 1. check that all nodes report OK
+		if *resp.OK {
+			output.NodesHealthy = append(output.NodesHealthy, resp.HostIP.String())
+		} else {
+			output.NodesUnhealthy = append(output.NodesUnhealthy, resp.HostIP.String())
+			output.OK = false
+		}
+		output.NodesTotal++
+		// 2. check that all nodes report the expected peers
+		// on error, there might be no response from the node
+		if resp.Response == nil {
+			output.OK = false
+			continue
+		}
+		// if we get a response, let's check we get the expected nodes
+		observedNodes := []string{}
+		for _, peer := range resp.Response.PodResults {
+			observedNodes = append(observedNodes, string(peer.HostIP))
+		}
+		sort.Strings(observedNodes)
+		if len(observedNodes) != len(expectedNodes) {
+			output.OK = false
+		}
+		for i, val := range observedNodes {
+			if val != expectedNodes[i] {
+				output.OK = false
+				break
+			}
+		}
+	}
+	output.DurationNs = time.Since(start).Nanoseconds()
+	return &output
+}
+
+// PingAllPodsResult holds results from pinging all nodes
 type PingAllPodsResult struct {
 	podName   string
 	podResult models.PodResult
@@ -85,6 +146,7 @@ func checkDNS() *models.DNSResults {
 	return &results
 }
 
+// CheckServicePodsResult results of the /check operation
 type CheckServicePodsResult struct {
 	podName           string
 	checkAllPodResult models.CheckAllPodResult
@@ -92,6 +154,7 @@ type CheckServicePodsResult struct {
 	podIPv4           strfmt.IPv4
 }
 
+// CheckAllPods calls all neighbours and returns a detailed report
 func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *models.CheckAllResults {
 
 	result := models.CheckAllResults{Responses: make(map[string]models.CheckAllPodResult)}
@@ -194,6 +257,7 @@ func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *
 	return &result
 }
 
+// HealthCheck returns a simple 200 OK response to verify the API is up
 func HealthCheck() *models.HealthCheckResults {
 	ok := true
 	start := time.Now()

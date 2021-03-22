@@ -25,15 +25,20 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
+// ClientOption is the option for Client methods
+type ClientOption func(*runtime.ClientOperation)
+
 // ClientService is the interface for Client methods
 type ClientService interface {
-	CheckAllPods(params *CheckAllPodsParams) (*CheckAllPodsOK, error)
+	CheckAllPods(params *CheckAllPodsParams, opts ...ClientOption) (*CheckAllPodsOK, error)
 
-	CheckServicePods(params *CheckServicePodsParams) (*CheckServicePodsOK, error)
+	CheckServicePods(params *CheckServicePodsParams, opts ...ClientOption) (*CheckServicePodsOK, error)
 
-	Healthz(params *HealthzParams) (*HealthzOK, error)
+	ClusterHealth(params *ClusterHealthParams, opts ...ClientOption) (*ClusterHealthOK, error)
 
-	Ping(params *PingParams) (*PingOK, error)
+	Healthz(params *HealthzParams, opts ...ClientOption) (*HealthzOK, error)
+
+	Ping(params *PingParams, opts ...ClientOption) (*PingOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -41,13 +46,12 @@ type ClientService interface {
 /*
   CheckAllPods Queries the API server for all other pods in this service, and makes all of them query all of their neighbours, using their pods IPs. Calls their /check endpoint.
 */
-func (a *Client) CheckAllPods(params *CheckAllPodsParams) (*CheckAllPodsOK, error) {
+func (a *Client) CheckAllPods(params *CheckAllPodsParams, opts ...ClientOption) (*CheckAllPodsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewCheckAllPodsParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "checkAllPods",
 		Method:             "GET",
 		PathPattern:        "/check_all",
@@ -58,7 +62,12 @@ func (a *Client) CheckAllPods(params *CheckAllPodsParams) (*CheckAllPodsOK, erro
 		Reader:             &CheckAllPodsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -75,13 +84,12 @@ func (a *Client) CheckAllPods(params *CheckAllPodsParams) (*CheckAllPodsOK, erro
 /*
   CheckServicePods Queries the API server for all other pods in this service, and pings them via their pods IPs. Calls their /ping endpoint
 */
-func (a *Client) CheckServicePods(params *CheckServicePodsParams) (*CheckServicePodsOK, error) {
+func (a *Client) CheckServicePods(params *CheckServicePodsParams, opts ...ClientOption) (*CheckServicePodsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewCheckServicePodsParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "checkServicePods",
 		Method:             "GET",
 		PathPattern:        "/check",
@@ -92,7 +100,12 @@ func (a *Client) CheckServicePods(params *CheckServicePodsParams) (*CheckService
 		Reader:             &CheckServicePodsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -107,15 +120,52 @@ func (a *Client) CheckServicePods(params *CheckServicePodsParams) (*CheckService
 }
 
 /*
+  ClusterHealth Checks the full graph. Returns a binary OK or not OK.
+*/
+func (a *Client) ClusterHealth(params *ClusterHealthParams, opts ...ClientOption) (*ClusterHealthOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewClusterHealthParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "clusterHealth",
+		Method:             "GET",
+		PathPattern:        "/cluster_health",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &ClusterHealthReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ClusterHealthOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for clusterHealth: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
   Healthz The healthcheck endpoint provides detailed information about the health of a web service. If each of the components required by the service are healthy, then the service is considered healthy and will return a 200 OK response. If any of the components needed by the service are unhealthy, then a 503 Service Unavailable response will be provided.
 */
-func (a *Client) Healthz(params *HealthzParams) (*HealthzOK, error) {
+func (a *Client) Healthz(params *HealthzParams, opts ...ClientOption) (*HealthzOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewHealthzParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "healthz",
 		Method:             "GET",
 		PathPattern:        "/healthz",
@@ -126,7 +176,12 @@ func (a *Client) Healthz(params *HealthzParams) (*HealthzOK, error) {
 		Reader:             &HealthzReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
@@ -143,13 +198,12 @@ func (a *Client) Healthz(params *HealthzParams) (*HealthzOK, error) {
 /*
   Ping return query stats
 */
-func (a *Client) Ping(params *PingParams) (*PingOK, error) {
+func (a *Client) Ping(params *PingParams, opts ...ClientOption) (*PingOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewPingParams()
 	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
+	op := &runtime.ClientOperation{
 		ID:                 "ping",
 		Method:             "GET",
 		PathPattern:        "/ping",
@@ -160,7 +214,12 @@ func (a *Client) Ping(params *PingParams) (*PingOK, error) {
 		Reader:             &PingReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	})
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
 	if err != nil {
 		return nil, err
 	}
