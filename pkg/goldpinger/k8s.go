@@ -44,7 +44,11 @@ func getPodNamespace() string {
 // GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s)
 func GetAllPods() map[string]*GoldpingerPod {
 	timer := GetLabeledKubernetesCallsTimer()
-	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(*GoldpingerConfig.Namespace).List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
+	listOpts := metav1.ListOptions{
+		LabelSelector: GoldpingerConfig.LabelSelector,
+		FieldSelector: "status.phase=Running", // only select Running pods, otherwise we will get them before they have IPs
+	}
+	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(*GoldpingerConfig.Namespace).List(listOpts)
 	if err != nil {
 		zap.L().Error("Error getting pods for selector", zap.String("selector", GoldpingerConfig.LabelSelector), zap.Error(err))
 		CountError("kubernetes_api")
@@ -52,7 +56,7 @@ func GetAllPods() map[string]*GoldpingerPod {
 		timer.ObserveDuration()
 	}
 
-	var podMap = make(map[string]*GoldpingerPod)
+	podMap := make(map[string]*GoldpingerPod)
 	for _, pod := range pods.Items {
 		podMap[pod.Name] = &GoldpingerPod{
 			Name:   pod.Name,
