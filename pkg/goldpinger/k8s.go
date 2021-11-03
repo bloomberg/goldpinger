@@ -23,6 +23,8 @@ import (
 	k8snet "k8s.io/utils/net"
 )
 
+var nodeIPMap = make(map[string]string)
+
 // PodNamespace is the auto-detected namespace for this goldpinger pod
 var PodNamespace = getPodNamespace()
 
@@ -43,18 +45,6 @@ func getPodNamespace() string {
 	return namespace
 }
 
-func getAllNodes() *v1.NodeList {
-	timer := GetLabeledKubernetesCallsTimer()
-	nodes, err := GoldpingerConfig.KubernetesClient.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		zap.L().Error("Error getting nodes", zap.Error(err))
-		CountError("kubernetes_api")
-	} else {
-		timer.ObserveDuration()
-	}
-	return nodes
-}
-
 // getHostIP gets the IP of the host where the pod is scheduled. If UseIPv6 is enabled then we need to check
 // the node IPs since HostIP will only list the default IP version one.
 func getHostIP(p v1.Pod) string {
@@ -62,26 +52,28 @@ func getHostIP(p v1.Pod) string {
 		return p.Status.HostIP
 	}
 
-	nodes := getAllNodes()
+	if addr, ok := nodeIPMap[p.Spec.NodeName]; ok {
+		return addr
+	}
 
-	for _, node := range nodes.Items {
-		var v6Addr string
-		var isNodeForPod bool
-		for _, addr := range node.Status.Addresses {
-			if addr.Address == p.Status.HostIP {
-				isNodeForPod = true
-			}
+	timer := GetLabeledKubernetesCallsTimer()
+	node, err := GoldpingerConfig.KubernetesClient.CoreV1().Nodes().Get(context.TODO(), p.Spec.NodeName, metav1.GetOptions{})
+	if err != nil {
+		zap.L().Error("error getting node", zap.Error(err))
+		CountError("kubernetes_api")
+		return p.Status.HostIP
+	} else {
+		timer.ObserveDuration()
+	}
 
-			if k8snet.IsIPv6String(addr.Address) {
-				v6Addr = addr.Address
-			}
-		}
-
-		if isNodeForPod && len(v6Addr) > 0 {
-			return v6Addr
+	result := p.Status.HostIP
+	for _, addr := range node.Status.Addresses {
+		if k8snet.IsIPv6String(addr.Address) {
+			result = addr.Address
 		}
 	}
-	return p.Status.HostIP
+	nodeIPMap[p.Spec.NodeName] = result
+	return result
 }
 
 // getPodIP will get an IPv6 IP from PodIPs if the UseIPv6 config is set, otherwise just return the object PodIP
