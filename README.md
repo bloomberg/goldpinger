@@ -231,6 +231,12 @@ subjects:
 
 You can also see [an example of using `kubeconfig` in the `./extras`](./extras/example-with-kubeconfig.yaml).
 
+### Using with IPv4/IPv6 dual-stack
+
+If your pods having IPv4 and IPv6 addresses assigned and you want to test communication over IPv6, you can specify the `USE_IPV6` environment variable which will use the IPv6 address on the pod and host.
+
+![ipv6](./extras/screenshot-ipv6.png)
+
 ### Note on DNS
 
 Note, that on top of resolving the other pods, all instances can also try to resolve arbitrary DNS. This allows you to test your DNS setup.
