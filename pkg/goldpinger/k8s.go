@@ -15,10 +15,12 @@
 package goldpinger
 
 import (
-	"io/ioutil"
-
+	"context"
 	"go.uber.org/zap"
+	"io/ioutil"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8snet "k8s.io/utils/net"
 )
 
 // PodNamespace is the auto-detected namespace for this goldpinger pod
@@ -41,10 +43,68 @@ func getPodNamespace() string {
 	return namespace
 }
 
+func getAllNodes() *v1.NodeList {
+	timer := GetLabeledKubernetesCallsTimer()
+	nodes, err := GoldpingerConfig.KubernetesClient.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		zap.L().Error("Error getting nodes", zap.Error(err))
+		CountError("kubernetes_api")
+	} else {
+		timer.ObserveDuration()
+	}
+	return nodes
+}
+
+// getHostIP gets the IP of the host where the pod is scheduled. If UseIPv6 is enabled then we need to check
+// the node IPs since HostIP will only list the default IP version one.
+func getHostIP(p v1.Pod) string {
+	if !GoldpingerConfig.UseIPv6 || k8snet.IsIPv6String(p.Status.HostIP) {
+		return p.Status.HostIP
+	}
+
+	nodes := getAllNodes()
+
+	for _, node := range nodes.Items {
+		var v6Addr string
+		var isNodeForPod bool
+		for _, addr := range node.Status.Addresses {
+			if addr.Address == p.Status.HostIP {
+				isNodeForPod = true
+			}
+
+			if k8snet.IsIPv6String(addr.Address) {
+				v6Addr = addr.Address
+			}
+		}
+
+		if isNodeForPod && len(v6Addr) > 0 {
+			return v6Addr
+		}
+	}
+	return p.Status.HostIP
+}
+
+// getPodIP will get an IPv6 IP from PodIPs if the UseIPv6 config is set, otherwise just return the object PodIP
+func getPodIP(p v1.Pod) string {
+	if !GoldpingerConfig.UseIPv6 {
+		return p.Status.PodIP
+	}
+
+	var v6IP string
+	if p.Status.PodIPs != nil {
+		for _, ip := range p.Status.PodIPs {
+			if k8snet.IsIPv6String(ip.IP) {
+				v6IP = ip.IP
+			}
+		}
+	}
+	return v6IP
+}
+
 // GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s)
 func GetAllPods() map[string]*GoldpingerPod {
 	timer := GetLabeledKubernetesCallsTimer()
-	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(*GoldpingerConfig.Namespace).List(metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
+	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(*GoldpingerConfig.Namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: GoldpingerConfig.LabelSelector})
 	if err != nil {
 		zap.L().Error("Error getting pods for selector", zap.String("selector", GoldpingerConfig.LabelSelector), zap.Error(err))
 		CountError("kubernetes_api")
@@ -56,8 +116,8 @@ func GetAllPods() map[string]*GoldpingerPod {
 	for _, pod := range pods.Items {
 		podMap[pod.Name] = &GoldpingerPod{
 			Name:   pod.Name,
-			PodIP:  pod.Status.PodIP,
-			HostIP: pod.Status.HostIP,
+			PodIP:  getPodIP(pod),
+			HostIP: getHostIP(pod),
 		}
 	}
 	return podMap

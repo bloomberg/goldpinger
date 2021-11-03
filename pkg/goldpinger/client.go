@@ -29,6 +29,7 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"go.uber.org/zap"
+	k8snet "k8s.io/utils/net"
 )
 
 // CheckNeighbours queries the kubernetes API server for all other goldpinger pods
@@ -273,7 +274,12 @@ func getClient(hostIP string) (*apiclient.Goldpinger, error) {
 	if hostIP == "" {
 		return nil, errors.New("Host or pod IP empty, can't make a call")
 	}
-	host := fmt.Sprintf("%s:%d", hostIP, GoldpingerConfig.Port)
+	var host string
+	if k8snet.IsIPv6String(hostIP) {
+		host = fmt.Sprintf("[%s]:%d", hostIP, GoldpingerConfig.Port)
+	} else {
+		host = fmt.Sprintf("%s:%d", hostIP, GoldpingerConfig.Port)
+	}
 	transport := httptransport.New(host, "", nil)
 	client := apiclient.New(transport, strfmt.Default)
 	apiclient.Default.SetTransport(transport)
