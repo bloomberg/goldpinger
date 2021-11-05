@@ -15,7 +15,6 @@
 package main
 
 import (
-	"k8s.io/utils/net"
 	"os"
 	"strconv"
 
@@ -24,6 +23,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/utils/net"
 
 	"github.com/bloomberg/goldpinger/v3/pkg/goldpinger"
 	"github.com/bloomberg/goldpinger/v3/pkg/restapi"
