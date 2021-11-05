@@ -30,12 +30,13 @@ var GoldpingerConfig = struct {
 	PingNumber       uint    `long:"ping-number" description:"Number of peers to ping. A value of 0 indicates all peers should be pinged." default:"0" env:"PING_NUMBER"`
 	Port             int     `long:"client-port-override" description:"(for testing) use this port when calling other instances" env:"CLIENT_PORT_OVERRIDE"`
 	UseHostIP        bool    `long:"use-host-ip" description:"When making the calls, use host ip (defaults to pod ip)" env:"USE_HOST_IP"`
-	UseIPv6          bool    `long:"use-ipv6" description:"Will find the IPv6 address on a pod to use for pinging." env:"USE_IPV6"`
 	LabelSelector    string  `long:"label-selector" description:"label selector to use to discover goldpinger pods in the cluster" env:"LABEL_SELECTOR" default:"app=goldpinger"`
 	Namespace        *string `long:"namespace" description:"namespace to use to discover goldpinger pods in the cluster (empty for all). Defaults to discovering the namespace for the current pod" env:"NAMESPACE"`
 	KubernetesClient *kubernetes.Clientset
 
 	DnsHosts []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
+
+	IPVersions []string `long:"ip-versions" description:"The IP versions to use (space delimited). Possible values are 4 and 6 (defaults to 4)." env:"IP_VERSIONS" env-delim:" "`
 
 	// Timeouts
 	PingTimeoutMs     int64 `long:"ping-timeout-ms" description:"The timeout in milliseconds for a ping call to other goldpinger pods" env:"PING_TIMEOUT_MS" default:"300"`

@@ -48,7 +48,7 @@ func getPodNamespace() string {
 // getHostIP gets the IP of the host where the pod is scheduled. If UseIPv6 is enabled then we need to check
 // the node IPs since HostIP will only list the default IP version one.
 func getHostIP(p v1.Pod) string {
-	if !GoldpingerConfig.UseIPv6 || k8snet.IsIPv6String(p.Status.HostIP) {
+	if ipMatchesConfig(p.Status.HostIP) {
 		return p.Status.HostIP
 	}
 
@@ -66,31 +66,31 @@ func getHostIP(p v1.Pod) string {
 		timer.ObserveDuration()
 	}
 
-	result := p.Status.HostIP
+	var hostIP string
 	for _, addr := range node.Status.Addresses {
-		if k8snet.IsIPv6String(addr.Address) {
-			result = addr.Address
+		if ipMatchesConfig(addr.Address) {
+			hostIP = addr.Address
 		}
 	}
-	nodeIPMap[p.Spec.NodeName] = result
-	return result
+	nodeIPMap[p.Spec.NodeName] = hostIP
+	return hostIP
 }
 
 // getPodIP will get an IPv6 IP from PodIPs if the UseIPv6 config is set, otherwise just return the object PodIP
 func getPodIP(p v1.Pod) string {
-	if !GoldpingerConfig.UseIPv6 {
+	if ipMatchesConfig(p.Status.PodIP) {
 		return p.Status.PodIP
 	}
 
-	var v6IP string
+	var podIP string
 	if p.Status.PodIPs != nil {
 		for _, ip := range p.Status.PodIPs {
-			if k8snet.IsIPv6String(ip.IP) {
-				v6IP = ip.IP
+			if ipMatchesConfig(ip.IP) {
+				podIP = ip.IP
 			}
 		}
 	}
-	return v6IP
+	return podIP
 }
 
 // GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s)
@@ -113,4 +113,24 @@ func GetAllPods() map[string]*GoldpingerPod {
 		}
 	}
 	return podMap
+}
+
+// ipMatchesConfig checks if the input IP family matches the first entry in the IPVersions config.
+// TODO update to check all config versions to support dual-stack pinging.
+func ipMatchesConfig(ip string) bool {
+	ipFamily := getIPFamily(ip)
+	return GoldpingerConfig.IPVersions[0] == ipFamily
+}
+
+// getIPFamily returns the IP family of the input IP.
+// Possible values are 4 and 6.
+func getIPFamily(ip string) string {
+	if k8snet.IsIPv4String(ip) {
+		return string(k8snet.IPv4)
+	}
+	if k8snet.IsIPv6String(ip) {
+		return k8snet.IPv6
+	}
+	zap.L().Error("Error determining IP family", zap.String("IP", ip))
+	return ""
 }
