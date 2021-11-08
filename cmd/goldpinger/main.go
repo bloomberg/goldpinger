@@ -23,6 +23,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/utils/net"
 
 	"github.com/bloomberg/goldpinger/v3/pkg/goldpinger"
 	"github.com/bloomberg/goldpinger/v3/pkg/restapi"
@@ -131,6 +132,16 @@ func main() {
 	}
 	if goldpinger.GoldpingerConfig.PingNumber == 0 {
 		logger.Info("--ping-number set to 0: pinging all pods")
+	}
+	if goldpinger.GoldpingerConfig.IPVersions == nil || len(goldpinger.GoldpingerConfig.IPVersions) == 0 {
+		logger.Info("IPVersions not set: settings to 4 (IPv4)")
+		goldpinger.GoldpingerConfig.IPVersions = []string{"4"}
+	}
+	if len(goldpinger.GoldpingerConfig.IPVersions) > 1 {
+		logger.Warn("Multiple IP versions not supported. Will use first version specified as default", zap.Strings("IPVersions", goldpinger.GoldpingerConfig.IPVersions))
+	}
+	if goldpinger.GoldpingerConfig.IPVersions[0] != string(net.IPv4) && goldpinger.GoldpingerConfig.IPVersions[0] != net.IPv6 {
+		logger.Error("Unknown IP version specified: expected values are 4 or 6", zap.Strings("IPVersions", goldpinger.GoldpingerConfig.IPVersions))
 	}
 
 	server.ConfigureAPI()
