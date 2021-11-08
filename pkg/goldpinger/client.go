@@ -17,9 +17,9 @@ package goldpinger
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"sort"
+	"strconv"
 	"sync"
 	"time"
 
@@ -269,7 +269,7 @@ func getClient(hostIP string) (*apiclient.Goldpinger, error) {
 	if hostIP == "" {
 		return nil, errors.New("Host or pod IP empty, can't make a call")
 	}
-	host := fmt.Sprintf("%s:%d", hostIP, GoldpingerConfig.Port)
+	host := net.JoinHostPort(hostIP, strconv.Itoa(GoldpingerConfig.Port))
 	transport := httptransport.New(host, "", nil)
 	client := apiclient.New(transport, strfmt.Default)
 	apiclient.Default.SetTransport(transport)
