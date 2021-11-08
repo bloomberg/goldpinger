@@ -57,7 +57,6 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 
 // CheckCluster does a CheckNeighboursNeighbours and analyses results to produce a binary OK or not OK
 func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
-
 	start := time.Now()
 	output := models.ClusterHealthResults{
 		GeneratedAt: strfmt.DateTime(start),
@@ -156,7 +155,6 @@ type CheckServicePodsResult struct {
 
 // CheckAllPods calls all neighbours and returns a detailed report
 func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *models.CheckAllResults {
-
 	result := models.CheckAllResults{Responses: make(map[string]models.CheckAllPodResult)}
 
 	ch := make(chan CheckServicePodsResult, len(pods))
@@ -164,9 +162,7 @@ func CheckAllPods(checkAllCtx context.Context, pods map[string]*GoldpingerPod) *
 	wg.Add(len(pods))
 
 	for _, pod := range pods {
-
 		go func(pod *GoldpingerPod) {
-
 			// logger
 			logger := zap.L().With(
 				zap.String("op", "check"),
