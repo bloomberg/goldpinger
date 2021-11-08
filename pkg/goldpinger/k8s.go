@@ -119,14 +119,14 @@ func GetAllPods() map[string]*GoldpingerPod {
 // TODO update to check all config versions to support dual-stack pinging.
 func ipMatchesConfig(ip string) bool {
 	ipFamily := getIPFamily(ip)
-	return GoldpingerConfig.IPVersions[0] == ipFamily
+	return GoldpingerConfig.IPVersions[0] == string(ipFamily)
 }
 
 // getIPFamily returns the IP family of the input IP.
 // Possible values are 4 and 6.
-func getIPFamily(ip string) string {
+func getIPFamily(ip string) k8snet.IPFamily {
 	if k8snet.IsIPv4String(ip) {
-		return string(k8snet.IPv4)
+		return k8snet.IPv4
 	}
 	if k8snet.IsIPv6String(ip) {
 		return k8snet.IPv6
