@@ -1,6 +1,6 @@
 module github.com/bloomberg/goldpinger/v3
 
-go 1.14
+go 1.15
 
 require (
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect

@@ -1,4 +1,8 @@
-FROM golang:1.14-alpine as builder
+FROM golang:1.15-alpine as builder
+ARG TARGETARCH
+ARG TARGETOS
+ARG GO_MOD_ACTION=download
+ENV GO111MODULE=on
 
 # Install our build tools
 
@@ -8,16 +12,19 @@ RUN apk add --update git make bash
 
 WORKDIR /w
 COPY go.mod go.sum /w/
-RUN go mod download
+RUN go mod $GO_MOD_ACTION
 
 # Build goldpinger
 
 COPY . ./
-RUN make bin/goldpinger
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH make bin/goldpinger
 
 # Build the asset container, copy over goldpinger
-
-FROM scratch
+FROM scratch as simple
 COPY --from=builder /w/bin/goldpinger /goldpinger
 COPY ./static /static
 ENTRYPOINT ["/goldpinger", "--static-file-path", "/static"]
+
+# For vendor builds, use the simple build and add the vendor'd files
+FROM simple as vendor
+COPY --from=builder /w/vendor /goldpinger-vendor-sources

@@ -68,21 +68,20 @@ The repo comes with two ways of building a `docker` image: compiling locally, an
 You will need `docker` version 17.05+ installed to support multi-stage builds.
 
 ```sh
-# step 1: launch the build
-make build-multistage
+# Build a local container without publishing
+make build
 
-# step 2: push the image somewhere
-namespace="docker.io/myhandle/" make tag
-namespace="docker.io/myhandle/" make push
+# Build & push the image somewhere
+namespace="docker.io/myhandle/" make build-release
 ```
 
 This was contributed via [@michiel](https://github.com/michiel) - kudos !
 
 ### Compiling locally
 
-In order to build `Goldpinger`, you are going to need `go` version 1.13+ and `docker`.
+In order to build `Goldpinger`, you are going to need `go` version 1.15+ and `docker`.
 
-Building from source code consists of compiling the binary and building a [Docker image](./build/Dockerfile-simple):
+Building from source code consists of compiling the binary and building a [Docker image](./Dockerfile):
 
 ```sh
 # step 0: check out the code
@@ -95,11 +94,10 @@ make bin/goldpinger
 ./bin/goldpinger --help
 
 # step 2: build the docker image containing the binary
-make build
+namespace="docker.io/myhandle/" make build
 
 # step 3: push the image somewhere
-namespace="docker.io/myhandle/" make tag
-namespace="docker.io/myhandle/" make push
+docker push $(namespace="docker.io/myhandle/" make version)
 ```
 
 ## Installation
