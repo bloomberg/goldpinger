@@ -25,22 +25,21 @@ swagger:
 	swagger generate server -t pkg -f ./swagger.yml --exclude-main -A goldpinger && \
 	swagger generate client -t pkg -f ./swagger.yml -A goldpinger
 
-build-multistage: build
+run:
+	go run ./cmd/goldpinger/main.go
+
+build:
+	docker build -t $(namespace)$(tag) --build-arg GO_MOD_ACTION=download --target simple -f ./Dockerfile .
+
+build-vendor:
+	docker build -t $(namespace)$(tag)-vendor --build-arg GO_MOD_ACTION=vendor --target vendor -f ./Dockerfile .
 
 build-release:
 	docker buildx build --push --platform linux/amd64,linux/arm64 -t $(namespace)$(tag) --build-arg GO_MOD_ACTION=download --target simple -f ./Dockerfile .
 	docker buildx build --push --platform linux/amd64,linux/arm64 -t $(namespace)$(tag)-vendor --build-arg GO_MOD_ACTION=vendor --target vendor -f ./Dockerfile .
 
-build:
-	docker build -t $(namespace)$(tag) --build-arg GO_MOD_ACTION=download --target simple -f ./Dockerfile .
-
-run:
-	go run ./cmd/goldpinger/main.go
-
 version:
 	@echo $(namespace)$(tag)
 
-vendor-build:
-	docker build -t $(namespace)$(tag)-vendor --build-arg GO_MOD_ACTION=vendor --target vendor -f ./Dockerfile .
 
-.PHONY: clean vendor swagger build build-multistage build-release vendor-build run version
+.PHONY: clean vendor swagger build build-release build-vendor run version
