@@ -16,14 +16,17 @@ jobs:
         with:
           go-version: 1.16
 
-      # basics
+      # local build
       - name: Compile the binary
         run: |
           make bin/goldpinger
           ./bin/goldpinger -h
+
+      # simple Docker build
       - name: Build the Docker image
         run: |
           make build
+          docker run `make version` --help
 
       # multi-arch build
       - name: Set up QEMU
