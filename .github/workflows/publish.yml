@@ -28,7 +28,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ secrets.DOCKER_HUB_USERNAME }}/goldpinger
+          images: ${{ secrets.DOCKERHUB_USER }}/goldpinger
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
