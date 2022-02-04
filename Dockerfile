@@ -11,7 +11,7 @@ RUN apk add --update git make bash
 # Get dependencies
 
 WORKDIR /w
-COPY go.mod go.sum /w/
+COPY go.mod go.sum ./
 RUN go mod $GO_MOD_ACTION
 
 # Build goldpinger
