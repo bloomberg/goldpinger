@@ -35,7 +35,6 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          build-args: GO_MOD_ACTION=download
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
@@ -49,9 +48,8 @@ jobs:
           flavor: |
             suffix: -vendor,onlatest=false
           file: ./Dockerfile
-          build-args: GO_MOD_ACTION=vendor
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}-vendor
           labels: ${{ steps.meta.outputs.labels }}
           target: vendor
