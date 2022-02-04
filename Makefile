@@ -29,14 +29,14 @@ run:
 	go run ./cmd/goldpinger/main.go
 
 build:
-	docker build -t $(namespace)$(tag) --build-arg GO_MOD_ACTION=download --target simple -f ./Dockerfile .
+	docker build -t $(namespace)$(tag) --target simple -f ./Dockerfile .
 
 build-vendor:
-	docker build -t $(namespace)$(tag)-vendor --build-arg GO_MOD_ACTION=vendor --target vendor -f ./Dockerfile .
+	docker build -t $(namespace)$(tag)-vendor --target vendor -f ./Dockerfile .
 
 build-release:
-	docker buildx build --push --platform linux/amd64,linux/arm64 -t $(namespace)$(tag) --build-arg GO_MOD_ACTION=download --target simple -f ./Dockerfile .
-	docker buildx build --push --platform linux/amd64,linux/arm64 -t $(namespace)$(tag)-vendor --build-arg GO_MOD_ACTION=vendor --target vendor -f ./Dockerfile .
+	docker buildx build --push --platform linux/amd64,linux/arm64 --target simple -t $(namespace)$(tag) -f ./Dockerfile .
+	docker buildx build --push --platform linux/amd64,linux/arm64 --target vendor -t $(namespace)$(tag)-vendor -f ./Dockerfile .
 
 version:
 	@echo $(namespace)$(tag)
