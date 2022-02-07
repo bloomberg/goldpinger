@@ -39,7 +39,6 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          build-args: GO_MOD_ACTION=download
           platforms: linux/amd64,linux/arm64
           target: simple
       - name: Build vendor image
@@ -50,6 +49,5 @@ jobs:
           flavor: |
             suffix: -vendor,onlatest=false
           file: ./Dockerfile
-          build-args: GO_MOD_ACTION=vendor
           platforms: linux/amd64,linux/arm64
           target: vendor
