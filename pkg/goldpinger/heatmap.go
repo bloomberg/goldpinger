@@ -26,7 +26,6 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
-	"time"
 
 	"go.uber.org/zap"
 	"golang.org/x/image/font"
@@ -83,7 +82,7 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(
 		r.Context(),
-		time.Duration(GoldpingerConfig.CheckAllTimeoutMs)*time.Millisecond,
+		GoldpingerConfig.CheckAllTimeout,
 	)
 	defer cancel()
 

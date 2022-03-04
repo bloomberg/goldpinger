@@ -118,6 +118,8 @@ func (m *PodResult) validateResponse(formats strfmt.Registry) error {
 		if err := m.Response.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("response")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("response")
 			}
 			return err
 		}
@@ -146,6 +148,8 @@ func (m *PodResult) contextValidateResponse(ctx context.Context, formats strfmt.
 		if err := m.Response.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("response")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("response")
 			}
 			return err
 		}

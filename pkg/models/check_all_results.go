@@ -23,9 +23,6 @@ type CheckAllResults struct {
 	// o k
 	OK *bool `json:"OK,omitempty"`
 
-	// dns results
-	DNSResults map[string]DNSResults `json:"dnsResults,omitempty"`
-
 	// hosts
 	Hosts []*CheckAllResultsHostsItems0 `json:"hosts"`
 
@@ -35,6 +32,9 @@ type CheckAllResults struct {
 	// hosts number
 	HostsNumber int32 `json:"hosts-number,omitempty"`
 
+	// probe results
+	ProbeResults map[string]ProbeResults `json:"probeResults,omitempty"`
+
 	// responses
 	Responses map[string]CheckAllPodResult `json:"responses,omitempty"`
 }
@@ -43,11 +43,11 @@ type CheckAllResults struct {
 func (m *CheckAllResults) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDNSResults(formats); err != nil {
+	if err := m.validateHosts(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateHosts(formats); err != nil {
+	if err := m.validateProbeResults(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -58,24 +58,6 @@ func (m *CheckAllResults) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *CheckAllResults) validateDNSResults(formats strfmt.Registry) error {
-	if swag.IsZero(m.DNSResults) { // not required
-		return nil
-	}
-
-	for k := range m.DNSResults {
-
-		if val, ok := m.DNSResults[k]; ok {
-			if err := val.Validate(formats); err != nil {
-				return err
-			}
-		}
-
-	}
-
 	return nil
 }
 
@@ -93,7 +75,27 @@ func (m *CheckAllResults) validateHosts(formats strfmt.Registry) error {
 			if err := m.Hosts[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("hosts" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("hosts" + "." + strconv.Itoa(i))
 				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *CheckAllResults) validateProbeResults(formats strfmt.Registry) error {
+	if swag.IsZero(m.ProbeResults) { // not required
+		return nil
+	}
+
+	for k := range m.ProbeResults {
+
+		if val, ok := m.ProbeResults[k]; ok {
+			if err := val.Validate(formats); err != nil {
 				return err
 			}
 		}
@@ -115,6 +117,11 @@ func (m *CheckAllResults) validateResponses(formats strfmt.Registry) error {
 		}
 		if val, ok := m.Responses[k]; ok {
 			if err := val.Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("responses" + "." + k)
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("responses" + "." + k)
+				}
 				return err
 			}
 		}
@@ -128,11 +135,11 @@ func (m *CheckAllResults) validateResponses(formats strfmt.Registry) error {
 func (m *CheckAllResults) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.contextValidateDNSResults(ctx, formats); err != nil {
+	if err := m.contextValidateHosts(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.contextValidateHosts(ctx, formats); err != nil {
+	if err := m.contextValidateProbeResults(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -146,12 +153,17 @@ func (m *CheckAllResults) ContextValidate(ctx context.Context, formats strfmt.Re
 	return nil
 }
 
-func (m *CheckAllResults) contextValidateDNSResults(ctx context.Context, formats strfmt.Registry) error {
+func (m *CheckAllResults) contextValidateHosts(ctx context.Context, formats strfmt.Registry) error {
 
-	for k := range m.DNSResults {
+	for i := 0; i < len(m.Hosts); i++ {
 
-		if val, ok := m.DNSResults[k]; ok {
-			if err := val.ContextValidate(ctx, formats); err != nil {
+		if m.Hosts[i] != nil {
+			if err := m.Hosts[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("hosts" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("hosts" + "." + strconv.Itoa(i))
+				}
 				return err
 			}
 		}
@@ -161,15 +173,12 @@ func (m *CheckAllResults) contextValidateDNSResults(ctx context.Context, formats
 	return nil
 }
 
-func (m *CheckAllResults) contextValidateHosts(ctx context.Context, formats strfmt.Registry) error {
+func (m *CheckAllResults) contextValidateProbeResults(ctx context.Context, formats strfmt.Registry) error {
 
-	for i := 0; i < len(m.Hosts); i++ {
+	for k := range m.ProbeResults {
 
-		if m.Hosts[i] != nil {
-			if err := m.Hosts[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("hosts" + "." + strconv.Itoa(i))
-				}
+		if val, ok := m.ProbeResults[k]; ok {
+			if err := val.ContextValidate(ctx, formats); err != nil {
 				return err
 			}
 		}

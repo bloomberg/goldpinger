@@ -46,7 +46,7 @@ type Pinger struct {
 func NewPinger(pod *GoldpingerPod, resultsChan chan<- PingAllPodsResult) *Pinger {
 	p := Pinger{
 		pod:         pod,
-		timeout:     time.Duration(GoldpingerConfig.PingTimeoutMs) * time.Millisecond,
+		timeout:     GoldpingerConfig.PingTimeout,
 		resultsChan: resultsChan,
 		stopChan:    make(chan struct{}),
 

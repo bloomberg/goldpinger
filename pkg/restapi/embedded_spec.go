@@ -203,10 +203,22 @@ func init() {
           "type": "integer",
           "format": "int32"
         },
+        "httpResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/HttpResults"
+          }
+        },
         "responses": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/CheckAllPodResult"
+          }
+        },
+        "tcpResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TcpResults"
           }
         }
       }
@@ -217,11 +229,17 @@ func init() {
         "dnsResults": {
           "$ref": "#/definitions/DnsResults"
         },
+        "httpResults": {
+          "$ref": "#/definitions/HttpResults"
+        },
         "podResults": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/PodResult"
           }
+        },
+        "tcpResults": {
+          "$ref": "#/definitions/TcpResults"
         }
       }
     },
@@ -261,21 +279,10 @@ func init() {
         }
       }
     },
-    "DnsResult": {
-      "properties": {
-        "error": {
-          "type": "string"
-        },
-        "response-time-ms": {
-          "type": "number",
-          "format": "int64"
-        }
-      }
-    },
     "DnsResults": {
       "type": "object",
       "additionalProperties": {
-        "$ref": "#/definitions/DnsResult"
+        "$ref": "#/definitions/ProbeResult"
       }
     },
     "HealthCheckResults": {
@@ -293,6 +300,12 @@ func init() {
           "type": "string",
           "format": "date-time"
         }
+      }
+    },
+    "HttpResults": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/ProbeResult"
       }
     },
     "PingResults": {
@@ -341,6 +354,23 @@ func init() {
           "type": "integer",
           "format": "int32"
         }
+      }
+    },
+    "ProbeResult": {
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "response-time-ms": {
+          "type": "number",
+          "format": "int64"
+        }
+      }
+    },
+    "TcpResults": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/ProbeResult"
       }
     }
   }
@@ -518,10 +548,22 @@ func init() {
           "type": "integer",
           "format": "int32"
         },
+        "httpResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/HttpResults"
+          }
+        },
         "responses": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/CheckAllPodResult"
+          }
+        },
+        "tcpResults": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/TcpResults"
           }
         }
       }
@@ -548,11 +590,17 @@ func init() {
         "dnsResults": {
           "$ref": "#/definitions/DnsResults"
         },
+        "httpResults": {
+          "$ref": "#/definitions/HttpResults"
+        },
         "podResults": {
           "type": "object",
           "additionalProperties": {
             "$ref": "#/definitions/PodResult"
           }
+        },
+        "tcpResults": {
+          "$ref": "#/definitions/TcpResults"
         }
       }
     },
@@ -592,21 +640,10 @@ func init() {
         }
       }
     },
-    "DnsResult": {
-      "properties": {
-        "error": {
-          "type": "string"
-        },
-        "response-time-ms": {
-          "type": "number",
-          "format": "int64"
-        }
-      }
-    },
     "DnsResults": {
       "type": "object",
       "additionalProperties": {
-        "$ref": "#/definitions/DnsResult"
+        "$ref": "#/definitions/ProbeResult"
       }
     },
     "HealthCheckResults": {
@@ -624,6 +661,12 @@ func init() {
           "type": "string",
           "format": "date-time"
         }
+      }
+    },
+    "HttpResults": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/ProbeResult"
       }
     },
     "PingResults": {
@@ -672,6 +715,23 @@ func init() {
           "type": "integer",
           "format": "int32"
         }
+      }
+    },
+    "ProbeResult": {
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "response-time-ms": {
+          "type": "number",
+          "format": "int64"
+        }
+      }
+    },
+    "TcpResults": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/ProbeResult"
       }
     }
   }
