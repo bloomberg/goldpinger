@@ -69,7 +69,8 @@ func getHostIP(p v1.Pod) string {
 
 	var hostIP string
 	for _, addr := range node.Status.Addresses {
-		if ipMatchesConfig(addr.Address) {
+		if (addr.Type == v1.NodeInternalIP || addr.Type == v1.NodeExternalIP) &&
+			ipMatchesConfig(addr.Address) {
 			hostIP = addr.Address
 		}
 	}
