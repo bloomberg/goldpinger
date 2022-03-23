@@ -16,8 +16,9 @@ package goldpinger
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"io/ioutil"
+
+	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8snet "k8s.io/utils/net"
@@ -68,7 +69,8 @@ func getHostIP(p v1.Pod) string {
 
 	var hostIP string
 	for _, addr := range node.Status.Addresses {
-		if ipMatchesConfig(addr.Address) {
+		if (addr.Type == v1.NodeInternalIP || addr.Type == v1.NodeExternalIP) &&
+			ipMatchesConfig(addr.Address) {
 			hostIP = addr.Address
 		}
 	}
