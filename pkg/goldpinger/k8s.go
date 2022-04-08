@@ -16,8 +16,9 @@ package goldpinger
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"io/ioutil"
+
+	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8snet "k8s.io/utils/net"
@@ -93,6 +94,14 @@ func getPodIP(p v1.Pod) string {
 	return podIP
 }
 
+func getPodNodeName(p v1.Pod) string {
+	if p.Spec.NodeName != "" {
+		return p.Spec.NodeName
+	}
+
+	return p.Name
+}
+
 // GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s)
 func GetAllPods() map[string]*GoldpingerPod {
 	timer := GetLabeledKubernetesCallsTimer()
@@ -111,7 +120,7 @@ func GetAllPods() map[string]*GoldpingerPod {
 	podMap := make(map[string]*GoldpingerPod)
 	for _, pod := range pods.Items {
 		podMap[pod.Name] = &GoldpingerPod{
-			Name:   pod.Name,
+			Name:   getPodNodeName(pod),
 			PodIP:  getPodIP(pod),
 			HostIP: getHostIP(pod),
 		}
