@@ -95,7 +95,7 @@ func getPodIP(p v1.Pod) string {
 }
 
 func getPodNodeName(p v1.Pod) string {
-	if p.Spec.NodeName != "" {
+	if GoldpingerConfig.DisplayNodeName {
 		return p.Spec.NodeName
 	}
 
