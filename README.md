@@ -231,7 +231,7 @@ You can also see [an example of using `kubeconfig` in the `./extras`](./extras/e
 
 ### Using with IPv4/IPv6 dual-stack
 
-If your pods having IPv4 and IPv6 addresses assigned and you want to test communication over IPv6, you can specify the `USE_IPV6` environment variable which will use the IPv6 address on the pod and host.
+If your cluster IPv4/IPv6 dual-stack and you want to force IPv6, you can set the `IP_VERSIONS` environment variable to "6" (default is "4") which will use the IPv6 address on the pod and host.
 
 ![ipv6](./extras/screenshot-ipv6.png)
 
