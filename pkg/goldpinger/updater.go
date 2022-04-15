@@ -34,8 +34,8 @@ var checkResultsMux = sync.Mutex{}
 // - there is already a pinger with the same name
 // - the pinger has the same podIP
 // - the pinger has the same hostIP
-func exists(existingPods map[string]*GoldpingerPod, new *GoldpingerPod) bool {
-	old, exists := existingPods[new.Name]
+func exists(existingPods map[string]*GoldpingerPod, podName string, new *GoldpingerPod) bool {
+	old, exists := existingPods[podName]
 	return exists && (old.PodIP == new.PodIP) && (old.HostIP == new.HostIP)
 }
 
@@ -61,7 +61,7 @@ func updatePingers(resultsChan chan<- PingAllPodsResult) {
 
 		latest := SelectPods()
 		for podName, pod := range latest {
-			if exists(existingPods, pod) {
+			if exists(existingPods, podName, pod) {
 				// This pod continues to exist in the latest iteration of the update
 				// without any changes
 				// Delete it from the set of pods that we wish to delete
