@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect
 	github.com/cespare/xxhash v1.1.0
-	github.com/go-openapi/errors v0.20.0
+	github.com/go-openapi/errors v0.20.2
 	github.com/go-openapi/loads v0.19.5
 	github.com/go-openapi/runtime v0.19.26
 	github.com/go-openapi/spec v0.19.8

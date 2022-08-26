@@ -153,14 +153,17 @@ func updateCounters() {
 		}
 	}
 	CountHealthyUnhealthyNodes(counterHealthy, float64(len(checkResults.PodResults))-counterHealthy)
-	// check DNS, but don't block the access to checkResultsMux
+	// check external targets, don't block the access to checkResultsMux
 	nodesHealthy := int(counterHealthy) == len(checkResults.PodResults)
 	go func(healthySoFar bool) {
 		if healthySoFar {
-			for _, response := range *checkDNS() {
-				if response.Error != "" {
-					healthySoFar = false
-					break
+			probeResults := checkTargets()
+			for host := range probeResults {
+				for _, response := range probeResults[host] {
+					if response.Error != "" {
+						healthySoFar = false
+						break
+					}
 				}
 			}
 		}

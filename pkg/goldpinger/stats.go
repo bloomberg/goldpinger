@@ -103,7 +103,26 @@ var (
 			"host",
 		},
 	)
-
+	goldPingerTcpErrorsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "goldpinger_tcp_errors_total",
+			Help: "Statistics of TCP probe errors per instance",
+		},
+		[]string{
+			"goldpinger_instance",
+			"host",
+		},
+	)
+	goldPingerHttpErrorsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "goldpinger_http_errors_total",
+			Help: "Statistics of HTTP probe errors per instance",
+		},
+		[]string{
+			"goldpinger_instance",
+			"host",
+		},
+	)
 	bootTime = time.Now()
 )
 
@@ -115,6 +134,8 @@ func init() {
 	prometheus.MustRegister(goldpingerResponseTimeKubernetesHistogram)
 	prometheus.MustRegister(goldpingerErrorsCounter)
 	prometheus.MustRegister(goldpingerDnsErrorsCounter)
+	prometheus.MustRegister(goldPingerHttpErrorsCounter)
+	prometheus.MustRegister(goldPingerTcpErrorsCounter)
 	zap.L().Info("Metrics setup - see /metrics")
 }
 
@@ -168,6 +189,22 @@ func CountError(errorType string) {
 // counts instances of dns errors
 func CountDnsError(host string) {
 	goldpingerDnsErrorsCounter.WithLabelValues(
+		GoldpingerConfig.Hostname,
+		host,
+	).Inc()
+}
+
+// CountTcpError counts instances of tcp errors for prober
+func CountTcpError(host string) {
+	goldPingerTcpErrorsCounter.WithLabelValues(
+		GoldpingerConfig.Hostname,
+		host,
+	).Inc()
+}
+
+// CountHttpError counts instances of tcp errors for prober
+func CountHttpError(host string) {
+	goldPingerHttpErrorsCounter.WithLabelValues(
 		GoldpingerConfig.Hostname,
 		host,
 	).Inc()

@@ -12,17 +12,21 @@ definitions:
         type: integer
       ping:
         type: integer
-  DnsResult:
+  ProbeResult:
     properties:
       response-time-ms:
         type: number
         format: int64
       error:
         type: string
-  DnsResults:
+      protocol:
+        type: string
+  ProbeResults:
     type: object
     additionalProperties:
-      $ref: '#/definitions/DnsResult'
+      type: array
+      items:
+        $ref: '#/definitions/ProbeResult' 
   PingResults:
     type: object
     properties:
@@ -60,8 +64,8 @@ definitions:
   CheckResults:
     type: object
     properties:
-      dnsResults:
-        $ref: '#/definitions/DnsResults'
+      probeResults:
+        $ref: '#/definitions/ProbeResults'    
       podResults:
         type: object
         additionalProperties:
@@ -110,10 +114,10 @@ definitions:
             podIP:
               type: string
               format: ipv4
-      dnsResults:
+      probeResults:
         type: object
         additionalProperties:
-          $ref: '#/definitions/DnsResults'
+          $ref: '#/definitions/ProbeResults'       
       responses:
         type: object
         additionalProperties:

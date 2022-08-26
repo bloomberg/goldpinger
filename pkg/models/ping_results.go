@@ -66,6 +66,8 @@ func (m *PingResults) validateReceived(formats strfmt.Registry) error {
 		if err := m.Received.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("received")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("received")
 			}
 			return err
 		}
@@ -94,6 +96,8 @@ func (m *PingResults) contextValidateReceived(ctx context.Context, formats strfm
 		if err := m.Received.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("received")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("received")
 			}
 			return err
 		}

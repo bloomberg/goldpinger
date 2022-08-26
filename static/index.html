@@ -213,6 +213,7 @@ var loadingDialog = function(enable){
 var global_data = undefined;
 var s; // the sigma graph
 
+
 var main = function(timeout){
 
         timeout = timeout || Number($("#timeout").val()) || 5.0;
@@ -229,7 +230,6 @@ var main = function(timeout){
 
                 // prepare nodes
                 var nodes = [];
-                var dnsCheckNodes = [];
                 var podIPs = [];
                 var resp = data.responses;
                 for (let podIP in resp) {
@@ -284,39 +284,44 @@ var main = function(timeout){
                         })
                 })
                 console.log(nodes);
-
-                if ('dnsResults' in data) {
-                    var yoffset = 0;
-                    for (let checkedHost in data.dnsResults) {
-                        let value = data.dnsResults[checkedHost];
-                        var allOk = true;
-                        for (let pod in value) {
-                            var podData = value[pod];
-                            var elapsed = 0;
-                            if ('response-time-ms' in podData) {
-                                elapsed = podData['response-time-ms'];
-                            }
-                            var podOk = (!('error' in podData));
-                            allOk = allOk && podOk
-                            edges.push({
-                                source: pod,
-                                target: checkedHost,
-                                _data: {
+                 
+                var probeResultsNodes = [];
+                if ('probeResults' in data) {
+                  var yoffset = 0;
+                  for (let checkedHost in data.probeResults) {
+                      let  value = data.probeResults[checkedHost];
+                      var allOk = true;
+                      for (let pod in value) {
+                          for (var i = 0; i < value[pod].length; i++){
+                                var elapsed = 0;
+                                var podData = value[pod][i];
+                                if ('response-time-ms' in podData) {
+                                        elapsed = podData['response-time-ms'];
+                                }
+                                var podOk = (!('error' in podData));
+                                allOk = allOk && podOk
+                                edges.push({
+                                  source: pod,
+                                  target: checkedHost,
+                                  _data: {
                                     "OK": podOk,
                                     "elapsed": elapsed,
-                                    "isDNSCheckNode": true,
-                                }
-                            });
+                                    "isprobeResultsNode": true,
+                                  }
+                                });              
+                          } 
                         }
+
                         value["OK"] = allOk
-                        dnsCheckNodes.push({
-                            "label": checkedHost,
-                            "id": checkedHost,
-                            "x": 0,
-                            "y": 0,
-                            _data: value,
-                        });
-                    }
+                        probeResultsNodes.push({
+                                "label": checkedHost,
+                                "id": checkedHost,
+                                "x": 0,
+                                "y": 0,
+                                _data: value,
+                         });
+           
+                  } 
                 }
 
                 // build the actual graph
@@ -351,7 +356,7 @@ var main = function(timeout){
                 });
 
                 // generate any dns nodes on the graph
-                dnsCheckNodes.forEach(function(node, i, a){
+                probeResultsNodes.forEach(function(node, i, a){
                         node.x = 2;
                         node.y = (0.6 * i / a.length) - 0.8;
                         node.size = 10;
@@ -359,7 +364,6 @@ var main = function(timeout){
                         if (!node._data.OK) {
                                 node.color = "red";
                         }
-                        //console.log(node);
                         s.graph.addNode(node);
                 });
 
@@ -374,7 +378,7 @@ var main = function(timeout){
                         if (!edge._data.OK) {
                                 color = "red";
                         }
-                        if ("isDNSCheckNode" in edge._data) {
+                        if ("isprobeResultsNode" in edge._data) {
                                 type = "dashed";
                         }
                         var edge = {

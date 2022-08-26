@@ -256,6 +256,27 @@ and `goldpinger` should show something like this:
 
 ![screenshot-DNS-resolution](./extras/dns-screenshot.png)
 
+### TCP and HTTP checks to external targets
+
+Instances can also be configured to do simple TCP or HTTP checks on external targets. This is useful for visualizing more nuanced connectivity flows.
+
+```sh
+      --tcp-targets=             A list of external targets(<host>:<port> or <ip>:<port>) to attempt a TCP check on (space delimited) [$TCP_TARGETS]
+      --http-targets=            A  list of external targets(<http or https>://<url>) to attempt an HTTP{S} check on. A 200 HTTP code is considered successful. (space delimited) [$HTTP_TARGETS]
+      --tcp-targets-timeout=  The timeout for a tcp check on the provided tcp-targets (default: 500) [$TCP_TARGETS_TIMEOUT]
+      --dns-targets-timeout=  The timeout for a tcp check on the provided udp-targets (default: 500) [$DNS_TARGETS_TIMEOUT]
+```
+
+```yaml
+        - name: HTTP_TARGETS
+          value: http://bloomberg.com
+        - name: TCP_TARGETS
+          value: 10.34.5.141:5000 10.34.195.193:6442
+```
+
+the timeouts for the TCP, DNS and HTTP checks can be configured via `TCP_TARGETS_TIMEOUT`, `DNS_TARGETS_TIMEOUT` and `HTTP_TARGETS_TIMEOUT` respectively. 
+
+![screenshot-tcp-http-checks](./extras/tcp-checks-screenshot.png)
 
 ## Usage
 

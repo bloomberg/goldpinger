@@ -144,6 +144,23 @@ func main() {
 		logger.Error("Unknown IP version specified: expected values are 4 or 6", zap.Strings("IPVersions", goldpinger.GoldpingerConfig.IPVersions))
 	}
 
+	// Handle deprecated flags
+	if int(goldpinger.GoldpingerConfig.PingTimeout) == 0 {
+		logger.Warn("ping-timeout-ms is deprecated in favor of ping-timeout and will be removed in the future",
+			zap.Int64("ping-timeout-ms", goldpinger.GoldpingerConfig.PingTimeoutMs))
+		goldpinger.GoldpingerConfig.PingTimeout = time.Duration(goldpinger.GoldpingerConfig.PingTimeoutMs) * time.Millisecond
+	}
+	if int(goldpinger.GoldpingerConfig.CheckTimeout) == 0 {
+		logger.Warn("check-timeout-ms is deprecated in favor of check-timeout and will be removed in the future",
+			zap.Int64("check-timeout-ms", goldpinger.GoldpingerConfig.CheckTimeoutMs))
+		goldpinger.GoldpingerConfig.CheckTimeout = time.Duration(goldpinger.GoldpingerConfig.CheckTimeoutMs) * time.Millisecond
+	}
+	if int(goldpinger.GoldpingerConfig.CheckAllTimeout) == 0 {
+		logger.Warn("check-all-timeout-ms is deprecated in favor of check-all-timeout will be removed in the future",
+			zap.Int64("check-all-timeout-ms", goldpinger.GoldpingerConfig.CheckAllTimeoutMs))
+		goldpinger.GoldpingerConfig.CheckAllTimeout = time.Duration(goldpinger.GoldpingerConfig.CheckAllTimeoutMs) * time.Millisecond
+	}
+
 	server.ConfigureAPI()
 	goldpinger.StartUpdater()
 

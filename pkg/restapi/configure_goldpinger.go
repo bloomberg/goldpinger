@@ -20,7 +20,6 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
-	"time"
 
 	"strings"
 
@@ -61,7 +60,7 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 
 			ctx, cancel := context.WithTimeout(
 				params.HTTPRequest.Context(),
-				time.Duration(goldpinger.GoldpingerConfig.PingTimeoutMs)*time.Millisecond,
+				goldpinger.GoldpingerConfig.PingTimeout,
 			)
 			defer cancel()
 
@@ -74,7 +73,7 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 
 			ctx, cancel := context.WithTimeout(
 				params.HTTPRequest.Context(),
-				time.Duration(goldpinger.GoldpingerConfig.CheckTimeoutMs)*time.Millisecond,
+				goldpinger.GoldpingerConfig.CheckTimeout,
 			)
 			defer cancel()
 
@@ -87,7 +86,7 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 
 			ctx, cancel := context.WithTimeout(
 				params.HTTPRequest.Context(),
-				time.Duration(goldpinger.GoldpingerConfig.CheckAllTimeoutMs)*time.Millisecond,
+				goldpinger.GoldpingerConfig.CheckAllTimeout,
 			)
 			defer cancel()
 
@@ -100,7 +99,7 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 
 			ctx, cancel := context.WithTimeout(
 				params.HTTPRequest.Context(),
-				time.Duration(goldpinger.GoldpingerConfig.CheckAllTimeoutMs)*time.Millisecond,
+				goldpinger.GoldpingerConfig.CheckAllTimeout,
 			)
 			defer cancel()
 
