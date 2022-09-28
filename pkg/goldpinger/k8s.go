@@ -17,6 +17,7 @@ package goldpinger
 import (
 	"context"
 	"io/ioutil"
+	"k8s.io/client-go/kubernetes"
 
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
@@ -48,7 +49,7 @@ func getPodNamespace() string {
 
 // getHostIP gets the IP of the host where the pod is scheduled. If UseIPv6 is enabled then we need to check
 // the node IPs since HostIP will only list the default IP version one.
-func getHostIP(p v1.Pod) string {
+func getHostIP(clientSet *kubernetes.Clientset, p v1.Pod) string {
 	if ipMatchesConfig(p.Status.HostIP) {
 		return p.Status.HostIP
 	}
@@ -58,7 +59,7 @@ func getHostIP(p v1.Pod) string {
 	}
 
 	timer := GetLabeledKubernetesCallsTimer()
-	node, err := GoldpingerConfig.KubernetesClient.CoreV1().Nodes().Get(context.TODO(), p.Spec.NodeName, metav1.GetOptions{})
+	node, err := clientSet.CoreV1().Nodes().Get(context.TODO(), p.Spec.NodeName, metav1.GetOptions{})
 	if err != nil {
 		zap.L().Error("error getting node", zap.Error(err))
 		CountError("kubernetes_api")
@@ -110,20 +111,21 @@ func GetAllPods() map[string]*GoldpingerPod {
 		LabelSelector: GoldpingerConfig.LabelSelector,
 		FieldSelector: "status.phase=Running", // only select Running pods, otherwise we will get them before they have IPs
 	}
-	pods, err := GoldpingerConfig.KubernetesClient.CoreV1().Pods(*GoldpingerConfig.Namespace).List(context.TODO(), listOpts)
-	if err != nil {
-		zap.L().Error("Error getting pods for selector", zap.String("selector", GoldpingerConfig.LabelSelector), zap.Error(err))
-		CountError("kubernetes_api")
-	} else {
-		timer.ObserveDuration()
-	}
-
 	podMap := make(map[string]*GoldpingerPod)
-	for _, pod := range pods.Items {
-		podMap[pod.Name] = &GoldpingerPod{
-			Name:   getPodNodeName(pod),
-			PodIP:  getPodIP(pod),
-			HostIP: getHostIP(pod),
+	for _, clientSet := range GoldpingerConfig.KubernetesClient {
+		pods, err := clientSet.CoreV1().Pods(*GoldpingerConfig.Namespace).List(context.TODO(), listOpts)
+		if err != nil {
+			zap.L().Error("Error getting pods for selector", zap.String("selector", GoldpingerConfig.LabelSelector), zap.Error(err))
+			CountError("kubernetes_api")
+		} else {
+			timer.ObserveDuration()
+		}
+		for _, pod := range pods.Items {
+			podMap[pod.Name] = &GoldpingerPod{
+				Name:   getPodNodeName(pod),
+				PodIP:  getPodIP(pod),
+				HostIP: getHostIP(clientSet, pod),
+			}
 		}
 	}
 	return podMap

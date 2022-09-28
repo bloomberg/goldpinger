@@ -17,15 +17,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
+	"k8s.io/client-go/rest"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/go-openapi/loads"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/utils/net"
 
@@ -119,24 +121,58 @@ func main() {
 		logger.Info("Using configured namespace", zap.String("namespace", *goldpinger.GoldpingerConfig.Namespace))
 	}
 
-	// make a kubernetes client
+	// make kubernetes client
+	goldpinger.GoldpingerConfig.KubernetesClient = make([]*kubernetes.Clientset, 0)
 	var config *rest.Config
 	if goldpinger.GoldpingerConfig.KubeConfigPath == "" {
-		logger.Info("Kubeconfig not specified, trying to use in cluster config")
+		logger.Info("KubeConfig not specified, trying to use in cluster config")
 		config, err = rest.InClusterConfig()
+		// create the clientSet
+		clientSet, err := kubernetes.NewForConfig(config)
+		if err != nil {
+			logger.Fatal("kubernetes.NewForConfig error ", zap.Error(err))
+		}
+		goldpinger.GoldpingerConfig.KubernetesClient = append(goldpinger.GoldpingerConfig.KubernetesClient, clientSet)
 	} else {
-		logger.Info("Kubeconfig specified", zap.String("path", goldpinger.GoldpingerConfig.KubeConfigPath))
-		config, err = clientcmd.BuildConfigFromFlags("", goldpinger.GoldpingerConfig.KubeConfigPath)
+		f, err := os.Open(goldpinger.GoldpingerConfig.KubeConfigPath)
+		if err != nil {
+			logger.Info("Open outer configured error", zap.Error(err))
+		}
+		defer f.Close()
+		stat, err := f.Stat()
+		if err != nil {
+			logger.Info("Path outer configured error", zap.Error(err))
+		}
+
+		doOuterModel := func(path string) {
+			logger.Info("KubeConfig specified", zap.String("path", path))
+			config, err := clientcmd.BuildConfigFromFlags("", path)
+			if err != nil {
+				logger.Fatal("Error getting config ", zap.Error(err))
+			}
+			// create the clientset
+			clientSet, err := kubernetes.NewForConfig(config)
+			if err != nil {
+				logger.Fatal("kubernetes.NewForConfig error ", zap.Error(err))
+			}
+			goldpinger.GoldpingerConfig.KubernetesClient = append(goldpinger.GoldpingerConfig.KubernetesClient, clientSet)
+		}
+
+		if stat.IsDir() {
+			err := filepath.Walk(goldpinger.GoldpingerConfig.KubeConfigPath,
+				func(path string, info fs.FileInfo, err error) error {
+					if !info.IsDir() {
+						doOuterModel(path)
+					}
+					return nil
+				})
+			if err != nil {
+				logger.Info("Path walk configured error", zap.Error(err))
+			}
+		} else {
+			doOuterModel(goldpinger.GoldpingerConfig.KubeConfigPath)
+		}
 	}
-	if err != nil {
-		logger.Fatal("Error getting config ", zap.Error(err))
-	}
-	// create the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		logger.Fatal("kubernetes.NewForConfig error ", zap.Error(err))
-	}
-	goldpinger.GoldpingerConfig.KubernetesClient = clientset
 
 	// Check if we have an override for the client, default to own port
 	if goldpinger.GoldpingerConfig.Port == 0 {
