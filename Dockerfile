@@ -23,6 +23,7 @@ RUN go mod vendor
 FROM scratch as simple
 COPY --from=builder /w/bin/goldpinger /goldpinger
 COPY ./static /static
+COPY ./config /config
 ENTRYPOINT ["/goldpinger", "--static-file-path", "/static"]
 
 # For vendor builds, use the simple build and add the vendor'd files

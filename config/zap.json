@@ -1,0 +1,21 @@
+{
+    "level": "info",
+    "encoding": "json",
+    "outputPaths": [
+        "stdout"
+    ],
+    "errorOutputPaths": [
+        "stderr"
+    ],
+    "initialFields": {
+    },
+    "encoderConfig": {
+        "messageKey": "message",
+        "levelKey": "level",
+        "levelEncoder": "lowercase",
+        "timeKey": "ts",
+        "timeEncoder": "ISO8601",
+        "callerKey": "caller",
+        "callerEncoder": "Short"
+    }
+}
