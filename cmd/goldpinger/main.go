@@ -15,8 +15,11 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/go-openapi/loads"
@@ -37,37 +40,32 @@ var (
 	Version, Build string
 )
 
-func getLogger() *zap.Logger {
+func getLogger(zapconfigpath string) (*zap.Logger, error) {
 	var logger *zap.Logger
 	var err error
 
-	// We haven't parsed flags at this stage and that might be error prone
-	// so just use an envvar
-	if debug, err := strconv.ParseBool(os.Getenv("DEBUG")); err == nil && debug {
-		logger, err = zap.NewDevelopment()
-	} else {
-		logger, err = zap.NewProduction()
-	}
+	zapconfigJSON, err := ioutil.ReadFile(zapconfigpath)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("Could not read zap config file: %w", err)
 	}
-	zap.ReplaceGlobals(logger)
-	return logger
+
+	var cfg zap.Config
+	if err := json.Unmarshal(zapconfigJSON, &cfg); err != nil {
+		return nil, fmt.Errorf("Could not read zap config as json: %w", err)
+	}
+	logger, err = cfg.Build()
+	if err != nil {
+		return nil, fmt.Errorf("Could not build zap config: %w", err)
+	}
+
+	return logger, nil
 }
 
 func main() {
-	logger := getLogger()
-	defer logger.Sync()
-
-	undo := zap.RedirectStdLog(logger)
-	defer undo()
-
-	logger.Info("Goldpinger", zap.String("version", Version), zap.String("build", Build))
-
 	// load embedded swagger file
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
-		logger.Error("Coud not parse swagger", zap.Error(err))
+		log.Fatalf("Could not parse swagger: %v", err)
 	}
 
 	// create new service API
@@ -84,7 +82,7 @@ func main() {
 	for _, optsGroup := range api.CommandLineOptionsGroups {
 		_, err := parser.AddGroup(optsGroup.ShortDescription, optsGroup.LongDescription, optsGroup.Options)
 		if err != nil {
-			logger.Error("Coud not add flag group", zap.Error(err))
+			log.Fatalf("Could not add flag group: %v", err)
 		}
 	}
 
@@ -97,6 +95,23 @@ func main() {
 		}
 		os.Exit(code)
 	}
+
+	// Configure logger
+	logger, err := getLogger(goldpinger.GoldpingerConfig.ZapConfigPath)
+	if err != nil {
+		var errDev error
+		logger, errDev = zap.NewDevelopment()
+		if errDev != nil {
+			log.Fatalf("Could not build a development logger: %v", errDev)
+		}
+		logger.Warn("Logger could not be built, defaulting to development settings", zap.String("error", fmt.Sprintf("%v", err)))
+	}
+	defer logger.Sync()
+
+	undo := zap.RedirectStdLog(logger)
+	defer undo()
+
+	logger.Info("Goldpinger", zap.String("version", Version), zap.String("build", Build))
 
 	if goldpinger.GoldpingerConfig.Namespace == nil {
 		goldpinger.GoldpingerConfig.Namespace = &goldpinger.PodNamespace
