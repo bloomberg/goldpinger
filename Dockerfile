@@ -1,8 +1,9 @@
-FROM golang:1.15-alpine as builder
+FROM golang:1.19-alpine as builder
 ARG TARGETARCH
 ARG TARGETOS
 ENV GO111MODULE=on
-
+ENV GO111MODULE=on \
+    GOPROXY=https://goproxy.cn,direct
 # Install our build tools
 
 RUN apk add --update git make bash

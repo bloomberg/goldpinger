@@ -36,7 +36,7 @@ var GoldpingerConfig = struct {
 	LabelSelector    string  `long:"label-selector" description:"label selector to use to discover goldpinger pods in the cluster" env:"LABEL_SELECTOR" default:"app=goldpinger"`
 	Namespace        *string `long:"namespace" description:"namespace to use to discover goldpinger pods in the cluster (empty for all). Defaults to discovering the namespace for the current pod" env:"NAMESPACE"`
 	DisplayNodeName  bool    `long:"display-nodename" description:"Display nodename other than podname in UI (defaults is podname)." env:"DISPLAY_NODENAME"`
-	KubernetesClient *kubernetes.Clientset
+	KubernetesClient []*kubernetes.Clientset
 
 	DnsHosts    []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
 	TCPTargets  []string `long:"tcp-targets" description:"A list of external targets(<host>:<port> or <ip>:<port>) to attempt a TCP check on (space delimited)" env:"TCP_TARGETS" env-delim:" "`
