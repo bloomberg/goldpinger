@@ -107,6 +107,8 @@ func getPodNodeName(p v1.Pod) string {
 func GetAllPods() map[string]*GoldpingerPod {
 	timer := GetLabeledKubernetesCallsTimer()
 	listOpts := metav1.ListOptions{
+		ResourceVersion: "0",
+
 		LabelSelector: GoldpingerConfig.LabelSelector,
 		FieldSelector: "status.phase=Running", // only select Running pods, otherwise we will get them before they have IPs
 	}
