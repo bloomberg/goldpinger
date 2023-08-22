@@ -213,7 +213,7 @@ Note, that you will also need to add an RBAC rule to allow `Goldpinger` to list 
 
 ```yaml
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: default
