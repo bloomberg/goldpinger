@@ -21,6 +21,7 @@ import (
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/kubectl/pkg/util/podutils"
 	k8snet "k8s.io/utils/net"
 )
 
@@ -120,6 +121,9 @@ func GetAllPods() map[string]*GoldpingerPod {
 
 	podMap := make(map[string]*GoldpingerPod)
 	for _, pod := range pods.Items {
+		if !podutils.IsPodReady(&pod) {
+			continue
+		}
 		podMap[pod.Name] = &GoldpingerPod{
 			Name:   getPodNodeName(pod),
 			PodIP:  getPodIP(pod),
