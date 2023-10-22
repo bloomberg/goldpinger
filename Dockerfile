@@ -14,7 +14,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH make bin/goldpinger
 RUN go mod vendor
 
 # Build the asset container, copy over goldpinger
-FROM gcr.io/distroless/static:nonroot
+FROM gcr.io/distroless/static:nonroot as simple
 COPY --from=builder /w/bin/goldpinger /goldpinger
 COPY ./static /static
 COPY ./config /config
