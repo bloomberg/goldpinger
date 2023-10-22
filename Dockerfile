@@ -1,14 +1,8 @@
-FROM golang:1.15-alpine as builder
+FROM golang:1.21 as builder
 ARG TARGETARCH
 ARG TARGETOS
-ENV GO111MODULE=on
-
-# Install our build tools
-
-RUN apk add --update git make bash
 
 # Get dependencies
-
 WORKDIR /w
 COPY go.mod go.sum ./
 RUN go mod download
@@ -20,7 +14,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH make bin/goldpinger
 RUN go mod vendor
 
 # Build the asset container, copy over goldpinger
-FROM scratch as simple
+FROM gcr.io/distroless/static:nonroot
 COPY --from=builder /w/bin/goldpinger /goldpinger
 COPY ./static /static
 COPY ./config /config
