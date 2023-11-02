@@ -1,4 +1,6 @@
-FROM golang:1.21 as builder
+ARG NANOSERVER_VERSION=ltcs2022
+
+FROM --platform=$BUILDPLATFORM golang:1.21 as builder
 ARG TARGETARCH
 ARG TARGETOS
 
@@ -16,6 +18,12 @@ RUN go mod vendor
 # Build the asset container, copy over goldpinger
 FROM gcr.io/distroless/static:nonroot as simple
 COPY --from=builder /w/bin/goldpinger /goldpinger
+COPY ./static /static
+COPY ./config /config
+ENTRYPOINT ["/goldpinger", "--static-file-path", "/static"]
+
+FROM mcr.microsoft.com/windows/nanoserver:$NANOSERVER_VERSION AS windows
+COPY --from=builder /w/bin/goldpinger /goldpinger.exe
 COPY ./static /static
 COPY ./config /config
 ENTRYPOINT ["/goldpinger", "--static-file-path", "/static"]
