@@ -26,7 +26,7 @@ FROM mcr.microsoft.com/windows/nanoserver:$NANOSERVER_VERSION AS windows
 COPY --from=builder /w/bin/goldpinger /goldpinger.exe
 COPY ./static /static
 COPY ./config /config
-ENTRYPOINT ["/goldpinger", "--static-file-path", "/static"]
+ENTRYPOINT ["/goldpinger.exe", "--static-file-path=/static"]
 
 # For vendor builds, use the simple build and add the vendor'd files
 FROM simple as vendor
