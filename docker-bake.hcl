@@ -35,7 +35,7 @@ target "windows-nanoserver-ltsc2019" {
 
   target = "windows"
   args = {
-    NANOSERVER_VERSION = "ltsc2019"
+    WINDOWS_BASE_IMAGE = "mcr.microsoft.com/windows/nanoserver:ltsc2019"
   }
 }
 
@@ -47,6 +47,6 @@ target "windows-nanoserver-ltsc2022" {
 
   target = "windows"
   args = {
-    NANOSERVER_VERSION = "ltsc2022"
+    WINDOWS_BASE_IMAGE = "mcr.microsoft.com/windows/nanoserver:ltsc2022"
   }
 }

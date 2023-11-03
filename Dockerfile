@@ -1,4 +1,4 @@
-ARG NANOSERVER_VERSION=ltcs2022
+ARG WINDOWS_BASE_IMAGE=mcr.microsoft.com/windows/nanoserver:ltcs2022
 
 FROM --platform=$BUILDPLATFORM golang:1.21 as builder
 ARG TARGETARCH
@@ -22,7 +22,7 @@ COPY ./static /static
 COPY ./config /config
 ENTRYPOINT ["/goldpinger", "--static-file-path", "/static"]
 
-FROM mcr.microsoft.com/windows/nanoserver:$NANOSERVER_VERSION AS windows
+FROM $WINDOWS_BASE_IMAGE AS windows
 COPY --from=builder /w/bin/goldpinger /goldpinger.exe
 COPY ./static /static
 COPY ./config /config
