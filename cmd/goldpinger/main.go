@@ -20,10 +20,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-openapi/loads"
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -131,6 +133,10 @@ func main() {
 	if err != nil {
 		logger.Fatal("Error getting config ", zap.Error(err))
 	}
+	// communicate to kube-apiserver with protobuf
+	config.AcceptContentTypes = strings.Join([]string{runtime.ContentTypeProtobuf, runtime.ContentTypeJSON}, ",")
+	config.ContentType = runtime.ContentTypeProtobuf
+
 	// create the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
