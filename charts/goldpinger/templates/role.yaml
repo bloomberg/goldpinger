@@ -1,0 +1,20 @@
+{{- if or .Values.podSecurityPolicy.enabled (not .Values.rbac.clusterscoped) }}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "goldpinger.fullname" . }}-pod-security-policy
+  labels:
+    {{- include "goldpinger.labels" . | nindent 4 }}
+rules:
+{{- if not .Values.rbac.clusterscoped }}
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+{{- end }}
+{{- if .Values.podSecurityPolicy.enabled }}
+  - apiGroups: ["extensions"]
+    resources: ["podsecuritypolicies"]
+    resourceNames: [{{ .Values.podSecurityPolicy.policyName | quote }}]
+    verbs: ["use"]
+{{- end }}
+{{- end }}
