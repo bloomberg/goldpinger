@@ -129,6 +129,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: goldpinger-serviceaccount
+  namespace: default
 ---
 apiVersion: apps/v1
 kind: DaemonSet
