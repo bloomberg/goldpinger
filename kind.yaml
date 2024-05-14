@@ -7,7 +7,7 @@ apiVersion: ctlptl.dev/v1alpha1
 kind: Cluster
 product: kind
 registry: ctlptl-registry
-kubernetesVersion: v1.27.3
+kubernetesVersion: v1.30.0
 kindV1Alpha4Cluster:
   name: goldpinger-test
   nodes:
