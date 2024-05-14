@@ -1,6 +1,6 @@
 name: Helm Test
 on:
-  pull_request:  
+  pull_request:
 jobs:
   helm_test:
     runs-on: ubuntu-latest
@@ -11,23 +11,23 @@ jobs:
     - name: Install Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.22
 
     - name: Install Tools
       shell: bash
       id: tool-versions
       env:
-        TILT_TOOL_CTLPTL_VERSION: "0.8.21"
-        TILT_TOOL_KIND_VERSION: "0.20.0" 
-        TILT_TOOL_KUBECTL_VERSION: "1.27.3"
-        TILT_TOOL_HELM_VERSION: "3.12.2"
-        TILT_TOOL_TILT_VERSION: "0.33.3"
+        TILT_TOOL_CTLPTL_VERSION: "0.8.28"
+        TILT_TOOL_KIND_VERSION: "0.23.0"
+        TILT_TOOL_KUBECTL_VERSION: "1.30.0"
+        TILT_TOOL_HELM_VERSION: "3.14.4"
+        TILT_TOOL_TILT_VERSION: "0.33.13"
       run: |
 
         # Create Tools Directory
         TOOLS_DIR=/opt/helm_tools
         mkdir -p "${TOOLS_DIR}"
-        
+
         # Download ctlptl
         echo "Downloading ctlptl"
         curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v${TILT_TOOL_CTLPTL_VERSION}/ctlptl.${TILT_TOOL_CTLPTL_VERSION}.linux.x86_64.tar.gz | sudo tar -xzv -C "${TOOLS_DIR}" ctlptl
