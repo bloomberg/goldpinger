@@ -1,0 +1,162 @@
+# Default values for goldpinger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+image:
+  repository: bloomberg/goldpinger
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  # pullSecrets:
+  #   - myRegistryKeySecretName
+
+rbac:
+  create: true
+  clusterscoped: true
+
+serviceAccount:
+  create: true
+  name:
+
+goldpinger:
+  port: 8080
+  zapConfig: |
+    {
+      "level": "info",
+      "encoding": "json",
+      "outputPaths": [
+          "stdout"
+      ],
+      "errorOutputPaths": [
+          "stderr"
+      ],
+      "initialFields": {
+      },
+      "encoderConfig": {
+          "messageKey": "message",
+          "levelKey": "level",
+          "levelEncoder": "lowercase",
+          "timeKey": "ts",
+          "timeEncoder": "ISO8601",
+          "callerKey": "caller",
+          "callerEncoder": "Short"
+      }
+    }
+
+extraEnv: []
+
+service:
+  type: ClusterIP
+  port: 8081
+  annotations: {}
+  labels: {}
+  loadBalancerSourceRanges: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+## Set a priorityClassName for the pod. If left blank a default priority will be set.
+priorityClassName:
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+podAnnotations: {}
+
+podLabels: {}
+
+updateStrategy: {}
+  # type: RollingUpdate
+  # rollingUpdate:
+  #   maxUnavailable: 1
+
+## Node labels for pod assignment
+## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+##
+nodeSelector: {}
+
+## Tolerations for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: []
+
+## Affinity for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+##
+affinity: {}
+
+## Enable this if pod security policy enabled in your cluster
+## It will bind ServiceAccount with unrestricted podSecurityPolicy
+## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+podSecurityPolicy:
+  enabled: false
+  policyName: unrestricted-psp
+
+## Set security context of the goldpinger container
+## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+containerSecurityContext:
+  capabilities:
+    drop:
+      - ALL
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+
+## Set security context of the pod
+## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+  seccompProfile:
+    type: RuntimeDefault
+
+serviceMonitor:
+  enabled: false
+  selector:
+    prometheus: "kube-prometheus"
+  # namespace: monitoring
+  interval: 30s
+  # honorLabels: true
+
+## Custom PrometheusRule to be defined
+## ref: https://github.com/coreos/prometheus-operator#customresourcedefinitions
+prometheusRule:
+  enabled: false
+  rules:
+    - alert: goldpinger_nodes_unhealthy
+      expr: |
+        sum(goldpinger_nodes_health_total{job="{{ template "goldpinger.fullname" . }}", status="unhealthy"})
+        BY (instance, goldpinger_instance) > 0
+      for: 5m
+      annotations:
+        description: |
+          Goldpinger instance {{ "{{ $labels.goldpinger_instance }}" }} has been reporting unhealthy nodes for at least 5 minutes.
+        summary: Instance {{ "{{ $labels.instance }}" }} down
+      labels:
+        severity: warning

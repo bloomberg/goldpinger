@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "goldpinger.fullname" . }}
+  labels:
+    {{- include "goldpinger.labels" . | nindent 4 }}
+spec:
+  {{- with .Values.updateStrategy }}
+  updateStrategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "goldpinger.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "goldpinger.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podLabels }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      priorityClassName: {{ .Values.priorityClassName }}
+      serviceAccountName: {{ include "goldpinger.serviceAccountName" . }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: goldpinger-daemon
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: zap
+              mountPath: /config
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "{{ .Values.goldpinger.port }}"
+            - name: LABEL_SELECTOR
+              value: "app.kubernetes.io/name={{ include "goldpinger.name" . }}"
+            {{- if .Values.extraEnv -}}
+            {{ toYaml .Values.extraEnv | nindent 12 }}
+            {{- end }}
+          {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.goldpinger.port }}
+              protocol: TCP
+              {{- range $k := .Values.extraEnv }}
+              {{- if and (eq $k.name "USE_HOST_IP") (eq $k.value "true") }}
+              hostPort: {{ $.Values.goldpinger.port }}
+              {{- end }}
+              {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: zap
+          configMap:
+            name: {{ include "goldpinger.fullname" . }}-zap
+      {{- range $k := .Values.extraEnv }}
+      {{- if and (eq $k.name "USE_HOST_IP") (eq $k.value "true") }}
+      hostNetwork: true
+      {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

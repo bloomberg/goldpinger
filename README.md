@@ -101,14 +101,25 @@ docker push $(namespace="docker.io/myhandle/" make version)
 ```
 
 ## Installation
-
 `Goldpinger` works by asking `Kubernetes` for pods with particular labels (`app=goldpinger`). While you can deploy `Goldpinger` in a variety of ways, it works very nicely as a `DaemonSet` out of the box.
 
-### Authentication with Kubernetes API
+### Helm Installation
+Goldpinger can be installed via [Helm](https://helm.sh/) using the following:
+
+```
+helm repo add goldpinger https://bloomberg.github.io/goldpinger
+helm repo update
+helm install goldpinger goldpinger/goldpinger
+```
+
+### Manual Installation
+`Goldpinger` can be installed manually via configuration similar to the following:
+
+#### Authentication with Kubernetes API
 
 `Goldpinger` supports using a `kubeconfig` (specify with `--kubeconfig-path`) or service accounts.
 
-### Example YAML
+#### Example YAML
 
 Here's an example of what you can do (using the in-cluster authentication to `Kubernetes` apiserver).
 

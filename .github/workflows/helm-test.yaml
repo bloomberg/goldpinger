@@ -1,0 +1,74 @@
+name: Helm Test
+on:
+  pull_request:
+jobs:
+  helm_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.22
+
+    - name: Install Tools
+      shell: bash
+      id: tool-versions
+      env:
+        TILT_TOOL_CTLPTL_VERSION: "0.8.28"
+        TILT_TOOL_KIND_VERSION: "0.23.0"
+        TILT_TOOL_KUBECTL_VERSION: "1.30.0"
+        TILT_TOOL_HELM_VERSION: "3.14.4"
+        TILT_TOOL_TILT_VERSION: "0.33.13"
+      run: |
+
+        # Create Tools Directory
+        TOOLS_DIR=/opt/helm_tools
+        mkdir -p "${TOOLS_DIR}"
+
+        # Download ctlptl
+        echo "Downloading ctlptl"
+        curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v${TILT_TOOL_CTLPTL_VERSION}/ctlptl.${TILT_TOOL_CTLPTL_VERSION}.linux.x86_64.tar.gz | sudo tar -xzv -C "${TOOLS_DIR}" ctlptl
+
+        # Download kind
+        echo "Downloading kind"
+        curl -fsSL https://kind.sigs.k8s.io/dl/v${TILT_TOOL_KIND_VERSION}/kind-linux-amd64 -o "${TOOLS_DIR}/kind"
+
+        # Download kubectl
+        echo "Downloading kubectl"
+        curl -fsSL https://dl.k8s.io/release/v${TILT_TOOL_KUBECTL_VERSION}/bin/linux/amd64/kubectl -o "${TOOLS_DIR}/kubectl"
+
+        # Download helm
+        echo "Downloading helm"
+        curl -fsSL https://get.helm.sh/helm-v${TILT_TOOL_HELM_VERSION}-linux-amd64.tar.gz | tar -xzv -C "${TOOLS_DIR}" --strip-components=1 linux-amd64/helm
+
+        # Download tilt
+        echo "Downloading tilt"
+        curl -fsSL https://github.com/tilt-dev/tilt/releases/download/v${TILT_TOOL_TILT_VERSION}/tilt.${TILT_TOOL_TILT_VERSION}.linux.x86_64.tar.gz | tar -xzv -C "${TOOLS_DIR}" tilt
+
+        # Make the binaries runnable
+        echo "Making binaries executable"
+        sudo chmod -R +x "${TOOLS_DIR}"
+
+        # Add tools to path
+        echo "PATH=${PATH}:${TOOLS_DIR}" >> $GITHUB_ENV
+
+    - name: Start Kind Cluster
+      shell: bash
+      run: |
+        ctlptl apply -f kind.yaml
+
+    - name: Run Tilt Tests
+      shell: bash
+      run: |
+        tilt ci --debug --output-snapshot-on-exit=/tmp/tilt-snapshot.json
+
+    - name: Upload Tilt Snapshot
+      if: success() || failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: tilt-snapshot
+        path: |
+          /tmp/tilt-snapshot.json
