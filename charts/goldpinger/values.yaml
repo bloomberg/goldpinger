@@ -119,19 +119,22 @@ podSecurityPolicy:
 
 ## Set security context of the goldpinger container
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-containerSecurityContext: {}
-#  allowPrivilegeEscalation: false
-#  privileged: false
-#  readOnlyRootFilesystem: true
+containerSecurityContext:
+  capabilities:
+    drop:
+      - ALL
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
 
 ## Set security context of the pod
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-podSecurityContext: {}
-#  runAsNonRoot: true
-#  runAsUser: 1001
-#  runAsGroup: 2001
-#  seccompProfile:
-#    type: RuntimeDefault
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+  seccompProfile:
+    type: RuntimeDefault
 
 serviceMonitor:
   enabled: false
