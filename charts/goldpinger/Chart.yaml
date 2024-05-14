@@ -1,6 +1,6 @@
 apiVersion: v1
 name: goldpinger
-appVersion: "v3.7.0"
+appVersion: "v3.10.1"
 version: 1.0.0
 description: Goldpinger is a tool to help debug, troublshoot and visualize network connectivity and slowness issues.
 home: https://github.com/bloomberg/goldpinger
