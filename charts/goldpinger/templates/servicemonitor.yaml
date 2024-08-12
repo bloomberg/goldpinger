@@ -25,4 +25,8 @@ spec:
   selector:
     matchLabels:
       {{- include "goldpinger.selectorLabels" . | nindent 6 }}
+  {{- with .Values.serviceMonitor.metricRelabelings }}
+  metricRelabelings:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- end -}}
