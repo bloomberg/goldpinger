@@ -143,7 +143,7 @@ serviceMonitor:
   # namespace: monitoring
   interval: 30s
   # honorLabels: true
-  metricRelabelings: {}
+  metricRelabelings: []
   # - action: drop
   #   source_labels: [__name__]
   #   regex: goldpinger_peers_response_time_s_bucket
