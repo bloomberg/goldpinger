@@ -2,6 +2,19 @@ apiVersion: v1
 entries:
   goldpinger:
   - apiVersion: v1
+    appVersion: 3.10.2
+    created: "2024-11-11T14:31:14.41363437Z"
+    description: Goldpinger is a tool to help debug, troubleshoot and visualize network
+      connectivity and slowness issues.
+    digest: a6200043d5347782b034a83132a3a2bbd02d33e2a07a70309adb585d69b07b9a
+    home: https://github.com/bloomberg/goldpinger
+    name: goldpinger
+    sources:
+    - https://github.com/bloomberg/goldpinger
+    urls:
+    - https://github.com/bloomberg/goldpinger/releases/download/goldpinger-1.0.1/goldpinger-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v1
     appVersion: 3.10.1
     created: "2024-05-14T14:47:00.150375039Z"
     description: Goldpinger is a tool to help debug, troublshoot and visualize network
@@ -14,4 +27,4 @@ entries:
     urls:
     - https://github.com/bloomberg/goldpinger/releases/download/goldpinger-1.0.0/goldpinger-1.0.0.tgz
     version: 1.0.0
-generated: "2024-05-14T14:47:00.15038583Z"
+generated: "2024-11-11T14:31:14.413646512Z"
