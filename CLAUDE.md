@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Goldpinger is a networking monitoring tool for Kubernetes clusters that runs as a DaemonSet and monitors connectivity between pods. It generates network topology visualizations, Prometheus metrics, and provides an API for cluster health monitoring.
 
+**Current Development Status**: The project is undergoing a UI rework with a new React frontend built using TanStack Start, replacing the previous legacy frontend.
+
 ## Development Commands
 
 ### Build Commands
@@ -26,8 +28,20 @@ Goldpinger is a networking monitoring tool for Kubernetes clusters that runs as 
 - `make swagger` - Regenerate API client/server code from swagger.yml
 - `make vendor` - Download and vendor dependencies
 - `make clean` - Clean build artifacts
+- `make version` - Print current image tag version
 
 ## Architecture
+
+### Project Structure
+
+- `cmd/goldpinger/` - Main application entry point
+- `pkg/goldpinger/` - Core business logic and networking functionality
+- `pkg/restapi/` - Auto-generated REST API server and client (from swagger.yml)
+- `pkg/models/` - Auto-generated data models (from swagger.yml)
+- `pkg/client/` - Auto-generated HTTP client (from swagger.yml)  
+- `web/` - React frontend built with TanStack Start
+- `charts/goldpinger/` - Helm chart for Kubernetes deployment
+- `extras/` - Example configurations, dashboards, and deployment files
 
 ### Core Components
 
@@ -55,10 +69,10 @@ Goldpinger is a networking monitoring tool for Kubernetes clusters that runs as 
 
 **React SPA Frontend (`web/`)**
 
-- Modern React-based SPA with TypeScript and TanStack Start framework
-- Uses Vite for bundling and TanStack Router for routing
+- Modern React-based SPA with TypeScript and TanStack Start framework  
+- Uses Vite for bundling, TanStack Router for routing, and Tailwind CSS for styling
 - Assets are embedded directly in the Go binary for single-artifact deployment
-- Supports development mode with hot reloading via proxy to Vite dev server
+- Built as a Single Page Application (SPA) with static prerendering enabled
 
 ### Key Features
 
@@ -104,15 +118,22 @@ Goldpinger is a networking monitoring tool for Kubernetes clusters that runs as 
 
 **Development Workflow**
 
-1. Start the Go backend: `make run --dev-mode` (enables proxy to Vite)
-2. Start the React dev server: `cd web && npm run dev`
-3. Access the application at `http://localhost:8080` (proxies to Vite on port 3000)
+1. Install dependencies: `cd web && npm install`
+2. Start the React dev server: `cd web && npm run dev` (runs on port 3000)
+3. For integrated development with backend, configure proxy in Go application
 
 **Production Build**
 
+- `cd web && npm run build` - Build the React SPA with Vite
 - React assets are embedded in the Go binary using `go:embed`
 - Single binary deployment with no external static file dependencies
-- Build process: `make build-web` → `make bin/goldpinger`
+- TanStack Start handles SPA generation with prerendering for better SEO
+
+**Frontend Commands**
+
+- `cd web && npm run dev` - Start Vite development server on port 3000
+- `cd web && npm run build` - Build production assets with TypeScript checking
+- `cd web && npm run start` - Start production server (for testing built assets)
 
 ## Deployment
 
