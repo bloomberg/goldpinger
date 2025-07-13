@@ -13,10 +13,45 @@
 
   html,
   body {
-    @apply text-gray-900 bg-gray-50 dark:bg-gray-950 dark:text-gray-200;
+    @apply text-gray-900 bg-white dark:bg-gray-950 dark:text-gray-200;
   }
 
   .using-mouse * {
     outline: none !important;
+  }
+}
+
+@layer components {
+  /* Pulse animation for active connections */
+  @keyframes pulse-connection {
+    0% {
+      stroke-opacity: 0.5;
+    }
+    50% {
+      stroke-opacity: 1;
+    }
+    100% {
+      stroke-opacity: 0.5;
+    }
+  }
+
+  .connection-active {
+    animation: pulse-connection 1.5s cubic-bezier(0.55, 0.085, 0.68, 0.53)
+      infinite;
+  }
+
+  /* Data flow animation */
+  @keyframes data-flow {
+    0% {
+      stroke-dashoffset: 20;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .data-flow {
+    stroke-dasharray: 5 5;
+    animation: data-flow 1s linear infinite;
   }
 }

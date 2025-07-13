@@ -1,0 +1,331 @@
+{
+  "hosts": [
+    {
+      "hostIP": "172.18.0.6",
+      "podIP": "10.244.0.6",
+      "podName": "goldpinger-7hq9d"
+    },
+    {
+      "hostIP": "172.18.0.5",
+      "podIP": "10.244.2.3",
+      "podName": "goldpinger-95rzh"
+    },
+    {
+      "hostIP": "172.18.0.2",
+      "podIP": "10.244.4.3",
+      "podName": "goldpinger-k46zr"
+    },
+    {
+      "hostIP": "172.18.0.3",
+      "podIP": "10.244.1.3",
+      "podName": "goldpinger-qkdn2"
+    },
+    {
+      "hostIP": "172.18.0.4",
+      "podIP": "10.244.3.3",
+      "podName": "goldpinger-jt6lz"
+    }
+  ],
+  "probeResults": {
+    "example.com:80": {
+      "goldpinger-7hq9d": [{ "protocol": "tcp", "response-time-ms": 15 }],
+      "goldpinger-95rzh": [{ "protocol": "tcp", "response-time-ms": 66 }],
+      "goldpinger-jt6lz": [{ "protocol": "tcp", "response-time-ms": 70 }],
+      "goldpinger-k46zr": [{ "protocol": "tcp", "response-time-ms": 67 }],
+      "goldpinger-qkdn2": [{ "protocol": "tcp", "response-time-ms": 69 }]
+    },
+    "google.com:80": {
+      "goldpinger-7hq9d": [{ "protocol": "tcp", "response-time-ms": 15 }],
+      "goldpinger-95rzh": [{ "protocol": "tcp", "response-time-ms": 15 }],
+      "goldpinger-jt6lz": [{ "protocol": "tcp", "response-time-ms": 15 }],
+      "goldpinger-k46zr": [{ "protocol": "tcp", "response-time-ms": 16 }],
+      "goldpinger-qkdn2": [{ "protocol": "tcp", "response-time-ms": 15 }]
+    }
+  },
+  "responses": {
+    "goldpinger-7hq9d": {
+      "HostIP": "172.18.0.6",
+      "OK": true,
+      "PodIP": "10.244.0.6",
+      "response": {
+        "podResults": {
+          "goldpinger-7hq9d": {
+            "HostIP": "172.18.0.6",
+            "OK": true,
+            "PingTime": "2025-07-13T01:01:58.939Z",
+            "PodIP": "10.244.0.6",
+            "response": { "boot_time": "2025-07-13T01:01:13.630Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          },
+          "goldpinger-95rzh": {
+            "HostIP": "172.18.0.5",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:15.179Z",
+            "PodIP": "10.244.2.3",
+            "response": { "boot_time": "2025-07-13T01:01:33.516Z" },
+            "status-code": 200
+          },
+          "goldpinger-jt6lz": {
+            "HostIP": "172.18.0.4",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:15.165Z",
+            "PodIP": "10.244.3.3",
+            "response": { "boot_time": "2025-07-13T01:00:33.125Z" },
+            "status-code": 200
+          },
+          "goldpinger-k46zr": {
+            "HostIP": "172.18.0.2",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:13.938Z",
+            "PodIP": "10.244.4.3",
+            "response": { "boot_time": "2025-07-13T01:01:53.002Z" },
+            "status-code": 200
+          },
+          "goldpinger-qkdn2": {
+            "HostIP": "172.18.0.3",
+            "OK": true,
+            "PingTime": "2025-07-13T01:01:51.598Z",
+            "PodIP": "10.244.1.3",
+            "response": { "boot_time": "2025-07-13T01:00:53.129Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          }
+        },
+        "probeResults": {
+          "example.com:80": [{ "protocol": "tcp", "response-time-ms": 15 }],
+          "google.com:80": [{ "protocol": "tcp", "response-time-ms": 15 }]
+        }
+      }
+    },
+    "goldpinger-95rzh": {
+      "HostIP": "172.18.0.5",
+      "OK": true,
+      "PodIP": "10.244.2.3",
+      "response": {
+        "podResults": {
+          "goldpinger-7hq9d": {
+            "HostIP": "172.18.0.6",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:04.360Z",
+            "PodIP": "10.244.0.6",
+            "response": { "boot_time": "2025-07-13T01:01:13.630Z" },
+            "status-code": 200
+          },
+          "goldpinger-95rzh": {
+            "HostIP": "172.18.0.5",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:09.965Z",
+            "PodIP": "10.244.2.3",
+            "response": { "boot_time": "2025-07-13T01:01:33.516Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          },
+          "goldpinger-jt6lz": {
+            "HostIP": "172.18.0.4",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:16.227Z",
+            "PodIP": "10.244.3.3",
+            "response": { "boot_time": "2025-07-13T01:00:33.125Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          },
+          "goldpinger-k46zr": {
+            "HostIP": "172.18.0.2",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:03.918Z",
+            "PodIP": "10.244.4.3",
+            "response": { "boot_time": "2025-07-13T01:01:53.002Z" },
+            "status-code": 200
+          },
+          "goldpinger-qkdn2": {
+            "HostIP": "172.18.0.3",
+            "OK": true,
+            "PingTime": "2025-07-13T01:01:51.918Z",
+            "PodIP": "10.244.1.3",
+            "response": { "boot_time": "2025-07-13T01:00:53.129Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          }
+        },
+        "probeResults": {
+          "example.com:80": [{ "protocol": "tcp", "response-time-ms": 66 }],
+          "google.com:80": [{ "protocol": "tcp", "response-time-ms": 15 }]
+        }
+      }
+    },
+    "goldpinger-jt6lz": {
+      "HostIP": "172.18.0.4",
+      "OK": true,
+      "PodIP": "10.244.3.3",
+      "response": {
+        "podResults": {
+          "goldpinger-7hq9d": {
+            "HostIP": "172.18.0.6",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:04.342Z",
+            "PodIP": "10.244.0.6",
+            "response": { "boot_time": "2025-07-13T01:01:13.630Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          },
+          "goldpinger-95rzh": {
+            "HostIP": "172.18.0.5",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:18.646Z",
+            "PodIP": "10.244.2.3",
+            "response": { "boot_time": "2025-07-13T01:01:33.516Z" },
+            "response-time-ms": 2,
+            "status-code": 200
+          },
+          "goldpinger-jt6lz": {
+            "HostIP": "172.18.0.4",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:05.635Z",
+            "PodIP": "10.244.3.3",
+            "response": { "boot_time": "2025-07-13T01:00:33.125Z" },
+            "response-time-ms": 3,
+            "status-code": 200
+          },
+          "goldpinger-k46zr": {
+            "HostIP": "172.18.0.2",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:03.641Z",
+            "PodIP": "10.244.4.3",
+            "response": { "boot_time": "2025-07-13T01:01:53.002Z" },
+            "response-time-ms": 2,
+            "status-code": 200
+          },
+          "goldpinger-qkdn2": {
+            "HostIP": "172.18.0.3",
+            "OK": true,
+            "PingTime": "2025-07-13T01:01:50.041Z",
+            "PodIP": "10.244.1.3",
+            "response": { "boot_time": "2025-07-13T01:00:53.129Z" },
+            "status-code": 200
+          }
+        },
+        "probeResults": {
+          "example.com:80": [{ "protocol": "tcp", "response-time-ms": 70 }],
+          "google.com:80": [{ "protocol": "tcp", "response-time-ms": 15 }]
+        }
+      }
+    },
+    "goldpinger-k46zr": {
+      "HostIP": "172.18.0.2",
+      "OK": true,
+      "PodIP": "10.244.4.3",
+      "response": {
+        "podResults": {
+          "goldpinger-7hq9d": {
+            "HostIP": "172.18.0.6",
+            "OK": true,
+            "PingTime": "2025-07-13T01:01:59.216Z",
+            "PodIP": "10.244.0.6",
+            "response": { "boot_time": "2025-07-13T01:01:13.630Z" },
+            "response-time-ms": 3,
+            "status-code": 200
+          },
+          "goldpinger-95rzh": {
+            "HostIP": "172.18.0.5",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:05.210Z",
+            "PodIP": "10.244.2.3",
+            "response": { "boot_time": "2025-07-13T01:01:33.516Z" },
+            "response-time-ms": 3,
+            "status-code": 200
+          },
+          "goldpinger-jt6lz": {
+            "HostIP": "172.18.0.4",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:11.209Z",
+            "PodIP": "10.244.3.3",
+            "response": { "boot_time": "2025-07-13T01:00:33.125Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          },
+          "goldpinger-k46zr": {
+            "HostIP": "172.18.0.2",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:17.211Z",
+            "PodIP": "10.244.4.3",
+            "response": { "boot_time": "2025-07-13T01:01:53.002Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          },
+          "goldpinger-qkdn2": {
+            "HostIP": "172.18.0.3",
+            "OK": true,
+            "PingTime": "2025-07-13T01:01:53.208Z",
+            "PodIP": "10.244.1.3",
+            "response": { "boot_time": "2025-07-13T01:00:53.129Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          }
+        },
+        "probeResults": {
+          "example.com:80": [{ "protocol": "tcp", "response-time-ms": 67 }],
+          "google.com:80": [{ "protocol": "tcp", "response-time-ms": 16 }]
+        }
+      }
+    },
+    "goldpinger-qkdn2": {
+      "HostIP": "172.18.0.3",
+      "OK": false,
+      "PodIP": "10.244.1.3",
+      "response": {
+        "podResults": {
+          "goldpinger-7hq9d": {
+            "HostIP": "172.18.0.6",
+            "OK": false,
+            "PingTime": "2025-07-13T01:01:53.605Z",
+            "PodIP": "10.244.0.6",
+            "response": { "boot_time": "2025-07-13T01:01:13.630Z" },
+            "response-time-ms": 4,
+            "status-code": 200
+          },
+          "goldpinger-95rzh": {
+            "HostIP": "172.18.0.5",
+            "OK": false,
+            "PingTime": "2025-07-13T01:01:53.378Z",
+            "PodIP": "10.244.2.3",
+            "response": { "boot_time": "2025-07-13T01:01:33.516Z" },
+            "response-time-ms": 1,
+            "status-code": 200
+          },
+          "goldpinger-jt6lz": {
+            "HostIP": "172.18.0.4",
+            "OK": false,
+            "PingTime": "2025-07-13T01:02:16.722Z",
+            "PodIP": "10.244.3.3",
+            "response": { "boot_time": "2025-07-13T01:00:33.125Z" },
+            "response-time-ms": 2,
+            "status-code": 200
+          },
+          "goldpinger-k46zr": {
+            "HostIP": "172.18.0.2",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:08.383Z",
+            "PodIP": "10.244.4.3",
+            "response": { "boot_time": "2025-07-13T01:01:53.002Z" },
+            "response-time-ms": 5,
+            "status-code": 200
+          },
+          "goldpinger-qkdn2": {
+            "HostIP": "172.18.0.3",
+            "OK": true,
+            "PingTime": "2025-07-13T01:02:09.440Z",
+            "PodIP": "10.244.1.3",
+            "response": { "boot_time": "2025-07-13T01:00:53.129Z" },
+            "response-time-ms": 2,
+            "status-code": 200
+          }
+        },
+        "probeResults": {
+          "example.com:80": [{ "protocol": "tcp", "response-time-ms": 69 }],
+          "google.com:80": [{ "protocol": "tcp", "response-time-ms": 15 }]
+        }
+      }
+    }
+  }
+}
