@@ -1,4 +1,6 @@
-# Welcome to TanStack.com!
+# UI Rework
+
+[![UI Rework](./media/demo.gif)](./media/demo.gif)
 
 This site is built with TanStack Router!
 
