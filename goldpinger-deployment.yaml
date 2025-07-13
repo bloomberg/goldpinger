@@ -49,8 +49,7 @@ spec:
       serviceAccountName: goldpinger-serviceaccount
       containers:
         - name: goldpinger
-          image: goldfinger
-          imagePullPolicy: Never
+          image: docker.io/bloomberg/goldpinger:latest
           env:
             - name: REFRESH_INTERVAL
               value: "30"
