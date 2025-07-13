@@ -1,0 +1,23 @@
+# kind-config-goldpinger.yaml
+# Simplified configuration for goldpinger connectivity testing
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: goldpinger-cluster
+nodes:
+  # Control plane node
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 8080 # For goldpinger web UI
+        hostPort: 8080
+        protocol: TCP
+  - role: worker
+  - role: worker
+  - role: worker
+  - role: worker
+
+networking:
+  # Keep default Kind CNI for simple pod-to-pod communication
+  disableDefaultCNI: false
+  # Default subnets work fine for goldpinger
+  podSubnet: "10.244.0.0/16"
+  serviceSubnet: "10.96.0.0/12"

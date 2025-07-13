@@ -1,0 +1,118 @@
+# goldpinger-deployment.yaml
+# Deploy goldpinger as a DaemonSet for connectivity testing
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: goldpinger-serviceaccount
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: goldpinger-clusterrole
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: goldpinger-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: goldpinger-clusterrole
+subjects:
+  - kind: ServiceAccount
+    name: goldpinger-serviceaccount
+    namespace: default
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: goldpinger
+  namespace: default
+  labels:
+    app: goldpinger
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: goldpinger
+  template:
+    metadata:
+      labels:
+        app: goldpinger
+    spec:
+      serviceAccountName: goldpinger-serviceaccount
+      containers:
+        - name: goldpinger
+          image: goldfinger
+          imagePullPolicy: Never
+          env:
+            - name: REFRESH_INTERVAL
+              value: "30"
+            - name: TCP_TARGETS
+              value: "google.com:80 example.com:80"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "8080"
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: 8080
+              name: http
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: goldpinger
+  namespace: default
+  labels:
+    app: goldpinger
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+  selector:
+    app: goldpinger
