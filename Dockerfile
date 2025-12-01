@@ -1,6 +1,6 @@
 ARG WINDOWS_BASE_IMAGE=mcr.microsoft.com/windows/nanoserver:ltcs2022
 
-FROM --platform=$BUILDPLATFORM golang:1.23 as builder
+FROM --platform=$BUILDPLATFORM golang:1.25 as builder
 ARG TARGETARCH
 ARG TARGETOS
 
