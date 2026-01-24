@@ -71,6 +71,18 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+httproute:
+  enabled: false
+  hostnames: []
+    # - chart-example.local
+  parentRefs: []
+    # - group: gateway.networking.k8s.io
+    #   kind: Gateway
+    #   name: default-gateway
+    #   namespace: "gateway-namespace"
+  annotations: {}
+    
+
 ## Set a priorityClassName for the pod. If left blank a default priority will be set.
 priorityClassName:
 
