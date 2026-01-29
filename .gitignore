@@ -91,3 +91,4 @@ ENV/
 # Rope project settings
 .ropeproject
 
+.secrets
