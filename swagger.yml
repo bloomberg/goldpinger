@@ -61,6 +61,18 @@ definitions:
         type: number
         format: int64
         description: wall clock time in milliseconds
+      loss-pct:
+        type: number
+        format: double
+        description: UDP packet loss percentage (0-100)
+      hop-count:
+        type: integer
+        format: int32
+        description: estimated network hop count from UDP TTL
+      udp-rtt-ms:
+        type: number
+        format: double
+        description: average UDP round-trip time in milliseconds
   CheckResults:
     type: object
     properties:

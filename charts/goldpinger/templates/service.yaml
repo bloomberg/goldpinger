@@ -18,6 +18,12 @@ spec:
       targetPort: {{ .Values.goldpinger.port }}
       protocol: TCP
       name: http
+    {{- if .Values.goldpinger.udp.enabled }}
+    - port: {{ .Values.goldpinger.udp.port }}
+      targetPort: {{ .Values.goldpinger.udp.port }}
+      protocol: UDP
+      name: udp-probe
+    {{- end }}
   selector:
     {{- include "goldpinger.selectorLabels" . | nindent 4 }}
   {{- if .Values.service.loadBalancerSourceRanges }}

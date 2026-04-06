@@ -50,6 +50,12 @@ spec:
               value: "{{ .Values.goldpinger.port }}"
             - name: LABEL_SELECTOR
               value: "app.kubernetes.io/name={{ include "goldpinger.name" . }}"
+            {{- if .Values.goldpinger.udp.enabled }}
+            - name: UDP_ENABLED
+              value: "true"
+            - name: UDP_PORT
+              value: "{{ .Values.goldpinger.udp.port }}"
+            {{- end }}
             {{- if .Values.extraEnv -}}
             {{ toYaml .Values.extraEnv | nindent 12 }}
             {{- end }}
@@ -66,6 +72,11 @@ spec:
               hostPort: {{ $.Values.goldpinger.port }}
               {{- end }}
               {{- end }}
+            {{- if .Values.goldpinger.udp.enabled }}
+            - name: udp-probe
+              containerPort: {{ .Values.goldpinger.udp.port }}
+              protocol: UDP
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /

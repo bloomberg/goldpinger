@@ -93,10 +93,11 @@ func updatePingers(resultsChan chan<- PingAllPodsResult) {
 
 // createPingers allocates a new pinger object for each new goldpinger Pod that's been discovered
 // It also:
-//     (a) initializes a result object in checkResults to store info on that pod
-//     (b) starts a new goroutines to continuously ping the given pod.
-//         Each new goroutine waits for a given time before starting the continuous ping
-//         to prevent a thundering herd
+//
+//	(a) initializes a result object in checkResults to store info on that pod
+//	(b) starts a new goroutines to continuously ping the given pod.
+//	    Each new goroutine waits for a given time before starting the continuous ping
+//	    to prevent a thundering herd
 func createPingers(pingers map[string]*Pinger, newPods map[string]*GoldpingerPod, resultsChan chan<- PingAllPodsResult, refreshPeriod time.Duration) {
 	if len(newPods) == 0 {
 		// I have nothing to do
@@ -135,6 +136,11 @@ func destroyPingers(pingers map[string]*Pinger, deletedPods map[string]*Goldping
 
 		// Close the channel to stop pinging
 		close(pinger.stopChan)
+
+		// Clean up stale UDP metric labels for this peer
+		if GoldpingerConfig.UDPEnabled {
+			DeletePeerUDPMetrics(pod.HostIP, pod.PodIP)
+		}
 
 		// delete from pingers
 		delete(pingers, podName)

@@ -186,6 +186,10 @@ func main() {
 	server.ConfigureAPI()
 	goldpinger.StartUpdater()
 
+	if goldpinger.GoldpingerConfig.UDPEnabled {
+		go goldpinger.StartUDPListener(goldpinger.GoldpingerConfig.UDPPort)
+	}
+
 	logger.Info("All good, starting serving the API")
 
 	// serve API

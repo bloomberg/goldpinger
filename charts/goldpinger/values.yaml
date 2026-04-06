@@ -23,6 +23,9 @@ serviceAccount:
 
 goldpinger:
   port: 8080
+  udp:
+    enabled: false
+    port: 6969
   zapConfig: |
     {
       "level": "info",

@@ -16,6 +16,7 @@ package goldpinger
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -111,6 +112,24 @@ func (p *Pinger) Ping() {
 	CountCall("made", "ping")
 	start := time.Now()
 
+	// Run HTTP ping and UDP probe concurrently
+	var udpResult UDPProbeResult
+	var wg sync.WaitGroup
+	if GoldpingerConfig.UDPEnabled {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			targetIP := pickPodHostIP(p.pod.PodIP, p.pod.HostIP)
+			udpResult = ProbeUDP(
+				targetIP,
+				GoldpingerConfig.UDPPort,
+				GoldpingerConfig.UDPPacketCount,
+				GoldpingerConfig.UDPPacketSize,
+				GoldpingerConfig.UDPTimeout,
+			)
+		}()
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), p.timeout)
 	defer cancel()
 
@@ -120,7 +139,34 @@ func (p *Pinger) Ping() {
 	responseTimeMs := responseTime.Nanoseconds() / int64(time.Millisecond)
 	p.histogram.Observe(responseTime.Seconds())
 
+	// Wait for UDP probe to complete
+	wg.Wait()
+
 	OK := (err == nil)
+
+	var lossPct float64
+	var hopCount int32
+	var udpRttMs float64
+	if GoldpingerConfig.UDPEnabled {
+		lossPct = udpResult.LossPct
+		hopCount = udpResult.HopCount
+		udpRttMs = udpResult.AvgRttS * 1000.0
+		if udpResult.Err != nil {
+			p.logger.Warn("UDP probe error", zap.Error(udpResult.Err))
+		} else {
+			p.logger.Debug("UDP probe complete",
+				zap.Float64("lossPct", lossPct),
+				zap.Int32("hopCount", hopCount),
+				zap.Float64("udpRttMs", udpRttMs),
+			)
+		}
+		SetPeerLossPct(p.pod.HostIP, p.pod.PodIP, lossPct)
+		SetPeerHopCount(p.pod.HostIP, p.pod.PodIP, hopCount)
+		if udpResult.AvgRttS > 0 {
+			ObservePeerUDPRtt(p.pod.HostIP, p.pod.PodIP, udpResult.AvgRttS)
+		}
+	}
+
 	if OK {
 		p.resultsChan <- PingAllPodsResult{
 			podName: p.pod.Name,
@@ -132,6 +178,9 @@ func (p *Pinger) Ping() {
 				Response:       resp.Payload,
 				StatusCode:     200,
 				ResponseTimeMs: responseTimeMs,
+				LossPct:        lossPct,
+				HopCount:       hopCount,
+				UDPRttMs:       udpRttMs,
 			},
 		}
 		p.logger.Debug("Success pinging pod", zap.Duration("responseTime", responseTime))
@@ -146,6 +195,9 @@ func (p *Pinger) Ping() {
 				Error:          err.Error(),
 				StatusCode:     504,
 				ResponseTimeMs: responseTimeMs,
+				LossPct:        lossPct,
+				HopCount:       hopCount,
+				UDPRttMs:       udpRttMs,
 			},
 		}
 		p.logger.Warn("Ping returned error", zap.Duration("responseTime", responseTime), zap.Error(err))

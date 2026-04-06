@@ -25,6 +25,7 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
     - [Authentication with Kubernetes API](#authentication-with-kubernetes-api)
     - [Example YAML](#example-yaml)
     - [Note on DNS](#note-on-dns)
+    - [UDP probe for packet loss, hop count, and RTT](#udp-probe-for-packet-loss-hop-count-and-rtt)
   - [Usage](#usage)
     - [UI](#ui)
     - [API](#api)
@@ -287,9 +288,55 @@ Instances can also be configured to do simple TCP or HTTP checks on external tar
           value: 10.34.5.141:5000 10.34.195.193:6442
 ```
 
-the timeouts for the TCP, DNS and HTTP checks can be configured via `TCP_TARGETS_TIMEOUT`, `DNS_TARGETS_TIMEOUT` and `HTTP_TARGETS_TIMEOUT` respectively. 
+the timeouts for the TCP, DNS and HTTP checks can be configured via `TCP_TARGETS_TIMEOUT`, `DNS_TARGETS_TIMEOUT` and `HTTP_TARGETS_TIMEOUT` respectively.
 
 ![screenshot-tcp-http-checks](./extras/tcp-checks-screenshot.png)
+
+### UDP probe for packet loss, hop count, and RTT
+
+In natively routed Kubernetes environments (e.g. Cilium, Calico in BGP mode), the existing HTTP ping can mask network issues: TCP retransmits hide packet loss, and HTTP latency includes the 3-way handshake, TLS, and application overhead. The UDP probe gives you visibility into the actual network layer.
+
+When enabled, each goldpinger pod runs a UDP echo listener. During each ping cycle, the prober sends a configurable number of sequenced UDP packets to each peer; the peer echoes them back. From the replies, goldpinger computes:
+
+- **Packet loss** — percentage of packets that were not returned, surfacing degraded links before they impact applications
+- **Hop count** — estimated from the IPv4 TTL or IPv6 HopLimit on received replies, useful for detecting asymmetric routing or unexpected topology changes
+- **UDP RTT** — average round-trip time with sub-millisecond precision, isolating network latency from TCP/HTTP overhead
+
+The feature is disabled by default and can be enabled with the following environment variables:
+
+```sh
+UDP_ENABLED=true        # enable UDP probing and echo listener
+UDP_PORT=6969           # listener port (default: 6969)
+UDP_PACKET_COUNT=10     # packets per probe (default: 10)
+UDP_PACKET_SIZE=64      # bytes per packet (default: 64)
+UDP_TIMEOUT=1s          # probe timeout (default: 1s)
+```
+
+Or via the Helm chart:
+
+```yaml
+goldpinger:
+  udp:
+    enabled: true
+    port: 6969
+```
+
+This adds three Prometheus metrics:
+
+```sh
+goldpinger_peers_loss_pct          # gauge: UDP packet loss percentage (0-100)
+goldpinger_peers_hop_count         # gauge: estimated hop count
+goldpinger_peers_udp_rtt_s         # histogram: UDP round-trip time in seconds
+goldpinger_udp_errors_total        # counter: UDP probe errors
+```
+
+Links with partial loss are shown as yellow edges in the graph UI, and edge labels display the UDP RTT instead of HTTP latency when available.
+
+![screenshot-udp-yellow-edges](./extras/udp-yellow-edges.png)
+
+![screenshot-udp-grafana](./extras/udp-grafana-dashboards.png)
+
+No new dependencies are required (`golang.org/x/net` is already in go.mod), and no additional container capabilities are needed.
 
 ## Usage
 
@@ -317,10 +364,12 @@ These are probably the droids you are looking for:
 
 ```sh
 goldpinger_peers_response_time_s_*
-goldpinger_peers_response_time_s_*
 goldpinger_nodes_health_total
 goldpinger_stats_total
 goldpinger_errors_total
+goldpinger_peers_loss_pct           # (UDP probe, when enabled)
+goldpinger_peers_hop_count          # (UDP probe, when enabled)
+goldpinger_peers_udp_rtt_s_*        # (UDP probe, when enabled)
 ```
 
 ### Grafana

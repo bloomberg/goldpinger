@@ -44,6 +44,13 @@ var GoldpingerConfig = struct {
 
 	IPVersions []string `long:"ip-versions" description:"The IP versions to use (space delimited). Possible values are 4 and 6 (defaults to 4)." env:"IP_VERSIONS" env-delim:" "`
 
+	// UDP probe settings
+	UDPEnabled     bool          `long:"udp-enabled" description:"Enable UDP probe for loss and hop metrics" env:"UDP_ENABLED"`
+	UDPPort        int           `long:"udp-port" description:"Port for UDP echo listener" env:"UDP_PORT" default:"6969"`
+	UDPPacketCount int           `long:"udp-packet-count" description:"Number of UDP packets to send per probe" env:"UDP_PACKET_COUNT" default:"10"`
+	UDPPacketSize  int           `long:"udp-packet-size" description:"Size of each UDP probe packet in bytes" env:"UDP_PACKET_SIZE" default:"64"`
+	UDPTimeout     time.Duration `long:"udp-timeout" description:"Timeout for UDP probe" env:"UDP_TIMEOUT" default:"1s"`
+
 	// Timeouts
 	PingTimeoutMs     int64         `long:"ping-timeout-ms" description:"The timeout in milliseconds for a ping call to other goldpinger pods(deprecated)" env:"PING_TIMEOUT_MS" default:"300"`
 	CheckTimeoutMs    int64         `long:"check-timeout-ms" description:"The timeout in milliseconds for a check call to other goldpinger pods(deprecated)" env:"CHECK_TIMEOUT_MS" default:"1000"`

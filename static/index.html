@@ -378,8 +378,25 @@ var main = function(timeout){
                         if (!edge._data.OK) {
                                 color = "red";
                         }
+                        if (edge._data.OK && edge._data["loss-pct"] > 0) {
+                                color = "#f0ad4e";
+                        }
                         if ("isprobeResultsNode" in edge._data) {
                                 type = "dashed";
+                        }
+                        var label = "";
+                        if (edge._data["udp-rtt-ms"] > 0) {
+                                label = edge._data["udp-rtt-ms"].toFixed(2) + "ms udp";
+                        } else if (edge._data["response-time-ms"]) {
+                                label = edge._data["response-time-ms"] + "ms";
+                        } else if (edge._data.elapsed) {
+                                label = edge._data.elapsed;
+                        }
+                        if (edge._data["loss-pct"] > 0) {
+                                label += " " + edge._data["loss-pct"].toFixed(1) + "% loss";
+                        }
+                        if (edge._data["hop-count"] > 0) {
+                                label += " " + edge._data["hop-count"] + " hops";
                         }
                         var edge = {
                                 id: "e" + i,
@@ -387,7 +404,7 @@ var main = function(timeout){
                                 target: edge.target,
                                 type: type,
                                 color: color,
-                                label: edge._data.elapsed,
+                                label: label,
                                 size: 7
                         }
                         //console.log(edge);

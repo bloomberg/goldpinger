@@ -2,17 +2,17 @@
 
 // Package restapi Goldpinger
 //
-//  Schemes:
-//    http
-//  Host: localhost
-//  BasePath: /
-//  Version: 3.0.0
+//	Schemes:
+//	  http
+//	Host: localhost
+//	BasePath: /
+//	Version: 3.0.0
 //
-//  Consumes:
-//    - application/json
+//	Consumes:
+//	  - application/json
 //
-//  Produces:
-//    - application/json
+//	Produces:
+//	  - application/json
 //
 // swagger:meta
 package restapi
