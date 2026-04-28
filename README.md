@@ -26,6 +26,7 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
     - [Example YAML](#example-yaml)
     - [Note on DNS](#note-on-dns)
     - [UDP probe for packet loss, hop count, and RTT](#udp-probe-for-packet-loss-hop-count-and-rtt)
+    - [Active/passive node sharding](#activepassive-node-sharding)
   - [Usage](#usage)
     - [UI](#ui)
     - [API](#api)
@@ -340,6 +341,74 @@ Links with partial loss are shown as yellow edges in the graph UI, and edge labe
 
 No new dependencies are required (`golang.org/x/net` is already in go.mod), and no additional container capabilities are needed.
 
+### Active/passive node sharding
+
+At scale, every goldpinger pod list-watches all pods via the Kubernetes API server. With hundreds or thousands of nodes, this creates N concurrent list-watches that can overwhelm the API server and trigger cascading failures.
+
+Active/passive sharding lets you configure a percentage of nodes as **active** (list-watch + ping peers) while the rest are **passive** (only respond to `/ping`). Active nodes still ping passive nodes, so connectivity is validated across the entire cluster with a fraction of the API server load.
+
+#### Configuration
+
+| Method | Example |
+|--------|---------|
+| Env var | `ACTIVE_NODE_PERCENTAGE=10` |
+| CLI flag | `--active-node-percentage=10` |
+| Helm | `goldpinger.activeNodePercentage: 10` |
+
+The default is `100` (all nodes active) — fully backwards compatible.
+
+#### Forcing specific nodes active
+
+For small clusters or when you need a guarantee that specific nodes are always active:
+
+| Method | Example |
+|--------|---------|
+| Env var | `ACTIVE_NODES=node-1,node-2` |
+| CLI flag | `--active-nodes=node-1,node-2` |
+| Helm | `goldpinger.activeNodes: [node-1, node-2]` |
+
+Nodes in this list are always active, regardless of the percentage hash.
+
+> **Note for small clusters:** The hash-based percentage is probabilistic. With fewer than ~20 nodes and a low percentage, it's possible all nodes hash into the passive range. Use `ACTIVE_NODES` to guarantee at least one active node.
+
+#### How it works
+
+Each pod hashes its own node name (from `spec.nodeName`) using FNV-1a and checks if `hash % 100 < percentage`. This is deterministic — the same node always gets the same role across restarts, with no inter-pod coordination.
+
+> **Mode is evaluated once at startup and never changes while the pod is running.** To change a node from passive to active (or vice versa), update the configuration and perform a **DaemonSet rolling restart** (`kubectl rollout restart daemonset/goldpinger`). This design is intentional: it means passive nodes make zero API server calls for their entire lifetime, which is ideal for large clusters.
+
+
+#### Behavior by mode
+
+| Endpoint | Active | Passive |
+|----------|--------|---------|
+| `GET /ping` | 200 | 200 |
+| `GET /healthz` | 200 | 200 |
+| `GET /metrics` | Full metrics | Mode metric only |
+| `GET /check` | 200 | 503 |
+| `GET /check_all` | 200 | 503 |
+| `GET /cluster_health` | 200 | 503 |
+
+Passive nodes skip Kubernetes client creation entirely — no list-watch, no API server load.
+
+#### Monitoring
+
+The `goldpinger_node_mode` Prometheus metric indicates the node's mode: `1` for active, `0` for passive. You can use this to verify your sharding configuration:
+
+```promql
+# Count active vs passive nodes
+count(goldpinger_node_mode == 1)  # active nodes
+count(goldpinger_node_mode == 0)  # passive nodes
+```
+
+#### Example: 1000-node cluster
+
+| Config | API server list-watches | Nodes pinged |
+|--------|------------------------|--------------|
+| Default (100%) | 1000 | 1000 |
+| 10% | ~100 | 1000 |
+| 1% | ~10 | 1000 |
+
 ## Usage
 
 ### UI
@@ -374,6 +443,7 @@ goldpinger_peers_hop_count          # (UDP probe, when enabled)
 goldpinger_peers_udp_rtt_s_*        # (UDP probe, when enabled)
 goldpinger_udp_duplicates_total     # (UDP probe, when enabled)
 goldpinger_udp_out_of_order_total   # (UDP probe, when enabled)
+goldpinger_node_mode                # 1 = active, 0 = passive (active/passive sharding)
 ```
 
 ### Grafana

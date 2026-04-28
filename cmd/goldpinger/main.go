@@ -98,6 +98,15 @@ func main() {
 		os.Exit(code)
 	}
 
+	// Handle --check-node-hash: print bucket info and exit
+	if len(goldpinger.GoldpingerConfig.CheckNodeHash) > 0 {
+		for _, name := range goldpinger.GoldpingerConfig.CheckNodeHash {
+			bucket := goldpinger.NodeHashBucket(name)
+			fmt.Printf("%s: bucket %d (active when ACTIVE_NODE_PERCENTAGE >= %d)\n", name, bucket, bucket+1)
+		}
+		os.Exit(0)
+	}
+
 	// Configure logger
 	logger, err := getLogger(goldpinger.GoldpingerConfig.ZapConfigPath)
 	if err != nil {
@@ -115,77 +124,116 @@ func main() {
 
 	logger.Info("Goldpinger", zap.String("version", Version), zap.String("build", Build))
 
-	if goldpinger.GoldpingerConfig.Namespace == nil {
-		goldpinger.GoldpingerConfig.Namespace = &goldpinger.PodNamespace
+	// Determine node mode (active/passive sharding)
+	goldpinger.NodeMode = goldpinger.DetermineNodeMode(
+		goldpinger.GoldpingerConfig.Hostname,
+		goldpinger.GoldpingerConfig.ActiveNodePercentage,
+		goldpinger.GoldpingerConfig.ActiveNodes,
+	)
+	logger.Info("Node mode determined",
+		zap.String("hostname", goldpinger.GoldpingerConfig.Hostname),
+		zap.String("mode", goldpinger.NodeMode),
+		zap.Int("activeNodePercentage", goldpinger.GoldpingerConfig.ActiveNodePercentage),
+		zap.Strings("activeNodes", goldpinger.GoldpingerConfig.ActiveNodes),
+	)
+	if goldpinger.GoldpingerConfig.Hostname == "" {
+		logger.Warn("Empty hostname, defaulting to active mode")
+	}
+	if goldpinger.GoldpingerConfig.ActiveNodePercentage < 1 {
+		logger.Warn("ACTIVE_NODE_PERCENTAGE below minimum, clamping to 1",
+			zap.Int("configured", goldpinger.GoldpingerConfig.ActiveNodePercentage))
+	}
+	if goldpinger.GoldpingerConfig.ActiveNodePercentage > 100 {
+		logger.Warn("ACTIVE_NODE_PERCENTAGE above maximum, clamping to 100",
+			zap.Int("configured", goldpinger.GoldpingerConfig.ActiveNodePercentage))
+	}
+	if goldpinger.NodeMode == goldpinger.NodeModePassive && len(goldpinger.GoldpingerConfig.ActiveNodes) == 0 {
+		logger.Warn("Passive node with no ACTIVE_NODES set. In small clusters, all nodes may be passive. Set ACTIVE_NODES to guarantee at least one active node.",
+			zap.Int("activeNodePercentage", goldpinger.GoldpingerConfig.ActiveNodePercentage),
+			zap.String("hostname", goldpinger.GoldpingerConfig.Hostname),
+		)
+	}
+	goldpinger.SetNodeMode(goldpinger.NodeMode)
+
+	if goldpinger.IsActiveNode() {
+		if goldpinger.GoldpingerConfig.Namespace == nil {
+			goldpinger.GoldpingerConfig.Namespace = &goldpinger.PodNamespace
+		} else {
+			logger.Info("Using configured namespace", zap.String("namespace", *goldpinger.GoldpingerConfig.Namespace))
+		}
+
+		// make a kubernetes client
+		var config *rest.Config
+		if goldpinger.GoldpingerConfig.KubeConfigPath == "" {
+			logger.Info("Kubeconfig not specified, trying to use in cluster config")
+			config, err = rest.InClusterConfig()
+		} else {
+			logger.Info("Kubeconfig specified", zap.String("path", goldpinger.GoldpingerConfig.KubeConfigPath))
+			config, err = clientcmd.BuildConfigFromFlags("", goldpinger.GoldpingerConfig.KubeConfigPath)
+		}
+		if err != nil {
+			logger.Fatal("Error getting config ", zap.Error(err))
+		}
+		// communicate to kube-apiserver with protobuf
+		config.AcceptContentTypes = strings.Join([]string{runtime.ContentTypeProtobuf, runtime.ContentTypeJSON}, ",")
+		config.ContentType = runtime.ContentTypeProtobuf
+
+		// create the clientset
+		clientset, err := kubernetes.NewForConfig(config)
+		if err != nil {
+			logger.Fatal("kubernetes.NewForConfig error ", zap.Error(err))
+		}
+		goldpinger.GoldpingerConfig.KubernetesClient = clientset
+
+		// Check if we have an override for the client, default to own port
+		if goldpinger.GoldpingerConfig.Port == 0 {
+			goldpinger.GoldpingerConfig.Port = server.Port
+		}
+
+		if goldpinger.GoldpingerConfig.PodIP == "" {
+			logger.Info("PodIP not set: pinging all pods")
+		}
+		if goldpinger.GoldpingerConfig.PingNumber == 0 {
+			logger.Info("--ping-number set to 0: pinging all pods")
+		}
+		if goldpinger.GoldpingerConfig.IPVersions == nil || len(goldpinger.GoldpingerConfig.IPVersions) == 0 {
+			logger.Info("IPVersions not set: settings to 4 (IPv4)")
+			goldpinger.GoldpingerConfig.IPVersions = []string{"4"}
+		}
+		if len(goldpinger.GoldpingerConfig.IPVersions) > 1 {
+			logger.Warn("Multiple IP versions not supported. Will use first version specified as default", zap.Strings("IPVersions", goldpinger.GoldpingerConfig.IPVersions))
+		}
+		if goldpinger.GoldpingerConfig.IPVersions[0] != string(net.IPv4) && goldpinger.GoldpingerConfig.IPVersions[0] != string(net.IPv6) {
+			logger.Error("Unknown IP version specified: expected values are 4 or 6", zap.Strings("IPVersions", goldpinger.GoldpingerConfig.IPVersions))
+		}
+
+		// Handle deprecated flags
+		if int(goldpinger.GoldpingerConfig.PingTimeout) == 0 {
+			logger.Warn("ping-timeout-ms is deprecated in favor of ping-timeout and will be removed in the future",
+				zap.Int64("ping-timeout-ms", goldpinger.GoldpingerConfig.PingTimeoutMs))
+			goldpinger.GoldpingerConfig.PingTimeout = time.Duration(goldpinger.GoldpingerConfig.PingTimeoutMs) * time.Millisecond
+		}
+		if int(goldpinger.GoldpingerConfig.CheckTimeout) == 0 {
+			logger.Warn("check-timeout-ms is deprecated in favor of check-timeout and will be removed in the future",
+				zap.Int64("check-timeout-ms", goldpinger.GoldpingerConfig.CheckTimeoutMs))
+			goldpinger.GoldpingerConfig.CheckTimeout = time.Duration(goldpinger.GoldpingerConfig.CheckTimeoutMs) * time.Millisecond
+		}
+		if int(goldpinger.GoldpingerConfig.CheckAllTimeout) == 0 {
+			logger.Warn("check-all-timeout-ms is deprecated in favor of check-all-timeout will be removed in the future",
+				zap.Int64("check-all-timeout-ms", goldpinger.GoldpingerConfig.CheckAllTimeoutMs))
+			goldpinger.GoldpingerConfig.CheckAllTimeout = time.Duration(goldpinger.GoldpingerConfig.CheckAllTimeoutMs) * time.Millisecond
+		}
+
+		server.ConfigureAPI()
+		goldpinger.StartUpdater()
 	} else {
-		logger.Info("Using configured namespace", zap.String("namespace", *goldpinger.GoldpingerConfig.Namespace))
+		logger.Info("Running in passive mode - serving /ping, /healthz, /metrics (+ UDP listener if enabled) only. No k8s API calls will be made. Restart the DaemonSet to re-evaluate mode.")
+		server.ConfigureAPI()
 	}
 
-	// make a kubernetes client
-	var config *rest.Config
-	if goldpinger.GoldpingerConfig.KubeConfigPath == "" {
-		logger.Info("Kubeconfig not specified, trying to use in cluster config")
-		config, err = rest.InClusterConfig()
-	} else {
-		logger.Info("Kubeconfig specified", zap.String("path", goldpinger.GoldpingerConfig.KubeConfigPath))
-		config, err = clientcmd.BuildConfigFromFlags("", goldpinger.GoldpingerConfig.KubeConfigPath)
-	}
-	if err != nil {
-		logger.Fatal("Error getting config ", zap.Error(err))
-	}
-	// communicate to kube-apiserver with protobuf
-	config.AcceptContentTypes = strings.Join([]string{runtime.ContentTypeProtobuf, runtime.ContentTypeJSON}, ",")
-	config.ContentType = runtime.ContentTypeProtobuf
-
-	// create the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		logger.Fatal("kubernetes.NewForConfig error ", zap.Error(err))
-	}
-	goldpinger.GoldpingerConfig.KubernetesClient = clientset
-
-	// Check if we have an override for the client, default to own port
-	if goldpinger.GoldpingerConfig.Port == 0 {
-		goldpinger.GoldpingerConfig.Port = server.Port
-	}
-
-	if goldpinger.GoldpingerConfig.PodIP == "" {
-		logger.Info("PodIP not set: pinging all pods")
-	}
-	if goldpinger.GoldpingerConfig.PingNumber == 0 {
-		logger.Info("--ping-number set to 0: pinging all pods")
-	}
-	if goldpinger.GoldpingerConfig.IPVersions == nil || len(goldpinger.GoldpingerConfig.IPVersions) == 0 {
-		logger.Info("IPVersions not set: settings to 4 (IPv4)")
-		goldpinger.GoldpingerConfig.IPVersions = []string{"4"}
-	}
-	if len(goldpinger.GoldpingerConfig.IPVersions) > 1 {
-		logger.Warn("Multiple IP versions not supported. Will use first version specified as default", zap.Strings("IPVersions", goldpinger.GoldpingerConfig.IPVersions))
-	}
-	if goldpinger.GoldpingerConfig.IPVersions[0] != string(net.IPv4) && goldpinger.GoldpingerConfig.IPVersions[0] != string(net.IPv6) {
-		logger.Error("Unknown IP version specified: expected values are 4 or 6", zap.Strings("IPVersions", goldpinger.GoldpingerConfig.IPVersions))
-	}
-
-	// Handle deprecated flags
-	if int(goldpinger.GoldpingerConfig.PingTimeout) == 0 {
-		logger.Warn("ping-timeout-ms is deprecated in favor of ping-timeout and will be removed in the future",
-			zap.Int64("ping-timeout-ms", goldpinger.GoldpingerConfig.PingTimeoutMs))
-		goldpinger.GoldpingerConfig.PingTimeout = time.Duration(goldpinger.GoldpingerConfig.PingTimeoutMs) * time.Millisecond
-	}
-	if int(goldpinger.GoldpingerConfig.CheckTimeout) == 0 {
-		logger.Warn("check-timeout-ms is deprecated in favor of check-timeout and will be removed in the future",
-			zap.Int64("check-timeout-ms", goldpinger.GoldpingerConfig.CheckTimeoutMs))
-		goldpinger.GoldpingerConfig.CheckTimeout = time.Duration(goldpinger.GoldpingerConfig.CheckTimeoutMs) * time.Millisecond
-	}
-	if int(goldpinger.GoldpingerConfig.CheckAllTimeout) == 0 {
-		logger.Warn("check-all-timeout-ms is deprecated in favor of check-all-timeout will be removed in the future",
-			zap.Int64("check-all-timeout-ms", goldpinger.GoldpingerConfig.CheckAllTimeoutMs))
-		goldpinger.GoldpingerConfig.CheckAllTimeout = time.Duration(goldpinger.GoldpingerConfig.CheckAllTimeoutMs) * time.Millisecond
-	}
-
-	server.ConfigureAPI()
-	goldpinger.StartUpdater()
-
+	// UDP listener runs regardless of active/passive mode so active peers can
+	// measure UDP connectivity to passive nodes. Passive only disables outbound
+	// pinging and k8s API calls, not responding to inbound probes.
 	if goldpinger.GoldpingerConfig.UDPEnabled {
 		go goldpinger.StartUDPListener(goldpinger.GoldpingerConfig.UDPPort)
 	}

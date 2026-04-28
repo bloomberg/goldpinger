@@ -23,6 +23,13 @@ serviceAccount:
 
 goldpinger:
   port: 8080
+  # Percentage of nodes (1-100) that are "active" (list-watch + ping).
+  # Remaining nodes are "passive" (respond to /ping only, no API server load).
+  # For small clusters, also set activeNodes to guarantee at least one active node.
+  activeNodePercentage: 100
+  # List of node names that should always be active, regardless of percentage hash.
+  # Recommended for small clusters to guarantee at least one active node.
+  activeNodes: []
   udp:
     enabled: false
     port: 6969

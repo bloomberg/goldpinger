@@ -189,6 +189,15 @@ var (
 			"pod_ip",
 		},
 	)
+	goldpingerNodeModeGauge = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "goldpinger_node_mode",
+			Help: "1 when node is active (list-watch + ping), 0 when passive (respond only)",
+		},
+		[]string{
+			"goldpinger_instance",
+		},
+	)
 	bootTime = time.Now()
 )
 
@@ -208,6 +217,7 @@ func init() {
 	prometheus.MustRegister(goldpingerUDPErrorsCounter)
 	prometheus.MustRegister(goldpingerUDPDuplicatesCounter)
 	prometheus.MustRegister(goldpingerUDPOutOfOrderCounter)
+	prometheus.MustRegister(goldpingerNodeModeGauge)
 	zap.L().Info("Metrics setup - see /metrics")
 }
 
@@ -216,6 +226,17 @@ func GetStats(ctx context.Context) *models.PingResults {
 	return &models.PingResults{
 		BootTime: strfmt.DateTime(bootTime),
 	}
+}
+
+// SetNodeMode sets the node mode gauge metric (1 = active, 0 = passive)
+func SetNodeMode(mode string) {
+	val := 0.0
+	if mode == NodeModeActive {
+		val = 1.0
+	}
+	goldpingerNodeModeGauge.WithLabelValues(
+		GoldpingerConfig.Hostname,
+	).Set(val)
 }
 
 // counts various calls received and made
