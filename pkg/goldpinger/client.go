@@ -54,12 +54,17 @@ func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
 
 // CheckCluster does a CheckNeighboursNeighbours and analyses results to produce a binary OK or not OK
 func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
+	return checkClusterHealth(ctx, SelectPods())
+}
+
+// checkClusterHealth calls every pod in selectedPods and aggregates the responses
+// into a binary OK or not OK for the cluster.
+func checkClusterHealth(ctx context.Context, selectedPods map[string]*GoldpingerPod) *models.ClusterHealthResults {
 	start := time.Now()
 	output := models.ClusterHealthResults{
 		GeneratedAt: strfmt.DateTime(start),
 		OK:          true,
 	}
-	selectedPods := SelectPods()
 
 	// precompute the expected set of nodes
 	expectedNodes := []string{}
@@ -75,39 +80,106 @@ func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
 	if len(checkAll.Responses) < 1 {
 		output.OK = false
 	}
-	for _, resp := range checkAll.Responses {
+	for podName, resp := range checkAll.Responses {
+		verdict := evaluatePeerResponse(podName, resp, expectedNodes)
 		// 1. check that all nodes report OK
-		if *resp.OK {
-			output.NodesHealthy = append(output.NodesHealthy, resp.HostIP.String())
+		if verdict.reachable {
+			output.NodesHealthy = append(output.NodesHealthy, verdict.hostIP)
 		} else {
-			output.NodesUnhealthy = append(output.NodesUnhealthy, resp.HostIP.String())
+			output.NodesUnhealthy = append(output.NodesUnhealthy, verdict.hostIP)
 			output.OK = false
 		}
 		output.NodesTotal++
 		// 2. check that all nodes report the expected peers
-		// on error, there might be no response from the node
-		if resp.Response == nil {
+		if !verdict.reportsExpectedNodes {
 			output.OK = false
-			continue
-		}
-		// if we get a response, let's check we get the expected nodes
-		observedNodes := []string{}
-		for _, peer := range resp.Response.PodResults {
-			observedNodes = append(observedNodes, string(peer.HostIP))
-		}
-		sort.Strings(observedNodes)
-		if len(observedNodes) != len(expectedNodes) {
-			output.OK = false
-		}
-		for i, val := range observedNodes {
-			if val != expectedNodes[i] {
-				output.OK = false
-				break
-			}
 		}
 	}
 	output.DurationNs = time.Since(start).Nanoseconds()
 	return &output
+}
+
+// peerVerdict is the outcome of inspecting a single peer's response.
+type peerVerdict struct {
+	// hostIP is the node the peer was discovered on, as we know it - never
+	// as the peer reports it.
+	hostIP string
+	// reachable is true if the peer answered our /check call successfully.
+	reachable bool
+	// reportsExpectedNodes is true if the peer's view of the cluster matches ours.
+	reportsExpectedNodes bool
+}
+
+// evaluatePeerResponse inspects a single peer's response to our /check call.
+//
+// Peer identity rests on kubernetes metadata and network reachability rather
+// than on any cryptographic authentication, so anything able to join the
+// discovered peer set can serve an arbitrary body here. The response is
+// therefore untrusted input: nothing below indexes or dereferences a
+// peer-controlled value without first bounding its shape, and any panic that
+// still gets through is recovered so one hostile peer cannot take the whole
+// process down (CWE-248).
+func evaluatePeerResponse(podName string, resp models.CheckAllPodResult, expectedNodes []string) (verdict peerVerdict) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			zap.L().Error(
+				"Recovered from panic while processing a peer response",
+				zap.String("op", "checkCluster"),
+				zap.String("name", podName),
+				zap.String("hostIP", verdict.hostIP),
+				zap.Any("panic", recovered),
+			)
+			CountError("checkClusterPeerResponse")
+			verdict.reachable = false
+			verdict.reportsExpectedNodes = false
+		}
+	}()
+
+	verdict.hostIP = resp.HostIP.String()
+	verdict.reachable = resp.OK != nil && *resp.OK
+	// on error, there might be no response from the node
+	if resp.Response == nil {
+		return
+	}
+
+	verdict.reportsExpectedNodes = reportsExpectedNodes(expectedNodes, resp.Response.PodResults)
+	if !verdict.reportsExpectedNodes {
+		zap.L().Warn(
+			"Peer reported an unexpected set of nodes",
+			zap.String("op", "checkCluster"),
+			zap.String("name", podName),
+			zap.String("hostIP", verdict.hostIP),
+			zap.Int("observedPodResults", len(resp.Response.PodResults)),
+			zap.Int("expectedNodes", len(expectedNodes)),
+		)
+	}
+	return
+}
+
+// reportsExpectedNodes reports whether the host IPs in an untrusted peer's pod
+// results are exactly the nodes we expect, compared as sorted multisets.
+// expectedNodes must already be sorted.
+//
+// The count is compared first, both because a peer that reports a different
+// number of nodes already disagrees with us and because it bounds the work we
+// do - and the slice we index - to the number of pods we discovered ourselves.
+// A peer that returns extra or unexpected entries is simply not in agreement;
+// it must never be able to walk this loop off the end of expectedNodes.
+func reportsExpectedNodes(expectedNodes []string, podResults map[string]models.PodResult) bool {
+	if len(podResults) != len(expectedNodes) {
+		return false
+	}
+	observedNodes := make([]string, 0, len(expectedNodes))
+	for _, peer := range podResults {
+		observedNodes = append(observedNodes, string(peer.HostIP))
+	}
+	sort.Strings(observedNodes)
+	for i, val := range observedNodes {
+		if val != expectedNodes[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // PingAllPodsResult holds results from pinging all nodes
