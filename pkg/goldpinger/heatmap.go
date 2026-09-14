@@ -121,12 +121,20 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 
 	// draw all the boxes
 	for sourceIP, results := range checkResults.Responses {
-		if *results.OK {
-			for destinationIP, response := range results.Response.PodResults {
-				x, y := getPingBoxCoordinates(order[sourceIP], order[destinationIP], boxSize, paddingSize)
-				color := getPingBoxColor(response.ResponseTimeMs, tresholdLatencies)
-				drawPingBox(canvas, boxSize+x, boxSize+y, boxSize, color)
+		if results.OK == nil || !*results.OK || results.Response == nil {
+			continue
+		}
+		for destinationIP, response := range results.Response.PodResults {
+			// Peer responses are untrusted: a peer can name any destination it
+			// likes. Skip the ones we didn't discover ourselves rather than
+			// letting them default to row 0 and paint over a real peer's row.
+			destination, known := order[destinationIP]
+			if !known {
+				continue
 			}
+			x, y := getPingBoxCoordinates(order[sourceIP], destination, boxSize, paddingSize)
+			color := getPingBoxColor(response.ResponseTimeMs, tresholdLatencies)
+			drawPingBox(canvas, boxSize+x, boxSize+y, boxSize, color)
 		}
 	}
 
