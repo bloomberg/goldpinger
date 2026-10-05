@@ -1,4 +1,4 @@
-{{- if .Values.httproute.enabled -}}
+{{- if .Values.httpRoute.enabled -}}
 {{- $fullName := include "goldpinger.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
 apiVersion: gateway.networking.k8s.io/v1
@@ -7,23 +7,23 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "goldpinger.labels" . | nindent 4 }}
-  {{- with .Values.httproute.annotations }}
+  {{- with .Values.httpRoute.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- with .Values.httproute.hostnames }}
+  {{- with .Values.httpRoute.hostnames }}
   hostnames:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.httproute.parentRefs }}
+  {{- with .Values.httpRoute.parentRefs }}
   parentRefs:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   rules:
     - backendRefs:
       - name: {{ $fullName }}
-        port: {{ .Values.service.port }}
+        port: {{ $svcPort }}
         weight: 1
       matches:
       - path:

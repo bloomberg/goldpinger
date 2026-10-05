@@ -74,7 +74,7 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-httproute:
+httpRoute:
   enabled: false
   hostnames: []
     # - chart-example.local
@@ -84,7 +84,6 @@ httproute:
     #   name: default-gateway
     #   namespace: "gateway-namespace"
   annotations: {}
-    
 
 ## Set a priorityClassName for the pod. If left blank a default priority will be set.
 priorityClassName:
