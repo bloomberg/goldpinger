@@ -193,14 +193,13 @@ var fetchJSON = function(url) {
 };
 
 var prepareJSON = function(subject){
-        return "<code style='white-space: pre;'>"
-                + JSON.stringify(subject, undefined, 4)
-                + "</code>"
+        return $("<code style='white-space: pre;'></code>")
+                .text(JSON.stringify(subject, undefined, 4));
 }
 
 var loadingDialog = function(enable){
-        $('#modal-title').html("Loading");
-        $('#modal-body').html(prepareJSON({stuff:{will_be_there:true, soon: "Math.random() > 0.5"}}));
+        $('#modal-title').text("Loading");
+        $('#modal-body').empty().append(prepareJSON({stuff:{will_be_there:true, soon: "Math.random() > 0.5"}}));
 
         // show the things
         if (enable){
@@ -445,8 +444,8 @@ var main = function(timeout){
                         hideNotTouching(node.id);
 
                         // fill the voids
-                        $('#modal-title').html(node.id);
-                        $('#modal-body').html(prepareJSON(node._data));
+                        $('#modal-title').text(node.id);
+                        $('#modal-body').empty().append(prepareJSON(node._data));
 
                         // show the things
                         $('#modal-window-code').modal('show');
@@ -461,8 +460,8 @@ var main = function(timeout){
                         console.log(edge);
 
                         // fill the voids
-                        $('#modal-title').html(edge.id);
-                        $('#modal-body').html(prepareJSON(edge._data));
+                        $('#modal-title').text(edge.id);
+                        $('#modal-body').empty().append(prepareJSON(edge._data));
 
                         // show the things
                         $('#modal-window-code').modal('show');
@@ -470,8 +469,8 @@ var main = function(timeout){
         })
         .catch(function(err){
             console.error(err);
-            $('#modal-title').html("Error");
-            $('#modal-body').html(prepareJSON(err));
+            $('#modal-title').text("Error");
+            $('#modal-body').empty().append(prepareJSON(err));
             $('#modal-window-code').modal('show');
         });
 };
@@ -480,8 +479,8 @@ main();
 
 $("#show-data").click(function (e) {
         // fill the voids
-        $('#modal-title').html("check_all");
-        $('#modal-body').html(prepareJSON(global_data));
+        $('#modal-title').text("check_all");
+        $('#modal-body').empty().append(prepareJSON(global_data));
 
         // show the things
         $('#modal-window-code').modal('show');
