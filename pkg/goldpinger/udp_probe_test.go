@@ -71,6 +71,76 @@ func startLossyEchoListener(t *testing.T, dropEveryN int) (int, func()) {
 	return port, func() { pc.Close() }
 }
 
+// startDuplicatingEchoListener echoes every packet twice, producing duplicates.
+func startDuplicatingEchoListener(t *testing.T) (int, func()) {
+	t.Helper()
+	pc, err := net.ListenPacket("udp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := pc.LocalAddr().(*net.UDPAddr).Port
+
+	go func() {
+		buf := make([]byte, udpMaxPacketSize)
+		for {
+			n, addr, err := pc.ReadFrom(buf)
+			if err != nil {
+				return
+			}
+			if n >= udpHeaderSize {
+				magic := binary.BigEndian.Uint32(buf[0:4])
+				if magic == udpMagic {
+					pc.WriteTo(buf[:n], addr)
+					pc.WriteTo(buf[:n], addr) // duplicate
+				}
+			}
+		}
+	}()
+
+	return port, func() { pc.Close() }
+}
+
+// startReorderingEchoListener buffers two packets at a time and sends
+// them back in reverse order, producing out-of-order replies.
+func startReorderingEchoListener(t *testing.T) (int, func()) {
+	t.Helper()
+	pc, err := net.ListenPacket("udp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := pc.LocalAddr().(*net.UDPAddr).Port
+
+	go func() {
+		buf1 := make([]byte, udpMaxPacketSize)
+		buf2 := make([]byte, udpMaxPacketSize)
+		for {
+			// Read first packet
+			n1, addr1, err := pc.ReadFrom(buf1)
+			if err != nil {
+				return
+			}
+			// Read second packet
+			n2, addr2, err := pc.ReadFrom(buf2)
+			if err != nil {
+				// Got one but not two — send the first anyway
+				if n1 >= udpHeaderSize && binary.BigEndian.Uint32(buf1[0:4]) == udpMagic {
+					pc.WriteTo(buf1[:n1], addr1)
+				}
+				return
+			}
+			// Send them in reverse order
+			if n2 >= udpHeaderSize && binary.BigEndian.Uint32(buf2[0:4]) == udpMagic {
+				pc.WriteTo(buf2[:n2], addr2)
+			}
+			if n1 >= udpHeaderSize && binary.BigEndian.Uint32(buf1[0:4]) == udpMagic {
+				pc.WriteTo(buf1[:n1], addr1)
+			}
+		}
+	}()
+
+	return port, func() { pc.Close() }
+}
+
 func TestProbeUDP_NoLoss(t *testing.T) {
 	port, cleanup := startTestEchoListener(t)
 	defer cleanup()
@@ -157,6 +227,40 @@ func TestProbeUDP_PacketFormat(t *testing.T) {
 	if seq != 42 {
 		t.Errorf("expected seq 42, got %d", seq)
 	}
+}
+
+func TestProbeUDP_Duplicates(t *testing.T) {
+	port, cleanup := startDuplicatingEchoListener(t)
+	defer cleanup()
+
+	result := ProbeUDP("127.0.0.1", port, 5, 64, 2*time.Second)
+	if result.Err != nil {
+		t.Fatalf("unexpected error: %v", result.Err)
+	}
+	if result.LossPct != 0 {
+		t.Errorf("expected 0%% loss, got %.1f%%", result.LossPct)
+	}
+	if result.Duplicates == 0 {
+		t.Error("expected duplicates > 0, got 0")
+	}
+	t.Logf("duplicates detected: %d", result.Duplicates)
+}
+
+func TestProbeUDP_OutOfOrder(t *testing.T) {
+	port, cleanup := startReorderingEchoListener(t)
+	defer cleanup()
+
+	result := ProbeUDP("127.0.0.1", port, 10, 64, 2*time.Second)
+	if result.Err != nil {
+		t.Fatalf("unexpected error: %v", result.Err)
+	}
+	if result.LossPct != 0 {
+		t.Errorf("expected 0%% loss, got %.1f%%", result.LossPct)
+	}
+	if result.OutOfOrder == 0 {
+		t.Error("expected out-of-order > 0, got 0")
+	}
+	t.Logf("out-of-order detected: %d, duplicates: %d", result.OutOfOrder, result.Duplicates)
 }
 
 func TestEstimateHops(t *testing.T) {

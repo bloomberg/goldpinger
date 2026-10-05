@@ -40,10 +40,12 @@ const (
 
 // UDPProbeResult holds the results of a UDP probe to a peer
 type UDPProbeResult struct {
-	LossPct  float64
-	HopCount int32
-	AvgRttS  float64
-	Err      error
+	LossPct    float64
+	HopCount   int32
+	AvgRttS    float64
+	Duplicates int
+	OutOfOrder int
+	Err        error
 }
 
 // StartUDPListener starts a UDP echo listener on the given port.
@@ -80,7 +82,51 @@ func StartUDPListener(port int) {
 	}
 }
 
-// ProbeUDP sends count UDP packets to the target and measures loss and hop count.
+// recvState tracks state accumulated while receiving UDP probe replies.
+type recvState struct {
+	received   int
+	totalRttNs int64
+	ttlValue   int
+	ttlFound   bool
+	seen       map[uint32]bool // sequence numbers already received
+	highestSeq int             // highest sequence number seen so far (-1 = none)
+	duplicates int
+	outOfOrder int
+}
+
+// processPacket inspects a received packet and updates the receive state.
+// Returns true if the packet was a valid, non-duplicate GPNG reply.
+func (s *recvState) processPacket(buf []byte, n int, now time.Time) bool {
+	if n < udpHeaderSize {
+		return false
+	}
+	magic := binary.BigEndian.Uint32(buf[0:4])
+	if magic != udpMagic {
+		return false
+	}
+	seq := binary.BigEndian.Uint32(buf[4:8])
+	if s.seen[seq] {
+		s.duplicates++
+		return false
+	}
+	s.seen[seq] = true
+
+	seqInt := int(seq)
+	if s.highestSeq >= 0 && seqInt < s.highestSeq {
+		s.outOfOrder++
+	}
+	if seqInt > s.highestSeq {
+		s.highestSeq = seqInt
+	}
+
+	sentNs := int64(binary.BigEndian.Uint64(buf[8:16]))
+	s.totalRttNs += now.UnixNano() - sentNs
+	s.received++
+	return true
+}
+
+// ProbeUDP sends count UDP packets to the target and measures loss, hop count,
+// RTT, and detects duplicate or out-of-order replies via sequence numbers.
 func ProbeUDP(targetIP string, port, count, size int, timeout time.Duration) UDPProbeResult {
 	if count <= 0 {
 		return UDPProbeResult{Err: fmt.Errorf("packet count must be > 0, got %d", count)}
@@ -102,8 +148,6 @@ func ProbeUDP(targetIP string, port, count, size int, timeout time.Duration) UDP
 
 	// Determine if this is IPv4 or IPv6 and set up TTL/HopLimit reading
 	isIPv6 := net.ParseIP(targetIP).To4() == nil
-	var ttlValue int
-	ttlFound := false
 
 	if isIPv6 {
 		p := ipv6.NewPacketConn(conn.(*net.UDPConn))
@@ -132,78 +176,67 @@ func ProbeUDP(targetIP string, port, count, size int, timeout time.Duration) UDP
 		}
 	}
 
-	// Receive replies
-	received := 0
-	var totalRttNs int64
+	// Receive replies, tracking sequence numbers for duplicates/reordering
+	state := recvState{
+		seen:       make(map[uint32]bool, count),
+		highestSeq: -1,
+	}
 	deadline := time.Now().Add(timeout)
 	conn.SetReadDeadline(deadline)
-
 	recvBuf := make([]byte, udpMaxPacketSize)
 
+	// We keep receiving until we have count unique replies or timeout.
+	// Duplicates don't count toward the received total, so we allow
+	// more iterations than count to handle them.
+	maxIter := count * 2
 	if isIPv6 {
 		p := ipv6.NewPacketConn(conn.(*net.UDPConn))
-		for received < count {
+		for i := 0; i < maxIter && state.received < count; i++ {
 			n, cm, _, err := p.ReadFrom(recvBuf)
 			now := time.Now()
 			if err != nil {
 				break
 			}
-			if n < udpHeaderSize {
-				continue
-			}
-			magic := binary.BigEndian.Uint32(recvBuf[0:4])
-			if magic != udpMagic {
-				continue
-			}
-			sentNs := int64(binary.BigEndian.Uint64(recvBuf[8:16]))
-			totalRttNs += now.UnixNano() - sentNs
-			received++
-			if cm != nil && cm.HopLimit > 0 && !ttlFound {
-				ttlValue = cm.HopLimit
-				ttlFound = true
+			state.processPacket(recvBuf[:n], n, now)
+			if cm != nil && cm.HopLimit > 0 && !state.ttlFound {
+				state.ttlValue = cm.HopLimit
+				state.ttlFound = true
 			}
 		}
 	} else {
 		p := ipv4.NewPacketConn(conn.(*net.UDPConn))
-		for received < count {
+		for i := 0; i < maxIter && state.received < count; i++ {
 			n, cm, _, err := p.ReadFrom(recvBuf)
 			now := time.Now()
 			if err != nil {
 				break
 			}
-			if n < udpHeaderSize {
-				continue
-			}
-			magic := binary.BigEndian.Uint32(recvBuf[0:4])
-			if magic != udpMagic {
-				continue
-			}
-			sentNs := int64(binary.BigEndian.Uint64(recvBuf[8:16]))
-			totalRttNs += now.UnixNano() - sentNs
-			received++
-			if cm != nil && cm.TTL > 0 && !ttlFound {
-				ttlValue = cm.TTL
-				ttlFound = true
+			state.processPacket(recvBuf[:n], n, now)
+			if cm != nil && cm.TTL > 0 && !state.ttlFound {
+				state.ttlValue = cm.TTL
+				state.ttlFound = true
 			}
 		}
 	}
 
-	lossPct := float64(count-received) / float64(count) * 100.0
+	lossPct := float64(count-state.received) / float64(count) * 100.0
 
 	var hopCount int32
-	if ttlFound {
-		hopCount = estimateHops(ttlValue)
+	if state.ttlFound {
+		hopCount = estimateHops(state.ttlValue)
 	}
 
 	var avgRttS float64
-	if received > 0 {
-		avgRttS = float64(totalRttNs) / float64(received) / 1e9
+	if state.received > 0 {
+		avgRttS = float64(state.totalRttNs) / float64(state.received) / 1e9
 	}
 
 	return UDPProbeResult{
-		LossPct:  lossPct,
-		HopCount: hopCount,
-		AvgRttS:  avgRttS,
+		LossPct:    lossPct,
+		HopCount:   hopCount,
+		AvgRttS:    avgRttS,
+		Duplicates: state.duplicates,
+		OutOfOrder: state.outOfOrder,
 	}
 }
 

@@ -110,6 +110,11 @@ func main() {
 	}
 	defer logger.Sync()
 
+	// Install this logger as the global returned by zap.L(). Without this,
+	// every zap.L() call throughout the goldpinger package resolves to zap's
+	// default no-op logger and those logs are silently dropped.
+	zap.ReplaceGlobals(logger)
+
 	undo := zap.RedirectStdLog(logger)
 	defer undo()
 

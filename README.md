@@ -328,6 +328,8 @@ goldpinger_peers_loss_pct          # gauge: UDP packet loss percentage (0-100)
 goldpinger_peers_hop_count         # gauge: estimated hop count
 goldpinger_peers_udp_rtt_s         # histogram: UDP round-trip time in seconds
 goldpinger_udp_errors_total        # counter: UDP probe errors
+goldpinger_udp_duplicates_total    # counter: duplicate UDP reply packets
+goldpinger_udp_out_of_order_total  # counter: out-of-order UDP reply packets
 ```
 
 Links with partial loss are shown as yellow edges in the graph UI, and edge labels display the UDP RTT instead of HTTP latency when available.
@@ -370,6 +372,8 @@ goldpinger_errors_total
 goldpinger_peers_loss_pct           # (UDP probe, when enabled)
 goldpinger_peers_hop_count          # (UDP probe, when enabled)
 goldpinger_peers_udp_rtt_s_*        # (UDP probe, when enabled)
+goldpinger_udp_duplicates_total     # (UDP probe, when enabled)
+goldpinger_udp_out_of_order_total   # (UDP probe, when enabled)
 ```
 
 ### Grafana

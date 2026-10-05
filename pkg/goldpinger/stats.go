@@ -167,6 +167,28 @@ var (
 			"host",
 		},
 	)
+	goldpingerUDPDuplicatesCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "goldpinger_udp_duplicates_total",
+			Help: "Count of duplicate UDP reply packets received",
+		},
+		[]string{
+			"goldpinger_instance",
+			"host_ip",
+			"pod_ip",
+		},
+	)
+	goldpingerUDPOutOfOrderCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "goldpinger_udp_out_of_order_total",
+			Help: "Count of out-of-order UDP reply packets received",
+		},
+		[]string{
+			"goldpinger_instance",
+			"host_ip",
+			"pod_ip",
+		},
+	)
 	bootTime = time.Now()
 )
 
@@ -184,6 +206,8 @@ func init() {
 	prometheus.MustRegister(goldpingerPeersHopCount)
 	prometheus.MustRegister(goldpingerPeersUDPRtt)
 	prometheus.MustRegister(goldpingerUDPErrorsCounter)
+	prometheus.MustRegister(goldpingerUDPDuplicatesCounter)
+	prometheus.MustRegister(goldpingerUDPOutOfOrderCounter)
 	zap.L().Info("Metrics setup - see /metrics")
 }
 
@@ -276,11 +300,25 @@ func SetPeerHopCount(hostIP, podIP string, hopCount int32) {
 	).Set(float64(hopCount))
 }
 
-// DeletePeerUDPMetrics removes stale UDP metric labels for a destroyed peer
+// DeletePeerMetrics removes stale metric labels for a destroyed peer.
+// The response-time histogram is observed with two call_type values:
+// "ping" (continuous from Pinger) and "check" (from CheckAllPods), so both
+// must be pruned. Must be called unconditionally when a peer is removed.
+func DeletePeerMetrics(hostIP, podIP string) {
+	goldpingerResponseTimePeersHistogram.DeleteLabelValues(GoldpingerConfig.Hostname, "ping", hostIP, podIP)
+	goldpingerResponseTimePeersHistogram.DeleteLabelValues(GoldpingerConfig.Hostname, "check", hostIP, podIP)
+}
+
+// DeletePeerUDPMetrics removes stale UDP metric labels for a destroyed peer.
+// This must be kept in sync with all per-peer UDP metrics to avoid stale
+// label sets lingering in /metrics after a pod rolls.
 func DeletePeerUDPMetrics(hostIP, podIP string) {
 	goldpingerPeersLossPct.DeleteLabelValues(GoldpingerConfig.Hostname, hostIP, podIP)
 	goldpingerPeersHopCount.DeleteLabelValues(GoldpingerConfig.Hostname, hostIP, podIP)
 	goldpingerPeersUDPRtt.DeleteLabelValues(GoldpingerConfig.Hostname, hostIP, podIP)
+	goldpingerUDPDuplicatesCounter.DeleteLabelValues(GoldpingerConfig.Hostname, hostIP, podIP)
+	goldpingerUDPOutOfOrderCounter.DeleteLabelValues(GoldpingerConfig.Hostname, hostIP, podIP)
+	goldpingerUDPErrorsCounter.DeleteLabelValues(GoldpingerConfig.Hostname, pickPodHostIP(podIP, hostIP))
 }
 
 // ObservePeerUDPRtt records a UDP RTT observation in seconds
@@ -298,6 +336,24 @@ func CountUDPError(host string) {
 		GoldpingerConfig.Hostname,
 		host,
 	).Inc()
+}
+
+// CountUDPDuplicates adds to the duplicate packet counter for a peer
+func CountUDPDuplicates(hostIP, podIP string, n int) {
+	goldpingerUDPDuplicatesCounter.WithLabelValues(
+		GoldpingerConfig.Hostname,
+		hostIP,
+		podIP,
+	).Add(float64(n))
+}
+
+// CountUDPOutOfOrder adds to the out-of-order packet counter for a peer
+func CountUDPOutOfOrder(hostIP, podIP string, n int) {
+	goldpingerUDPOutOfOrderCounter.WithLabelValues(
+		GoldpingerConfig.Hostname,
+		hostIP,
+		podIP,
+	).Add(float64(n))
 }
 
 // returns a timer for easy observing of the durations of calls to kubernetes API

@@ -165,6 +165,12 @@ func (p *Pinger) Ping() {
 		if udpResult.AvgRttS > 0 {
 			ObservePeerUDPRtt(p.pod.HostIP, p.pod.PodIP, udpResult.AvgRttS)
 		}
+		if udpResult.Duplicates > 0 {
+			CountUDPDuplicates(p.pod.HostIP, p.pod.PodIP, udpResult.Duplicates)
+		}
+		if udpResult.OutOfOrder > 0 {
+			CountUDPOutOfOrder(p.pod.HostIP, p.pod.PodIP, udpResult.OutOfOrder)
+		}
 	}
 
 	if OK {
