@@ -4,13 +4,13 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  name: {{ $fullName }}
   labels:
     {{- include "goldpinger.labels" . | nindent 4 }}
   {{- with .Values.httproute.annotations }}
-    annotations:
+  annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  name: {{ $fullName }}
 spec:
   {{- with .Values.httproute.hostnames }}
   hostnames:
