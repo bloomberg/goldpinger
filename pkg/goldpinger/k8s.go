@@ -103,6 +103,22 @@ func getPodNodeName(p v1.Pod) string {
 	return p.Name
 }
 
+// isReady is equivalent to k8s.io/kubectl/pkg/util/podutils.IsPodReady" but that brings us up a go version
+// if we don't mind those dependencies could replace.
+// it also checks DeletionTimestamp kubelet waits on next probe to set ready condition (endpoint slices remove immediately)
+func isReady(pod *v1.Pod) bool {
+	if pod.DeletionTimestamp != nil {
+		return false
+	}
+
+	for _, cond := range pod.Status.Conditions {
+		if cond.Type == v1.PodReady && cond.Status == v1.ConditionTrue {
+			return true
+		}
+	}
+	return false
+}
+
 // GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s)
 func GetAllPods() map[string]*GoldpingerPod {
 	timer := GetLabeledKubernetesCallsTimer()
@@ -122,6 +138,12 @@ func GetAllPods() map[string]*GoldpingerPod {
 
 	podMap := make(map[string]*GoldpingerPod)
 	for _, pod := range pods.Items {
+		if GoldpingerConfig.UseReadiness {
+			if !isReady(&pod) {
+				continue
+			}
+		}
+
 		podMap[pod.Name] = &GoldpingerPod{
 			Name:   getPodNodeName(pod),
 			PodIP:  getPodIP(pod),

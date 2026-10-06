@@ -38,6 +38,8 @@ var GoldpingerConfig = struct {
 	DisplayNodeName  bool    `long:"display-nodename" description:"Display nodename other than podname in UI (defaults is podname)." env:"DISPLAY_NODENAME"`
 	KubernetesClient *kubernetes.Clientset
 
+	UseReadiness bool `long:"use-readiness" description:"Use readiness probes to determine if a pod is ready (defaults to false which relies just on running)." env:"USE_READINESS"`
+
 	DnsHosts    []string `long:"host-to-resolve" description:"A host to attempt dns resolve on (space delimited)" env:"HOSTS_TO_RESOLVE" env-delim:" "`
 	TCPTargets  []string `long:"tcp-targets" description:"A list of external targets(<host>:<port> or <ip>:<port>) to attempt a TCP check on (space delimited)" env:"TCP_TARGETS" env-delim:" "`
 	HTTPTargets []string `long:"http-targets" description:"A list of external targets(<http or https>://<url>) to attempt an HTTP{S} check on. A 200 HTTP code is considered successful.(space delimited)" env:"HTTP_TARGETS" env-delim:" "`
