@@ -50,6 +50,14 @@ spec:
               value: "{{ .Values.goldpinger.port }}"
             - name: LABEL_SELECTOR
               value: "app.kubernetes.io/name={{ include "goldpinger.name" . }}"
+            {{- if ne (int .Values.goldpinger.activeNodePercentage) 100 }}
+            - name: ACTIVE_NODE_PERCENTAGE
+              value: "{{ .Values.goldpinger.activeNodePercentage }}"
+            {{- end }}
+            {{- if .Values.goldpinger.activeNodes }}
+            - name: ACTIVE_NODES
+              value: "{{ join "," .Values.goldpinger.activeNodes }}"
+            {{- end }}
             {{- if .Values.goldpinger.udp.enabled }}
             - name: UDP_ENABLED
               value: "true"

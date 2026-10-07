@@ -69,6 +69,9 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 
 	api.CheckServicePodsHandler = operations.CheckServicePodsHandlerFunc(
 		func(params operations.CheckServicePodsParams) middleware.Responder {
+			if !goldpinger.IsActiveNode() {
+				return middleware.Error(503, "this node is in passive mode and does not perform active checks")
+			}
 			goldpinger.CountCall("received", "check")
 
 			ctx, cancel := context.WithTimeout(
@@ -82,6 +85,9 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 
 	api.CheckAllPodsHandler = operations.CheckAllPodsHandlerFunc(
 		func(params operations.CheckAllPodsParams) middleware.Responder {
+			if !goldpinger.IsActiveNode() {
+				return middleware.Error(503, "this node is in passive mode and does not perform active checks")
+			}
 			goldpinger.CountCall("received", "check_all")
 
 			ctx, cancel := context.WithTimeout(
@@ -95,6 +101,9 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 
 	api.ClusterHealthHandler = operations.ClusterHealthHandlerFunc(
 		func(params operations.ClusterHealthParams) middleware.Responder {
+			if !goldpinger.IsActiveNode() {
+				return middleware.Error(503, "this node is in passive mode and does not perform active checks")
+			}
 			goldpinger.CountCall("received", "cluster_health")
 
 			ctx, cancel := context.WithTimeout(

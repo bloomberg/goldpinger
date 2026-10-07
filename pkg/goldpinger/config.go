@@ -27,7 +27,10 @@ var GoldpingerConfig = struct {
 	KubeConfigPath   string  `long:"kubeconfig" description:"Path to kubeconfig file" env:"KUBECONFIG"`
 	RefreshInterval  int     `long:"refresh-interval" description:"If > 0, will create a thread and collect stats every n seconds" env:"REFRESH_INTERVAL" default:"30"`
 	JitterFactor     float64 `long:"jitter-factor" description:"The amount of jitter to add while pinging clients" env:"JITTER_FACTOR" default:"0.05"`
-	Hostname         string  `long:"hostname" description:"Hostname to use" env:"HOSTNAME"`
+	Hostname             string   `long:"hostname" description:"Hostname to use" env:"HOSTNAME"`
+	ActiveNodePercentage int      `long:"active-node-percentage" description:"Percentage of nodes (1-100) that should be active (list-watch + ping). Remaining nodes are passive (respond only)." env:"ACTIVE_NODE_PERCENTAGE" default:"100"`
+	ActiveNodes          []string `long:"active-nodes" description:"Comma-separated list of node names that should always be active, regardless of percentage hash" env:"ACTIVE_NODES" env-delim:","`
+	CheckNodeHash        []string `long:"check-node-hash" description:"Print hash bucket for given node name(s) and exit. Useful for predicting active/passive assignment."`
 	PodIP            string  `long:"pod-ip" description:"Pod IP to use" env:"POD_IP"`
 	PodName          string  `long:"pod-name" description:"The name of this pod - used to select --ping-number of pods using rendezvous hashing" env:"POD_NAME"`
 	PingNumber       uint    `long:"ping-number" description:"Number of peers to ping. A value of 0 indicates all peers should be pinged." default:"0" env:"PING_NUMBER"`
