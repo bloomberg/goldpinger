@@ -196,15 +196,17 @@ func pickPodHostIP(podIP, hostIP string) string {
 	return podIP
 }
 
+// targetProbe describes how to check one kind of configured target.
+type targetProbe struct {
+	protocol string
+	hosts    []string
+	probeFn  func(addr string, timeout time.Duration) error
+	statFn   func(host string)
+	timeout  time.Duration
+}
+
 func checkTargets() models.ProbeResults {
-	results := make(map[string][]models.ProbeResult)
-	probes := []struct {
-		protocol string
-		hosts    []string
-		probeFn  func(addr string, timeout time.Duration) error
-		statFn   func(host string)
-		timeout  time.Duration
-	}{
+	probes := []targetProbe{
 		{
 			protocol: "dns",
 			hosts:    GoldpingerConfig.DnsHosts,
@@ -227,26 +229,50 @@ func checkTargets() models.ProbeResults {
 			timeout:  GoldpingerConfig.TCPCheckTimeout,
 		},
 	}
+	return runTargetProbes(probes)
+}
 
+// runTargetProbes runs every probe against every one of its hosts.
+//
+// The probes run concurrently, so checking N unreachable targets takes about
+// as long as the slowest single probe instead of the sum of all of them. Run
+// one after another, a few dead targets are enough to push /check past the
+// CheckTimeout its peers allow it, and the whole pod then shows as unhealthy.
+func runTargetProbes(probes []targetProbe) models.ProbeResults {
+	type outcome struct {
+		host string
+		res  models.ProbeResult
+	}
+	var outcomes []outcome
+	var probeOf []targetProbe
 	for _, probe := range probes {
 		for _, host := range probe.hosts {
-			if _, ok := results[host]; !ok {
-				results[host] = []models.ProbeResult{}
-			}
-
-			res := models.ProbeResult{Protocol: probe.protocol}
-			start := time.Now()
-			err := probe.probeFn(host, probe.timeout)
-			if err != nil {
-				res.Error = err.Error()
-				probe.statFn(host)
-			}
-
-			res.ResponseTimeMs = time.Since(start).Milliseconds()
-			results[host] = append(results[host], res)
+			outcomes = append(outcomes, outcome{host: host, res: models.ProbeResult{Protocol: probe.protocol}})
+			probeOf = append(probeOf, probe)
 		}
 	}
 
+	var wg sync.WaitGroup
+	for i := range outcomes {
+		wg.Add(1)
+		go func(probe targetProbe, out *outcome) {
+			defer wg.Done()
+			start := time.Now()
+			if err := probe.probeFn(out.host, probe.timeout); err != nil {
+				out.res.Error = err.Error()
+				probe.statFn(out.host)
+			}
+			out.res.ResponseTimeMs = time.Since(start).Milliseconds()
+		}(probeOf[i], &outcomes[i])
+	}
+	wg.Wait()
+
+	// Each goroutine wrote only to its own slot, so the results come out in
+	// the same order as before: per host, in the order of the probes above.
+	results := make(map[string][]models.ProbeResult)
+	for _, out := range outcomes {
+		results[out.host] = append(results[out.host], out.res)
+	}
 	return results
 }
 
