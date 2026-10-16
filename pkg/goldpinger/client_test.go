@@ -284,3 +284,82 @@ func TestCheckClusterHealthWithNoPeers(t *testing.T) {
 		t.Errorf("NodesTotal = %d, want 0", output.NodesTotal)
 	}
 }
+
+// TestCheckTargetsProbesConcurrently checks that unreachable targets are
+// probed in parallel. Probed one after another, every dead target adds its
+// full timeout to /check, and a few of them are enough to make the pod time
+// out for its peers (#144).
+func TestCheckTargetsProbesConcurrently(t *testing.T) {
+	const (
+		targetCount = 4
+		timeout     = 200 * time.Millisecond
+	)
+
+	// A target that never answers within the probe timeout.
+	release := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case <-release:
+		case <-r.Context().Done():
+		}
+	}))
+	t.Cleanup(server.Close)
+	t.Cleanup(func() { close(release) })
+
+	targets := make([]string, targetCount)
+	for i := range targets {
+		targets[i] = fmt.Sprintf("%s/target-%d", server.URL, i)
+	}
+
+	saved := GoldpingerConfig
+	t.Cleanup(func() { GoldpingerConfig = saved })
+	GoldpingerConfig.DnsHosts = nil
+	GoldpingerConfig.TCPTargets = nil
+	GoldpingerConfig.HTTPTargets = targets
+	GoldpingerConfig.HTTPCheckTimeout = timeout
+
+	start := time.Now()
+	results := checkTargets()
+	elapsed := time.Since(start)
+
+	if limit := 2 * timeout; elapsed >= limit {
+		t.Errorf("checking %d unreachable targets took %v, want less than %v", targetCount, elapsed, limit)
+	}
+	if len(results) != targetCount {
+		t.Fatalf("got results for %d targets, want %d", len(results), targetCount)
+	}
+	for _, target := range targets {
+		probes := results[target]
+		if len(probes) != 1 {
+			t.Fatalf("target %s: got %d probe results, want 1", target, len(probes))
+		}
+		if probes[0].Protocol != "http" {
+			t.Errorf("target %s: protocol is %q, want %q", target, probes[0].Protocol, "http")
+		}
+		if probes[0].Error == "" {
+			t.Errorf("target %s: expected a timeout error, got none", target)
+		}
+	}
+}
+
+// TestCheckTargetsKeepsProtocolOrder checks that a host configured for several
+// protocols still gets its results in the usual dns, http, tcp order.
+func TestCheckTargetsKeepsProtocolOrder(t *testing.T) {
+	saved := GoldpingerConfig
+	t.Cleanup(func() { GoldpingerConfig = saved })
+
+	// Every probe rejects this address immediately, so the test does no I/O.
+	const host = "not-a-valid-target"
+	GoldpingerConfig.DnsHosts = []string{host}
+	GoldpingerConfig.HTTPTargets = []string{host}
+	GoldpingerConfig.TCPTargets = []string{host}
+
+	probes := checkTargets()[host]
+	var protocols []string
+	for _, probe := range probes {
+		protocols = append(protocols, probe.Protocol)
+	}
+	if got, want := fmt.Sprint(protocols), fmt.Sprint([]string{"dns", "http", "tcp"}); got != want {
+		t.Errorf("protocols for %s are %s, want %s", host, got, want)
+	}
+}
