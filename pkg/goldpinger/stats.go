@@ -189,6 +189,29 @@ var (
 			"pod_ip",
 		},
 	)
+	goldpingerTargetsUpGauge = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "goldpinger_targets_up",
+			Help: "1 if the last check against an external dns/http/tcp target succeeded, 0 otherwise",
+		},
+		[]string{
+			"goldpinger_instance",
+			"protocol",
+			"host",
+		},
+	)
+	goldpingerTargetsResponseTimeHistogram = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "goldpinger_targets_response_time_s",
+			Help:    "Histogram of response times for checks against external dns/http/tcp targets",
+			Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10, 30},
+		},
+		[]string{
+			"goldpinger_instance",
+			"protocol",
+			"host",
+		},
+	)
 	bootTime = time.Now()
 )
 
@@ -208,6 +231,8 @@ func init() {
 	prometheus.MustRegister(goldpingerUDPErrorsCounter)
 	prometheus.MustRegister(goldpingerUDPDuplicatesCounter)
 	prometheus.MustRegister(goldpingerUDPOutOfOrderCounter)
+	prometheus.MustRegister(goldpingerTargetsUpGauge)
+	prometheus.MustRegister(goldpingerTargetsResponseTimeHistogram)
 	zap.L().Info("Metrics setup - see /metrics")
 }
 
@@ -280,6 +305,28 @@ func CountHttpError(host string) {
 		GoldpingerConfig.Hostname,
 		host,
 	).Inc()
+}
+
+// SetTargetUp sets the up/down gauge for a dns/http/tcp target check
+func SetTargetUp(protocol, host string, up bool) {
+	value := 0.0
+	if up {
+		value = 1.0
+	}
+	goldpingerTargetsUpGauge.WithLabelValues(
+		GoldpingerConfig.Hostname,
+		protocol,
+		host,
+	).Set(value)
+}
+
+// ObserveTargetResponseTime records a response time observation in seconds for a dns/http/tcp target check
+func ObserveTargetResponseTime(protocol, host string, seconds float64) {
+	goldpingerTargetsResponseTimeHistogram.WithLabelValues(
+		GoldpingerConfig.Hostname,
+		protocol,
+		host,
+	).Observe(seconds)
 }
 
 // SetPeerLossPct sets the UDP packet loss percentage gauge for a peer

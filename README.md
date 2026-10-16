@@ -292,6 +292,16 @@ the timeouts for the TCP, DNS and HTTP checks can be configured via `TCP_TARGETS
 
 ![screenshot-tcp-http-checks](./extras/tcp-checks-screenshot.png)
 
+Every check against these external targets (dns, http and tcp alike) is also exported as `Prometheus` metrics, labelled by `protocol` and `host`:
+
+```sh
+goldpinger_targets_up                # gauge: 1 if the last check succeeded, 0 otherwise
+goldpinger_targets_response_time_s_*  # histogram: response time of the check, in seconds
+goldpinger_dns_errors_total           # counter: dns resolution errors, by host
+goldpinger_tcp_errors_total           # counter: tcp check errors, by host
+goldpinger_http_errors_total          # counter: http check errors, by host
+```
+
 ### UDP probe for packet loss, hop count, and RTT
 
 In natively routed Kubernetes environments (e.g. Cilium, Calico in BGP mode), the existing HTTP ping can mask network issues: TCP retransmits hide packet loss, and HTTP latency includes the 3-way handshake, TLS, and application overhead. The UDP probe gives you visibility into the actual network layer.
@@ -369,11 +379,13 @@ goldpinger_peers_response_time_s_*
 goldpinger_nodes_health_total
 goldpinger_stats_total
 goldpinger_errors_total
-goldpinger_peers_loss_pct           # (UDP probe, when enabled)
-goldpinger_peers_hop_count          # (UDP probe, when enabled)
-goldpinger_peers_udp_rtt_s_*        # (UDP probe, when enabled)
-goldpinger_udp_duplicates_total     # (UDP probe, when enabled)
-goldpinger_udp_out_of_order_total   # (UDP probe, when enabled)
+goldpinger_targets_up                # (dns/http/tcp targets, when configured)
+goldpinger_targets_response_time_s_* # (dns/http/tcp targets, when configured)
+goldpinger_peers_loss_pct            # (UDP probe, when enabled)
+goldpinger_peers_hop_count           # (UDP probe, when enabled)
+goldpinger_peers_udp_rtt_s_*         # (UDP probe, when enabled)
+goldpinger_udp_duplicates_total      # (UDP probe, when enabled)
+goldpinger_udp_out_of_order_total    # (UDP probe, when enabled)
 ```
 
 ### Grafana

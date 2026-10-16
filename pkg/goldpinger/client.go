@@ -237,12 +237,15 @@ func checkTargets() models.ProbeResults {
 			res := models.ProbeResult{Protocol: probe.protocol}
 			start := time.Now()
 			err := probe.probeFn(host, probe.timeout)
+			responseTime := time.Since(start)
 			if err != nil {
 				res.Error = err.Error()
 				probe.statFn(host)
 			}
+			SetTargetUp(probe.protocol, host, err == nil)
+			ObserveTargetResponseTime(probe.protocol, host, responseTime.Seconds())
 
-			res.ResponseTimeMs = time.Since(start).Milliseconds()
+			res.ResponseTimeMs = responseTime.Milliseconds()
 			results[host] = append(results[host], res)
 		}
 	}

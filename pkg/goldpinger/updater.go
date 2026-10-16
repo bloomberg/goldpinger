@@ -164,14 +164,14 @@ func updateCounters() {
 	// check external targets, don't block the access to checkResultsMux
 	nodesHealthy := int(counterHealthy) == len(checkResults.PodResults)
 	go func(healthySoFar bool) {
-		if healthySoFar {
-			probeResults := checkTargets()
-			for host := range probeResults {
-				for _, response := range probeResults[host] {
-					if response.Error != "" {
-						healthySoFar = false
-						break
-					}
+		// always run target checks, so their Prometheus metrics stay fresh
+		// even when peers are already unhealthy
+		probeResults := checkTargets()
+		for host := range probeResults {
+			for _, response := range probeResults[host] {
+				if response.Error != "" {
+					healthySoFar = false
+					break
 				}
 			}
 		}
