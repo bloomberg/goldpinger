@@ -1,6 +1,6 @@
 # Goldpinger
 
-[![Publish](https://github.com/bloomberg/goldpinger/actions/workflows/publish.yml/badge.svg)](https://github.com/bloomberg/goldpinger/actions/workflows/publish.yml)
+[![CI](https://github.com/bloomberg/goldpinger/actions/workflows/main.yml/badge.svg)](https://github.com/bloomberg/goldpinger/actions/workflows/main.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/bloomberg/goldpinger)
 
 __Goldpinger__ makes calls between its instances to monitor your networking.
@@ -50,7 +50,7 @@ If you'd like to know more, you can watch [our presentation at Kubecon 2018 Seat
 Getting from sources:
 
 ```sh
-go get github.com/bloomberg/goldpinger/cmd/goldpinger
+go install github.com/bloomberg/goldpinger/v3/cmd/goldpinger@latest
 goldpinger --help
 ```
 
@@ -58,7 +58,7 @@ Getting from [docker hub](https://hub.docker.com/r/bloomberg/goldpinger):
 
 ```sh
 # get from docker hub
-docker pull bloomberg/goldpinger:v3.0.0
+docker pull bloomberg/goldpinger:3.11.5
 ```
 
 ## Building
@@ -81,7 +81,7 @@ This was contributed via [@michiel](https://github.com/michiel) - kudos !
 
 ### Compiling locally
 
-In order to build `Goldpinger`, you are going to need `go` version 1.15+ and `docker`.
+In order to build `Goldpinger`, you are going to need `go` version 1.27+ (see [`go.mod`](./go.mod)) and `docker`.
 
 Building from source code consists of compiling the binary and building a [Docker image](./Dockerfile):
 
@@ -179,7 +179,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-          image: "docker.io/bloomberg/goldpinger:v3.0.0"
+          image: "docker.io/bloomberg/goldpinger:3.11.5"
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -422,4 +422,4 @@ Before you create that PR, please make sure you read [CONTRIBUTING](./CONTRIBUTI
 
 Please read the [LICENSE](./LICENSE) file here.
 
-For each version built by travis, there is also an additional version, appended with `-vendor`, which contains all source code of the dependencies used in `goldpinger`.
+For each version built by CI, there is also an additional version, appended with `-vendor`, which contains all source code of the dependencies used in `goldpinger`.
