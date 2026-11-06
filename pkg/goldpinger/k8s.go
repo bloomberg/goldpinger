@@ -103,8 +103,10 @@ func getPodNodeName(p v1.Pod) string {
 	return p.Name
 }
 
-// GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s)
-func GetAllPods() map[string]*GoldpingerPod {
+// GetAllPods returns a mapping from a pod name to a pointer to a GoldpingerPod(s).
+// It returns an error if the pods could not be listed: callers must not treat
+// that as an empty list of pods.
+func GetAllPods() (map[string]*GoldpingerPod, error) {
 	timer := GetLabeledKubernetesCallsTimer()
 	listOpts := metav1.ListOptions{
 		ResourceVersion: "0",
@@ -116,9 +118,9 @@ func GetAllPods() map[string]*GoldpingerPod {
 	if err != nil {
 		zap.L().Error("Error getting pods for selector", zap.String("selector", GoldpingerConfig.LabelSelector), zap.Error(err))
 		CountError("kubernetes_api")
-	} else {
-		timer.ObserveDuration()
+		return nil, err
 	}
+	timer.ObserveDuration()
 
 	podMap := make(map[string]*GoldpingerPod)
 	for _, pod := range pods.Items {
@@ -128,7 +130,7 @@ func GetAllPods() map[string]*GoldpingerPod {
 			HostIP: getHostIP(pod),
 		}
 	}
-	return podMap
+	return podMap, nil
 }
 
 // ipMatchesConfig checks if the input IP family matches the first entry in the IPVersions config.

@@ -21,10 +21,13 @@ import (
 
 // SelectPods selects a set of pods from the results of GetAllPods
 // depending on the count according to a rendezvous hash
-func SelectPods() map[string]*GoldpingerPod {
-	allPods := GetAllPods()
+func SelectPods() (map[string]*GoldpingerPod, error) {
+	allPods, err := GetAllPods()
+	if err != nil {
+		return nil, err
+	}
 	if GoldpingerConfig.PingNumber <= 0 || int(GoldpingerConfig.PingNumber) >= len(allPods) {
-		return allPods
+		return allPods, nil
 	}
 
 	rzv := rendezvous.New([]string{}, rendezvous.Hasher(xxhash.Sum64String))
@@ -36,5 +39,5 @@ func SelectPods() map[string]*GoldpingerPod {
 	for _, podName := range matches {
 		toPing[podName] = allPods[podName]
 	}
-	return toPing
+	return toPing, nil
 }

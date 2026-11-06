@@ -50,45 +50,57 @@ func updatePingers(resultsChan chan<- PingAllPodsResult) {
 	refreshPeriod := time.Duration(GoldpingerConfig.RefreshInterval) * time.Second
 
 	for {
-		// Initialize deletedPods to all existing pods, we will remove
-		// any pods that should still exist from this list after we are done
-		// NOTE: This is *NOT* a copy of existingPods just a new variable name
-		// to make the intention/code clear and cleaner
-		deletedPods := existingPods
-
-		// New pods are brand new and haven't been seen before
-		newPods := make(map[string]*GoldpingerPod)
-
-		latest := SelectPods()
-		for podName, pod := range latest {
-			if exists(existingPods, podName, pod) {
-				// This pod continues to exist in the latest iteration of the update
-				// without any changes
-				// Delete it from the set of pods that we wish to delete
-				delete(deletedPods, podName)
-			} else {
-				// This pod is brand new and has never been seen before
-				// Add it to the list of newPods
-				newPods[podName] = pod
-			}
-		}
-
-		// deletedPods now contains any pods that have either been deleted from the api-server
-		// *OR* weren't selected by our rendezvous hash
-		// *OR* had their host/pod IP changed. Remove those pingers
-		destroyPingers(pingers, deletedPods)
-
-		// Next create pingers for new pods
-		createPingers(pingers, newPods, resultsChan, refreshPeriod)
-
-		// Finally, just set existingPods to the latest and collect garbage
-		existingPods = latest
-		deletedPods = nil
-		newPods = nil
+		existingPods = syncPingers(pingers, existingPods, resultsChan, refreshPeriod)
 
 		// Wait the given time before pinging
 		time.Sleep(refreshPeriod)
 	}
+}
+
+// syncPingers calls SelectPods() once, starts pingers for new pods and stops
+// pingers for pods that are gone. It returns the pods that are being pinged.
+// If the pods can't be listed, the current pingers are kept as they are:
+// otherwise a failing API server call would look like all peers are gone and
+// their metrics would disappear exactly when there may be a network problem.
+func syncPingers(pingers map[string]*Pinger, existingPods map[string]*GoldpingerPod, resultsChan chan<- PingAllPodsResult, refreshPeriod time.Duration) map[string]*GoldpingerPod {
+	latest, err := SelectPods()
+	if err != nil {
+		zap.L().Warn("Could not list pods, keeping current pingers", zap.Int("numPingers", len(pingers)), zap.Error(err))
+		return existingPods
+	}
+
+	// Initialize deletedPods to all existing pods, we will remove
+	// any pods that should still exist from this list after we are done
+	// NOTE: This is *NOT* a copy of existingPods just a new variable name
+	// to make the intention/code clear and cleaner
+	deletedPods := existingPods
+
+	// New pods are brand new and haven't been seen before
+	newPods := make(map[string]*GoldpingerPod)
+
+	for podName, pod := range latest {
+		if exists(existingPods, podName, pod) {
+			// This pod continues to exist in the latest iteration of the update
+			// without any changes
+			// Delete it from the set of pods that we wish to delete
+			delete(deletedPods, podName)
+		} else {
+			// This pod is brand new and has never been seen before
+			// Add it to the list of newPods
+			newPods[podName] = pod
+		}
+	}
+
+	// deletedPods now contains any pods that have either been deleted from the api-server
+	// *OR* weren't selected by our rendezvous hash
+	// *OR* had their host/pod IP changed. Remove those pingers
+	destroyPingers(pingers, deletedPods)
+
+	// Next create pingers for new pods
+	createPingers(pingers, newPods, resultsChan, refreshPeriod)
+
+	// Finally, the latest pods are the ones being pinged
+	return latest
 }
 
 // createPingers allocates a new pinger object for each new goldpinger Pod that's been discovered
@@ -208,7 +220,9 @@ func StartUpdater() {
 		return
 	}
 
-	pods := SelectPods()
+	// The pod count only sizes the results channel: if the pods can't be
+	// listed yet, the updater keeps retrying
+	pods, _ := SelectPods()
 
 	// Create a channel for the results
 	resultsChan := make(chan PingAllPodsResult, len(pods))
