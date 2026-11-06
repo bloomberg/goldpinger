@@ -49,12 +49,16 @@ func CheckNeighbours(ctx context.Context) *models.CheckResults {
 // CheckNeighboursNeighbours queries the kubernetes API server for all other goldpinger
 // pods then calls Check() on each one
 func CheckNeighboursNeighbours(ctx context.Context) *models.CheckAllResults {
-	return CheckAllPods(ctx, SelectPods())
+	// If the pods can't be listed, report an empty set of results
+	pods, _ := SelectPods()
+	return CheckAllPods(ctx, pods)
 }
 
 // CheckCluster does a CheckNeighboursNeighbours and analyses results to produce a binary OK or not OK
 func CheckCluster(ctx context.Context) *models.ClusterHealthResults {
-	return checkClusterHealth(ctx, SelectPods())
+	// If the pods can't be listed, an empty set of pods is reported as not OK
+	pods, _ := SelectPods()
+	return checkClusterHealth(ctx, pods)
 }
 
 // checkClusterHealth calls every pod in selectedPods and aggregates the responses

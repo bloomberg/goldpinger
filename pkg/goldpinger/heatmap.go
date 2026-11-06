@@ -87,7 +87,9 @@ func HeatmapHandler(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	// get the results
-	checkResults := CheckAllPods(ctx, GetAllPods())
+	// If the pods can't be listed, draw an empty heatmap
+	pods, _ := GetAllPods()
+	checkResults := CheckAllPods(ctx, pods)
 
 	// set some sizes
 	numberOfPods := len(checkResults.Responses)
