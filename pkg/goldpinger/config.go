@@ -51,6 +51,9 @@ var GoldpingerConfig = struct {
 	UDPPacketSize  int           `long:"udp-packet-size" description:"Size of each UDP probe packet in bytes" env:"UDP_PACKET_SIZE" default:"64"`
 	UDPTimeout     time.Duration `long:"udp-timeout" description:"Timeout for UDP probe" env:"UDP_TIMEOUT" default:"1s"`
 
+	// Padded ping settings
+	PingPadSize int `long:"ping-pad-size" description:"If > 0, also ping peers asking for a response padded with this many bytes (max 65536), to detect MTU problems on the path" env:"PING_PAD_SIZE" default:"0"`
+
 	// Timeouts
 	PingTimeoutMs     int64         `long:"ping-timeout-ms" description:"The timeout in milliseconds for a ping call to other goldpinger pods(deprecated)" env:"PING_TIMEOUT_MS" default:"300"`
 	CheckTimeoutMs    int64         `long:"check-timeout-ms" description:"The timeout in milliseconds for a check call to other goldpinger pods(deprecated)" env:"CHECK_TIMEOUT_MS" default:"1000"`

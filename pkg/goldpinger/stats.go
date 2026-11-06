@@ -134,6 +134,18 @@ var (
 			"pod_ip",
 		},
 	)
+	goldpingerPeersPaddedPingOK = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "goldpinger_peers_padded_ping_ok",
+			Help: "1 if the last padded ping to the peer succeeded, 0 otherwise",
+		},
+		[]string{
+			"goldpinger_instance",
+			"host_ip",
+			"pod_ip",
+		},
+	)
+
 	goldpingerPeersHopCount = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "goldpinger_peers_hop_count",
@@ -202,6 +214,7 @@ func init() {
 	prometheus.MustRegister(goldpingerDnsErrorsCounter)
 	prometheus.MustRegister(goldPingerHttpErrorsCounter)
 	prometheus.MustRegister(goldPingerTcpErrorsCounter)
+	prometheus.MustRegister(goldpingerPeersPaddedPingOK)
 	prometheus.MustRegister(goldpingerPeersLossPct)
 	prometheus.MustRegister(goldpingerPeersHopCount)
 	prometheus.MustRegister(goldpingerPeersUDPRtt)
@@ -300,13 +313,29 @@ func SetPeerHopCount(hostIP, podIP string, hopCount int32) {
 	).Set(float64(hopCount))
 }
 
+// SetPeerPaddedPingOK sets the padded ping gauge for a peer to 1 (ok) or 0 (failed)
+func SetPeerPaddedPingOK(hostIP, podIP string, ok bool) {
+	value := 1.0
+	if !ok {
+		value = 0
+	}
+	goldpingerPeersPaddedPingOK.WithLabelValues(
+		GoldpingerConfig.Hostname,
+		hostIP,
+		podIP,
+	).Set(value)
+}
+
 // DeletePeerMetrics removes stale metric labels for a destroyed peer.
-// The response-time histogram is observed with two call_type values:
-// "ping" (continuous from Pinger) and "check" (from CheckAllPods), so both
-// must be pruned. Must be called unconditionally when a peer is removed.
+// The response-time histogram is observed with three call_type values:
+// "ping" and "ping_padded" (continuous from Pinger) and "check" (from
+// CheckAllPods), so all must be pruned. Must be called unconditionally when
+// a peer is removed.
 func DeletePeerMetrics(hostIP, podIP string) {
 	goldpingerResponseTimePeersHistogram.DeleteLabelValues(GoldpingerConfig.Hostname, "ping", hostIP, podIP)
+	goldpingerResponseTimePeersHistogram.DeleteLabelValues(GoldpingerConfig.Hostname, "ping_padded", hostIP, podIP)
 	goldpingerResponseTimePeersHistogram.DeleteLabelValues(GoldpingerConfig.Hostname, "check", hostIP, podIP)
+	goldpingerPeersPaddedPingOK.DeleteLabelValues(GoldpingerConfig.Hostname, hostIP, podIP)
 }
 
 // DeletePeerUDPMetrics removes stale UDP metric labels for a destroyed peer.

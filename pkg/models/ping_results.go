@@ -21,6 +21,9 @@ type PingResults struct {
 	// Format: date-time
 	BootTime strfmt.DateTime `json:"boot_time,omitempty"`
 
+	// filler of the requested length, returned when /ping is called with the pad parameter
+	Padding string `json:"padding,omitempty"`
+
 	// received
 	Received *CallStats `json:"received,omitempty"`
 }

@@ -27,22 +27,32 @@ func TestDeletePeerMetrics_CleansResponseTimeHistogram(t *testing.T) {
 			GoldpingerConfig.Hostname = "test-instance"
 			defer func() { GoldpingerConfig.Hostname = origHostname }()
 
-			// Simulate observations for both call_type values the histogram uses
+			// Simulate observations for all call_type values the histogram uses
 			goldpingerResponseTimePeersHistogram.WithLabelValues(
 				GoldpingerConfig.Hostname, "ping", tt.hostIP, tt.podIP,
 			).Observe(0.005)
 			goldpingerResponseTimePeersHistogram.WithLabelValues(
+				GoldpingerConfig.Hostname, "ping_padded", tt.hostIP, tt.podIP,
+			).Observe(0.007)
+			goldpingerResponseTimePeersHistogram.WithLabelValues(
 				GoldpingerConfig.Hostname, "check", tt.hostIP, tt.podIP,
 			).Observe(0.010)
+			SetPeerPaddedPingOK(tt.hostIP, tt.podIP, true)
 
-			if n := countMetrics(goldpingerResponseTimePeersHistogram); n != 2 {
-				t.Fatalf("response time histogram has %d label sets before cleanup, want 2 — test setup is broken", n)
+			if n := countMetrics(goldpingerResponseTimePeersHistogram); n != 3 {
+				t.Fatalf("response time histogram has %d label sets before cleanup, want 3 — test setup is broken", n)
+			}
+			if n := countMetrics(goldpingerPeersPaddedPingOK); n != 1 {
+				t.Fatalf("padded ping gauge has %d label sets before cleanup, want 1 — test setup is broken", n)
 			}
 
 			DeletePeerMetrics(tt.hostIP, tt.podIP)
 
 			if n := countMetrics(goldpingerResponseTimePeersHistogram); n != 0 {
 				t.Errorf("response time histogram still has %d label set(s) after DeletePeerMetrics", n)
+			}
+			if n := countMetrics(goldpingerPeersPaddedPingOK); n != 0 {
+				t.Errorf("padded ping gauge still has %d label set(s) after DeletePeerMetrics", n)
 			}
 		})
 	}
@@ -52,9 +62,9 @@ func TestDeletePeerMetrics_CleansResponseTimeHistogram(t *testing.T) {
 // metrics for one peer does not affect a different peer's label set.
 func TestDeletePeerMetrics_LeavesOtherPeersIntact(t *testing.T) {
 	tests := []struct {
-		name    string
-		peerA   [2]string // {hostIP, podIP}
-		peerB   [2]string
+		name  string
+		peerA [2]string // {hostIP, podIP}
+		peerB [2]string
 	}{
 		{
 			"IPv4",

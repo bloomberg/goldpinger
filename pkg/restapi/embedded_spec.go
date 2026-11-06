@@ -108,6 +108,16 @@ func init() {
           "application/json"
         ],
         "operationId": "ping",
+        "parameters": [
+          {
+            "maximum": 65536,
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of filler bytes to add to the response. Large responses are split into full-sized TCP segments, which exposes MTU problems on the path that small pings do not.",
+            "name": "pad",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "return success",
@@ -281,6 +291,10 @@ func init() {
         "boot_time": {
           "type": "string",
           "format": "date-time"
+        },
+        "padding": {
+          "description": "filler of the requested length, returned when /ping is called with the pad parameter",
+          "type": "string"
         },
         "received": {
           "$ref": "#/definitions/CallStats"
@@ -457,6 +471,17 @@ func init() {
           "application/json"
         ],
         "operationId": "ping",
+        "parameters": [
+          {
+            "maximum": 65536,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "description": "Number of filler bytes to add to the response. Large responses are split into full-sized TCP segments, which exposes MTU problems on the path that small pings do not.",
+            "name": "pad",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "return success",
@@ -633,6 +658,10 @@ func init() {
         "boot_time": {
           "type": "string",
           "format": "date-time"
+        },
+        "padding": {
+          "description": "filler of the requested length, returned when /ping is called with the pad parameter",
+          "type": "string"
         },
         "received": {
           "$ref": "#/definitions/CallStats"

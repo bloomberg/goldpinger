@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewPingParams creates a new PingParams object,
@@ -57,6 +58,15 @@ PingParams contains all the parameters to send to the API endpoint
 	Typically these are written to a http.Request.
 */
 type PingParams struct {
+
+	/* Pad.
+
+	   Number of filler bytes to add to the response. Large responses are split into full-sized TCP segments, which exposes MTU problems on the path that small pings do not.
+
+	   Format: int32
+	*/
+	Pad *int32
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -110,6 +120,17 @@ func (o *PingParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithPad adds the pad to the ping params
+func (o *PingParams) WithPad(pad *int32) *PingParams {
+	o.SetPad(pad)
+	return o
+}
+
+// SetPad adds the pad to the ping params
+func (o *PingParams) SetPad(pad *int32) {
+	o.Pad = pad
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *PingParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -117,6 +138,23 @@ func (o *PingParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry
 		return err
 	}
 	var res []error
+
+	if o.Pad != nil {
+
+		// query param pad
+		var qrPad int32
+
+		if o.Pad != nil {
+			qrPad = *o.Pad
+		}
+		qPad := swag.FormatInt32(qrPad)
+		if qPad != "" {
+
+			if err := r.SetQueryParam("pad", qPad); err != nil {
+				return err
+			}
+		}
+	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

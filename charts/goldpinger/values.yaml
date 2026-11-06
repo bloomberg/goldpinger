@@ -26,6 +26,8 @@ goldpinger:
   udp:
     enabled: false
     port: 6969
+  # If > 0, also ping peers asking for a response padded with this many bytes, to detect MTU problems
+  pingPadSize: 0
   zapConfig: |
     {
       "level": "info",

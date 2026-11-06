@@ -16,6 +16,7 @@ package goldpinger
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -31,15 +32,16 @@ import (
 
 // Pinger contains all the info needed by a goroutine to continuously ping a pod
 type Pinger struct {
-	pod         *GoldpingerPod
-	client      *apiclient.Goldpinger
-	timeout     time.Duration
-	histogram   prometheus.Observer
-	hostIPv4    strfmt.IPv4
-	podIPv4     strfmt.IPv4
-	resultsChan chan<- PingAllPodsResult
-	stopChan    chan struct{}
-	logger      *zap.Logger
+	pod             *GoldpingerPod
+	client          *apiclient.Goldpinger
+	timeout         time.Duration
+	histogram       prometheus.Observer
+	paddedHistogram prometheus.Observer
+	hostIPv4        strfmt.IPv4
+	podIPv4         strfmt.IPv4
+	resultsChan     chan<- PingAllPodsResult
+	stopChan        chan struct{}
+	logger          *zap.Logger
 }
 
 // NewPinger constructs and returns a Pinger object responsible for pinging a single
@@ -54,6 +56,12 @@ func NewPinger(pod *GoldpingerPod, resultsChan chan<- PingAllPodsResult) *Pinger
 		histogram: goldpingerResponseTimePeersHistogram.WithLabelValues(
 			GoldpingerConfig.Hostname,
 			"ping",
+			pod.HostIP,
+			pod.PodIP,
+		),
+		paddedHistogram: goldpingerResponseTimePeersHistogram.WithLabelValues(
+			GoldpingerConfig.Hostname,
+			"ping_padded",
 			pod.HostIP,
 			pod.PodIP,
 		),
@@ -112,9 +120,16 @@ func (p *Pinger) Ping() {
 	CountCall("made", "ping")
 	start := time.Now()
 
-	// Run HTTP ping and UDP probe concurrently
+	// Run HTTP ping, padded HTTP ping and UDP probe concurrently
 	var udpResult UDPProbeResult
 	var wg sync.WaitGroup
+	if GoldpingerConfig.PingPadSize > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			p.pingPadded(client)
+		}()
+	}
 	if GoldpingerConfig.UDPEnabled {
 		wg.Add(1)
 		go func() {
@@ -139,7 +154,7 @@ func (p *Pinger) Ping() {
 	responseTimeMs := responseTime.Nanoseconds() / int64(time.Millisecond)
 	p.histogram.Observe(responseTime.Seconds())
 
-	// Wait for UDP probe to complete
+	// Wait for padded ping and UDP probe to complete
 	wg.Wait()
 
 	OK := (err == nil)
@@ -209,6 +224,46 @@ func (p *Pinger) Ping() {
 		p.logger.Warn("Ping returned error", zap.Duration("responseTime", responseTime), zap.Error(err))
 		CountError("ping")
 	}
+}
+
+// pingPadded makes a ping request asking the peer for a response padded to
+// GoldpingerConfig.PingPadSize bytes, so that the response is split into
+// full-sized TCP segments. When packets close to the MTU are dropped on the
+// path (an MTU mismatch, or a PMTU black hole where ICMP is filtered) the
+// padded ping fails while the regular ping still succeeds.
+func (p *Pinger) pingPadded(client *apiclient.Goldpinger) {
+	pad := int32(min(GoldpingerConfig.PingPadSize, maxPingPadSize))
+
+	CountCall("made", "ping_padded")
+	start := time.Now()
+
+	ctx, cancel := context.WithTimeout(context.Background(), p.timeout)
+	defer cancel()
+
+	params := operations.NewPingParamsWithContext(ctx).WithPad(&pad)
+	resp, err := client.Operations.Ping(params)
+	responseTime := time.Since(start)
+	p.paddedHistogram.Observe(responseTime.Seconds())
+
+	// A peer that doesn't know the pad parameter answers with a small
+	// response, which would make the check pass without testing anything.
+	if err == nil {
+		received := 0
+		if resp.Payload != nil {
+			received = len(resp.Payload.Padding)
+		}
+		if received != int(pad) {
+			err = fmt.Errorf("peer returned %d bytes of padding, want %d (does the peer support padded pings?)", received, pad)
+		}
+	}
+
+	SetPeerPaddedPingOK(p.pod.HostIP, p.pod.PodIP, err == nil)
+	if err != nil {
+		p.logger.Warn("Padded ping returned error", zap.Int32("pad", pad), zap.Duration("responseTime", responseTime), zap.Error(err))
+		CountError("ping_padded")
+		return
+	}
+	p.logger.Debug("Success pinging pod with padding", zap.Int32("pad", pad), zap.Duration("responseTime", responseTime))
 }
 
 // PingContinuously continuously pings the given pod with a delay between

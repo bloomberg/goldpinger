@@ -26,6 +26,7 @@ Oh, and it gives you the graph below for your cluster. Check out the [video expl
     - [Example YAML](#example-yaml)
     - [Note on DNS](#note-on-dns)
     - [UDP probe for packet loss, hop count, and RTT](#udp-probe-for-packet-loss-hop-count-and-rtt)
+    - [Padded ping for MTU problems](#padded-ping-for-mtu-problems)
   - [Usage](#usage)
     - [UI](#ui)
     - [API](#api)
@@ -339,6 +340,35 @@ Links with partial loss are shown as yellow edges in the graph UI, and edge labe
 ![screenshot-udp-grafana](./extras/udp-grafana-dashboards.png)
 
 No new dependencies are required (`golang.org/x/net` is already in go.mod), and no additional container capabilities are needed.
+
+### Padded ping for MTU problems
+
+The regular `/ping` request and response are small, so they fit in a single packet and succeed even when larger packets can't get through. That happens when the MTU is inconsistent somewhere on the path (e.g. an overlay or tunnel with a lower MTU than the pods expect), especially if the ICMP "fragmentation needed" messages that path MTU discovery relies on are filtered (a PMTU black hole). Applications then see connections that open fine but hang on larger requests or responses.
+
+When enabled, each pinger additionally calls `/ping?pad=N` on its peers, and the peer adds `N` bytes of random filler to its response. A large response is split into full-sized TCP segments (always sent with the Don't Fragment bit), so it fails where the regular ping succeeds if those segments are dropped. A peer that returns less padding than requested (e.g. one running an older version) is counted as a failure, so the check never passes without testing anything.
+
+The feature is disabled by default and can be enabled with:
+
+```sh
+PING_PAD_SIZE=8192      # bytes of padding to ask for (default: 0 = disabled, max: 65536)
+```
+
+Or via the Helm chart:
+
+```yaml
+goldpinger:
+  pingPadSize: 8192
+```
+
+A few kilobytes are enough to fill several segments. The padded ping uses `PING_TIMEOUT` and runs alongside the regular ping, so it doesn't make ping cycles longer. Results are reported as:
+
+```sh
+goldpinger_peers_padded_ping_ok                         # gauge: 1 if the last padded ping to the peer succeeded, 0 otherwise
+goldpinger_peers_response_time_s{call_type="ping_padded"} # histogram: padded ping response time
+goldpinger_errors_total{type="ping_padded"}              # counter: padded ping errors
+```
+
+A peer that answers the regular ping but has `goldpinger_peers_padded_ping_ok == 0` is a strong hint of an MTU problem between the two nodes. If path MTU discovery works, the kernel learns the lower MTU and later padded pings succeed, which is expected: applications aren't affected much in that case either. MSS clamping or `net.ipv4.tcp_mtu_probing` can also hide an inconsistent MTU from both goldpinger and your applications.
 
 ## Usage
 

@@ -56,6 +56,10 @@ spec:
             - name: UDP_PORT
               value: "{{ .Values.goldpinger.udp.port }}"
             {{- end }}
+            {{- if .Values.goldpinger.pingPadSize }}
+            - name: PING_PAD_SIZE
+              value: "{{ .Values.goldpinger.pingPadSize }}"
+            {{- end }}
             {{- if .Values.extraEnv -}}
             {{ toYaml .Values.extraEnv | nindent 12 }}
             {{- end }}
