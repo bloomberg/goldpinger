@@ -6,11 +6,17 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+
+	"github.com/go-openapi/swag"
 )
 
 // PingURL generates an URL for the ping operation
 type PingURL struct {
+	Pad *int32
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
@@ -36,6 +42,18 @@ func (o *PingURL) Build() (*url.URL, error) {
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	var padQ string
+	if o.Pad != nil {
+		padQ = swag.FormatInt32(*o.Pad)
+	}
+	if padQ != "" {
+		qs.Set("pad", padQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }

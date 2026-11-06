@@ -6,7 +6,11 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // NewPingParams creates a new PingParams object
@@ -24,6 +28,13 @@ func NewPingParams() PingParams {
 type PingParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
+
+	/*Number of filler bytes to add to the response. Large responses are split into full-sized TCP segments, which exposes MTU problems on the path that small pings do not.
+	  Maximum: 65536
+	  Minimum: 0
+	  In: query
+	*/
+	Pad *int32
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -34,9 +45,55 @@ func (o *PingParams) BindRequest(r *http.Request, route *middleware.MatchedRoute
 	var res []error
 
 	o.HTTPRequest = r
+	qs := runtime.Values(r.URL.Query())
 
+	qPad, qhkPad, _ := qs.GetOK("pad")
+	if err := o.bindPad(qPad, qhkPad, route.Formats); err != nil {
+		res = append(res, err)
+	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// bindPad binds and validates parameter Pad from query.
+func (o *PingParams) bindPad(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertInt32(raw)
+	if err != nil {
+		return errors.InvalidType("pad", "query", "int32", raw)
+	}
+	o.Pad = &value
+
+	if err := o.validatePad(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validatePad carries out validations for parameter Pad
+func (o *PingParams) validatePad(formats strfmt.Registry) error {
+
+	if err := validate.MinimumInt("pad", "query", int64(*o.Pad), 0, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("pad", "query", int64(*o.Pad), 65536, false); err != nil {
+		return err
+	}
+
 	return nil
 }

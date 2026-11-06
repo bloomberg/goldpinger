@@ -56,7 +56,11 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 
 	api.PingHandler = operations.PingHandlerFunc(
 		func(params operations.PingParams) middleware.Responder {
-			goldpinger.CountCall("received", "ping")
+			if params.Pad != nil && *params.Pad > 0 {
+				goldpinger.CountCall("received", "ping_padded")
+			} else {
+				goldpinger.CountCall("received", "ping")
+			}
 
 			ctx, cancel := context.WithTimeout(
 				params.HTTPRequest.Context(),
@@ -64,7 +68,11 @@ func configureAPI(api *operations.GoldpingerAPI) http.Handler {
 			)
 			defer cancel()
 
-			return operations.NewPingOK().WithPayload(goldpinger.GetStats(ctx))
+			stats := goldpinger.GetStats(ctx)
+			if params.Pad != nil {
+				stats.Padding = goldpinger.GetPadding(*params.Pad)
+			}
+			return operations.NewPingOK().WithPayload(stats)
 		})
 
 	api.CheckServicePodsHandler = operations.CheckServicePodsHandlerFunc(

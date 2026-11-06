@@ -35,6 +35,9 @@ definitions:
         type: string
       received:
           $ref: '#/definitions/CallStats'
+      padding:
+        type: string
+        description: filler of the requested length, returned when /ping is called with the pad parameter
   PodResult:
     type: object
     properties:
@@ -178,6 +181,17 @@ paths:
       produces:
         - application/json
       operationId: ping
+      parameters:
+        - name: pad
+          in: query
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 65536
+          required: false
+          description: Number of filler bytes to add to the response. Large responses
+                       are split into full-sized TCP segments, which exposes MTU problems
+                       on the path that small pings do not.
       responses:
         200:
           description: return success
