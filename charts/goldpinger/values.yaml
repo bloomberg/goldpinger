@@ -180,3 +180,15 @@ prometheusRule:
         summary: Instance {{ "{{ $labels.instance }}" }} down
       labels:
         severity: warning
+    # Only fires if goldpinger.pingPadSize is set
+    - alert: goldpinger_padded_ping_failing
+      expr: |
+        min(goldpinger_peers_padded_ping_ok{job="{{ template "goldpinger.fullname" . }}"})
+        BY (goldpinger_instance, host_ip, pod_ip) == 0
+      for: 5m
+      annotations:
+        description: |
+          Padded pings from goldpinger instance {{ "{{ $labels.goldpinger_instance }}" }} to pod {{ "{{ $labels.pod_ip }}" }} on host {{ "{{ $labels.host_ip }}" }} have been failing for at least 5 minutes. If regular pings between them still succeed, there is likely an MTU problem on the path.
+        summary: Padded pings to {{ "{{ $labels.host_ip }}" }} failing, possible MTU problem
+      labels:
+        severity: warning

@@ -368,7 +368,7 @@ goldpinger_peers_response_time_s{call_type="ping_padded"} # histogram: padded pi
 goldpinger_errors_total{type="ping_padded"}              # counter: padded ping errors
 ```
 
-A peer that answers the regular ping but has `goldpinger_peers_padded_ping_ok == 0` is a strong hint of an MTU problem between the two nodes. If path MTU discovery works, the kernel learns the lower MTU and later padded pings succeed, which is expected: applications aren't affected much in that case either. MSS clamping or `net.ipv4.tcp_mtu_probing` can also hide an inconsistent MTU from both goldpinger and your applications.
+A peer that answers the regular ping but has `goldpinger_peers_padded_ping_ok == 0` is a strong hint of an MTU problem between the two nodes. The Helm chart's `prometheusRule` includes a `goldpinger_padded_ping_failing` alert for this. If path MTU discovery works, the kernel learns the lower MTU and later padded pings succeed, which is expected: applications aren't affected much in that case either. MSS clamping or `net.ipv4.tcp_mtu_probing` can also hide an inconsistent MTU from both goldpinger and your applications.
 
 ## Usage
 
@@ -425,6 +425,19 @@ annotations:
   description: |
     Goldpinger instance {{ $labels.goldpinger_instance }} has been reporting unhealthy nodes for at least 5 minutes.
   summary: Instance {{ $labels.instance }} down
+```
+
+If you enabled the [padded ping](#padded-ping-for-mtu-problems), this rule alerts when padded pings to a peer keep failing, which usually means an MTU problem on the path:
+
+```yaml
+alert: goldpinger_padded_ping_failing
+expr: min(goldpinger_peers_padded_ping_ok)
+  BY (goldpinger_instance, host_ip, pod_ip) == 0
+for: 5m
+annotations:
+  description: |
+    Padded pings from goldpinger instance {{ $labels.goldpinger_instance }} to pod {{ $labels.pod_ip }} on host {{ $labels.host_ip }} have been failing for at least 5 minutes.
+  summary: Padded pings to {{ $labels.host_ip }} failing, possible MTU problem
 ```
 
 Similarly, why not :heart: contribute some amazing alerts for others to use ?
