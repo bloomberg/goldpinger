@@ -14,9 +14,9 @@ To participate under these terms, all that you must do is include a line like th
 
     Signed-Off-By: Random J. Developer <random@developer.example.org>
 
-    The simplest way to accomplish this is to add `-s` or `--signoff` to your `git commit` command.
+The simplest way to accomplish this is to add `-s` or `--signoff` to your `git commit` command.
 
-    You must use your real name (sorry, no pseudonyms, and no anonymous contributions).
+You must use your real name (sorry, no pseudonyms, and no anonymous contributions).
 
 ## Help / Documentation
 
